@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three proposals, three wins</title>
+<style>:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px;color:var(--ink)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:0 0 16px}
+.cards .card{margin:0;display:flex;flex-direction:column;gap:6px}
+.cards .card p{margin:0}
+.who{font-size:14px;font-weight:700;color:var(--accent)}
+.claim{font-weight:600}
+.stat{font-size:28px;font-weight:700;line-height:1.15;color:var(--accent-dark)}
+details{margin-top:auto;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;color:var(--accent);font-weight:700;padding:4px 0;min-height:32px}
+details ul{margin:6px 0 0;padding-left:20px}
+details li{margin:0 0 6px}
+fieldset{border:0;margin:0 0 16px;padding:0;min-width:0}
+legend{font-size:16px;font-weight:700;padding:0;margin:0 0 8px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;min-height:44px;border:1px solid var(--line);border-radius:8px;margin:0 0 8px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--accent)}
+.opt input{margin-top:4px;width:18px;height:18px;flex:none;accent-color:var(--accent)}
+.opt:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+fieldset:disabled .opt{cursor:default}
+fieldset:disabled .opt:hover{border-color:var(--line)}
+fieldset:disabled .opt:has(input:checked):hover{border-color:var(--accent)}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:default}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.msg{color:var(--near);font-weight:700;margin:10px 0 0;min-height:24px}
+#reveal{margin-top:24px}
+.hidden,#reveal[hidden]{display:none !important}
+.lock{border-left:6px solid var(--accent);border-radius:6px;padding:8px 12px;margin:0 0 12px;background:var(--accent-soft)}
+.lock p{margin:0;font-weight:700}
+.ledger{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0 16px}
+.ledger .card{margin:0}
+.ledger dl{margin:0}
+.ledger dt{font-size:14px;font-weight:700;color:var(--muted);margin-top:8px}
+.ledger dd{margin:0}
+.ledger dd.open{border-left:6px solid var(--near);background:var(--near-bg);border-radius:6px;padding:6px 10px;margin-top:2px}
+.capability{background:var(--accent-dark);color:#ffffff;border-radius:10px;padding:16px}
+.capability h2{color:#ffffff}
+.capability p{margin:0}
+.reset{margin-top:16px}
+.fade{animation:rise .3s ease-out both}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .cards,.ledger{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">You are here</p>
+  <h1>Three proposals, three wins</h1>
+  <p class="lede">You lead supply chain transformation at a multinational manufacturer with four product lines and nine plants. The steering group wants to change the baseline demand forecast, which is the forecast planning runs on today. Three proposals each report a win, and you must say which result best supports the change.</p>
+  <p class="small muted">Forecast error is how far forecasts landed from actual demand, shown as a percentage. Lower is better.</p>
+
+  <section class="cards" aria-label="The three results">
+    <article class="card">
+      <p class="who">Internal pilot</p>
+      <p class="stat" id="pilotStat"></p>
+      <p class="claim">Error fell on the manufacturer's own demand history.</p>
+      <p>The pilot covers one product line.</p>
+      <details>
+        <summary>Open the methods note</summary>
+        <ul id="note"></ul>
+      </details>
+    </article>
+    <article class="card">
+      <p class="who">Platform vendor</p>
+      <p class="claim">A case study shows a forecast gain at another consumer-goods company.</p>
+      <p>The vendor also ran a demonstration on history it prepared.</p>
+    </article>
+    <article class="card">
+      <p class="who">Demand-sensing vendor</p>
+      <p class="claim">A demonstration on the largest retail account looked convincing.</p>
+      <p>The approach uses point-of-sale data, which are the retailer's till records.</p>
+    </article>
+  </section>
+
+  <form class="card" id="commit" novalidate>
+    <fieldset id="fsChoice">
+      <legend>Which result gives the strongest support for changing the baseline forecast?</legend>
+      <label class="opt"><input type="radio" name="choice" value="pilot"> <span>Internal pilot</span></label>
+      <label class="opt"><input type="radio" name="choice" value="platform"> <span>Platform vendor</span></label>
+      <label class="opt"><input type="radio" name="choice" value="sensing"> <span>Demand-sensing vendor</span></label>
+      <label class="opt"><input type="radio" name="choice" value="none"> <span>I can't rank them from what is shown</span></label>
+    </fieldset>
+    <fieldset id="fsSure">
+      <legend>How sure are you?</legend>
+      <label class="opt"><input type="radio" name="sure" value="sure"> <span>Sure</span></label>
+      <label class="opt"><input type="radio" name="sure" value="leaning"> <span>Leaning</span></label>
+      <label class="opt"><input type="radio" name="sure" value="guessing"> <span>Guessing</span></label>
+    </fieldset>
+    <button type="submit" id="lock">Lock my reading</button>
+    <p class="msg" id="msg" role="alert"></p>
+  </form>
+
+  <section id="reveal" hidden aria-labelledby="revealHead">
+    <h2 id="revealHead" tabindex="-1">What your reading rests on</h2>
+    <div class="lock"><p id="lockedLine"></p></div>
+    <p id="readingNote"></p>
+    <div class="ledger" id="ledger"></div>
+    <p id="sameQ"></p>
+    <div class="capability">
+      <h2>The capability that is missing</h2>
+      <p>Setting one fair test before anyone reports a score. That means agreeing what every proposal must forecast, what it may know when it forecasts, and which current forecast it must beat.</p>
+    </div>
+    <button type="button" class="secondary reset" id="again">Start over</button>
+  </section>
+
+  <p class="small muted">The company, roles, and situation in this exercise are fictional case material.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var PILOT = { before: 29, after: 24 };
+  var pct = function (n) { return (n / 100).toLocaleString('en-US', { style: 'percent', maximumFractionDigits: 0 }); };
+
+  var CHOICE_LABEL = { pilot: 'the internal pilot', platform: 'the platform vendor', sensing: 'the demand-sensing vendor', none: 'no ranking from what is shown' };
+  var SURE_LABEL = { sure: 'sure', leaning: 'leaning', guessing: 'guessing' };
+
+  var READING = {
+    pilot: 'The pilot has real strength, because it ran on the manufacturer\u2019s own history. The reading skips something, though. The ' + pct(PILOT.after) + ' and the ' + pct(PILOT.before) + ' were measured in different places, as the methods note shows.',
+    platform: 'The case study comes from another company, so it cannot settle this decision. The demonstration used history the vendor prepared, which leaves this manufacturer\u2019s own demand untested.',
+    sensing: 'The demonstration looked convincing, but it covered one account, the largest. The result says little about the accounts that were left out.',
+    none: 'Holding back fits what the cards show. Holding back alone does not tell the team what to bring back, and that is the gap this opens.'
+  };
+
+  var LEDGER = [
+    { title: 'Internal pilot',
+      compared: 'A model figure with \u201Cthe current forecast.\u201D',
+      measured: 'The model on national totals. The current forecast for each item at each location.',
+      open: 'Which current forecast the ' + pct(PILOT.before) + ' describes: the engine\u2019s output before planners adjust it, or the number planners send.' },
+    { title: 'Platform vendor',
+      compared: 'Another company\u2019s result and a demonstration the vendor set up.',
+      measured: 'On that company\u2019s history and on history the vendor prepared.',
+      open: 'No result on this manufacturer\u2019s history under terms it set.' },
+    { title: 'Demand-sensing vendor',
+      compared: 'A demonstration on one account.',
+      measured: 'On the largest retail account.',
+      open: 'The other accounts. Some supply no sales feed and some restrict its use.' }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var locked = null; // recorded before anything is revealed
+
+  $('pilotStat').textContent = pct(PILOT.before) + ' to ' + pct(PILOT.after);
+  [
+    'Pilot error: ' + pct(PILOT.after) + ', measured on national totals.',
+    'Earlier error: ' + pct(PILOT.before) + ', measured for each item at each location.',
+    'The earlier figure is labeled \u201Cthe current forecast.\u201D The note does not say whether that means the engine\u2019s output or the number planners send.'
+  ].forEach(function (t) {
+    var li = document.createElement('li');
+    li.textContent = t;
+    $('note').appendChild(li);
+  });
+
+  function val(name) {
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : null;
+  }
+
+  function buildLedger() {
+    var host = $('ledger');
+    host.textContent = '';
+    LEDGER.forEach(function (r) {
+      var art = document.createElement('article');
+      art.className = 'card';
+      var h = document.createElement('h3'); h.textContent = r.title; art.appendChild(h);
+      var dl = document.createElement('dl');
+      [['What it compared', r.compared, ''], ['Where it was measured', r.measured, ''], ['What stays open', r.open, 'open']].forEach(function (x) {
+        var dt = document.createElement('dt'); dt.textContent = x[0];
+        var dd = document.createElement('dd'); dd.textContent = x[1]; if (x[2]) dd.className = x[2];
+        dl.appendChild(dt); dl.appendChild(dd);
+      });
+      art.appendChild(dl);
+      host.appendChild(art);
+    });
+  }
+
+  $('commit').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (locked) { return; }
+    var c = val('choice'), s = val('sure');
+    if (!c || !s) {
+      $('msg').textContent = 'Choose a result and how sure you are, then lock your reading.';
+      return;
+    }
+    $('msg').textContent = '';
+    locked = { choice: c, sure: s };           // commitment recorded first
+    $('fsChoice').disabled = true;
+    $('fsSure').disabled = true;
+    $('lock').disabled = true;
+
+    $('lockedLine').textContent = 'You locked: ' + CHOICE_LABEL[c] + ', and you were ' + SURE_LABEL[s] + '.';
+    $('readingNote').textContent = READING[c];
+    buildLedger();
+    $('sameQ').textContent = 'Each result answers a different question. They differ in what was forecast, where it was measured and what it was compared with, so no score can sit beside another.';
+    var rv = $('reveal');
+    rv.hidden = false;
+    rv.classList.remove('fade'); void rv.offsetWidth; rv.classList.add('fade');
+    $('revealHead').focus();
+  });
+
+  $('again').addEventListener('click', function () {
+    locked = null;
+    document.querySelectorAll('#commit input').forEach(function (i) { i.checked = false; });
+    $('fsChoice').disabled = false;
+    $('fsSure').disabled = false;
+    $('lock').disabled = false;
+    $('reveal').hidden = true;
+    $('msg').textContent = '';
+    window.scrollTo(0, 0);
+    document.querySelector('input[name="choice"]').focus();
+  });
+})();
+</script>
+</body>
+</html>

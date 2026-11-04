@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assemble the path to a fair forecasting comparison</title>
+<style>:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px;color:var(--ink)}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.hidden{display:none !important}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-of-type{border-top:0}
+.item p.ctext{margin:0 0 8px}
+.item .grid2{margin-top:6px}
+.fbbox:empty{display:none}
+.lane ol,.lane ul{margin:4px 0 0;padding-left:20px}
+.lane li{margin:2px 0}
+.lane h3{margin:0 0 2px}
+.lane{margin:0 0 8px}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Visualize the process</p>
+  <h1>Assemble the path from three headlines to a fair comparison</h1>
+  <p class="lede">A forecasting proposal is judged soundly when the problem is stated in operational terms, the moves run in an order their inputs allow, and each sign of success can be checked on the finished evaluation record. Sort the cards, then sequence the moves.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. Three proposals claim to improve the baseline forecast, the monthly forecast for each item at each location: an internal pilot, Vendor A’s platform, and Vendor B’s demand sensing. Each sponsor sent an accuracy figure measured its own way. The senior vice president wants a recommendation for each. Fifteen cards follow. Some belong on the path to an evaluation you can defend, and some are tempting moves the path rules out.</p>
+    <dl class="terms">
+      <dt>What was wrong</dt><dd>A failure of the evidence as submitted, true before any work begins.</dd>
+      <dt>What the lead did</dt><dd>A move the lead performs, in a sequence. Give each a step number. The check flags any move placed ahead of a move it depends on.</dd>
+      <dt>What shows it worked</dt><dd>Something an observer can verify on the finished evaluation record.</dd>
+      <dt>Leave out</dt><dd>A card that breaks a rule of a fair comparison. It does not belong in any lane.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="pool-h">
+    <h2 id="pool-h">The cards</h2>
+    <p class="small muted" id="count"></p>
+    <div id="pool"></div>
+  </section>
+
+  <section class="card" aria-labelledby="asm-h">
+    <h2 id="asm-h">Your assembly so far</h2>
+    <div class="grid2" id="asm"></div>
+    <div class="row">
+      <button type="button" id="check">Check my assembly</button>
+      <button type="button" class="secondary" id="reset">Clear all placements</button>
+    </div>
+    <div id="ofb" aria-live="polite"></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="second-h">
+    <h2 id="second-h">Fire a revision trigger</h2>
+    <p>The record is not final. Four kinds of news reopen it. For each one, choose where the path re-enters. The moves after that point run again.</p>
+    <div id="trig"></div>
+    <div class="row">
+      <button type="button" id="check2">Check where the path re-enters</button>
+    </div>
+    <div id="tsum" aria-live="polite"></div>
+  </section>
+
+  <p class="small muted">The company, roles, and situation in this exercise are fictional case material.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+
+  var LANES = [['', 'Choose'], ['wrong', 'What was wrong'], ['did', 'What the lead did'], ['worked', 'What shows it worked'], ['out', 'Leave out']];
+
+  var GEN_LANE = 'Ask three questions of this card. Would it be true before any work began? Does the lead act in it? Could an observer verify it on the finished record? Placement follows the question that gets a yes. First move: read the card for its actor and its tense.';
+  var GEN_OUT = 'A card leaves the assembly only if it breaks a rule of a fair comparison: it ranks figures measured on different terms, judges by family instead of evidence, or treats one candidate’s result as evidence about another. First move: check this card against those three.';
+  var NEAR_SIG = 'The structure is right: this card belongs on the path. One element is out of place: it describes a state an observer would verify on the finished record, and it names no move the lead makes.';
+  var NEAR_MOVE = 'The structure is right: this card belongs on the path. One element is out of place: it names a move the lead makes, and an observer cannot verify a move by looking at the finished record.';
+
+  var CARDS = [
+    { id: 'm3', s: 'Read at the decision level', lane: 'did', move: 3,
+      t: 'Restate each reported result at item × location × month, beside the naive benchmark and the forecast of record, and name the decision it supports.',
+      ok: 'Right. The lead is the actor, and the output, a result read where the decision acts, is what the defect screening tests.' },
+    { id: 's2', s: 'Three comparators', lane: 'worked',
+      t: 'One contract names the naive benchmark, the unadjusted engine, and the forecast of record as comparators for every candidate.',
+      ok: 'Right. An observer can verify it by reading the contract.' },
+    { id: 'd2', s: 'Back the advanced family', lane: 'out',
+      t: 'Back the machine-learning proposals, since machine learning is the more advanced family.',
+      why: 'A family names where a forecast’s signal comes from, not how good it is. Competition results favor different families under different conditions.',
+      first: 'First move: ask what this family assumes, and what evidence tests it.' },
+    { id: 'p2', s: 'Two levels in one headline', lane: 'wrong',
+      t: 'The pilot’s headline sets a model figure with locations added together nationally beside a current-process figure measured at each location.',
+      ok: 'Right. It fails before any work begins: two figures at different levels can differ for that reason alone.' },
+    { id: 'm1', s: 'Name the evidence owed', lane: 'did', move: 1,
+      t: 'For each candidate, name its approach family, or record “not disclosed,” and the evidence that family owes before any result counts.',
+      ok: 'Right. The lead is the actor, and the output, the evidence each family owes, decides what the contract must contain.' },
+    { id: 's4', s: 'Every gap named', lane: 'worked',
+      t: 'Every “not yet” on the record names the evidence gap and the test that would close it.',
+      ok: 'Right. An observer can verify it by reading the gap beside each disposition.' },
+    { id: 'd3', s: 'Ours was flat, so buy theirs', lane: 'out',
+      t: 'Since the internal pilot only ties the forecast planners send, sign Vendor A’s three-year contract.',
+      why: 'A flat internal result says nothing about Vendor A, whose evidence is another company’s case study and a demonstration on history it prepared.',
+      first: 'First move: ask what evidence Vendor A has produced under the same terms.' },
+    { id: 'p3', s: 'Which incumbent?', lane: 'wrong',
+      t: '“Better than the current forecast” never says whether it means the untuned engine or the adjusted number planners send.',
+      ok: 'Right. It fails before any work begins: beating the engine is not beating the forecast of record.' },
+    { id: 'm4', s: 'Screen for defects', lane: 'did', move: 4,
+      t: 'Match each suspicious pattern in the evidence packs to a defect, and put the challenge question it calls for to the proposer.',
+      ok: 'Right. The lead writes the challenges, aimed at the decision the evidence claims to serve.' },
+    { id: 'd1', s: 'Rank the headlines', lane: 'out',
+      t: 'Line up the three accuracy figures as submitted and back the lowest error.',
+      why: 'The figures rest on different data, periods, levels, and comparisons, so the lowest number wins a ranking of different tests.',
+      first: 'First move: ask whether the figures were produced under the same terms.' },
+    { id: 's1', s: 'Family or “not disclosed”', lane: 'worked',
+      t: 'Every candidate on the record carries a named family, or “not disclosed,” with the evidence it owes.',
+      ok: 'Right. An observer can verify it by reading each candidate’s row.' },
+    { id: 'p1', s: 'Three tests, no common terms', lane: 'wrong',
+      t: 'Each sponsor measured its figure on its own data, periods, and comparison, so the three headlines cannot be ranked.',
+      ok: 'Right. It fails before any work begins: a comparison with no common terms compares nothing.' },
+    { id: 'm2', s: 'Write the contract', lane: 'did', move: 2,
+      t: 'Fix one test for all three: target, item-locations, level, lag, information known on each issue date, untouched periods, comparators, and score.',
+      ok: 'Right. The lead is the actor, and the output, one set of terms, is what makes the results readable at all.' },
+    { id: 's3', s: 'Each gain tied to a decision', lane: 'worked',
+      t: 'Every reported gain on the record names the decision at whose level both figures were measured.',
+      ok: 'Right. An observer can verify it by checking the level of each figure against the decision named.' },
+    { id: 'm5', s: 'Dispose with a named gap', lane: 'did', move: 5,
+      t: 'Give each candidate adopt, pilot, reject, or not yet, with the evidence gap that would change the call.',
+      ok: 'Right. The lead decides, and each call rests on the four moves before it.' }
+  ];
+  var BYID = {}; CARDS.forEach(function (c) { BYID[c.id] = c; });
+
+  var MOVES = { m1: 'naming the evidence owed', m2: 'writing the contract', m3: 'reading at the decision level', m4: 'screening for defects', m5: 'disposing with a named gap' };
+  var DEPS = [
+    ['m1', 'm2', 'A family’s assumption decides what the contract must contain, so the contract waits for the evidence owed.'],
+    ['m2', 'm3', 'A result can be read at a level only once both figures share that level and a comparator, so the read waits for the contract.'],
+    ['m3', 'm4', 'A defect matters only to the decision the evidence claims to serve, so the screening waits for the decision-level read.'],
+    ['m1', 'm5', 'A disposition rests on all four moves, so it comes last.'],
+    ['m2', 'm5', 'A disposition rests on all four moves, so it comes last.'],
+    ['m3', 'm5', 'A disposition rests on all four moves, so it comes last.'],
+    ['m4', 'm5', 'A disposition rests on all four moves, so it comes last.']
+  ];
+  var MOVE_IDS = ['m1', 'm2', 'm3', 'm4', 'm5'];
+
+  var pool = byId('pool');
+  var laneOpts = LANES.map(function (l) { return '<option value="' + l[0] + '">' + l[1] + '</option>'; }).join('');
+  var stepOpts = '<option value="">Choose</option>';
+  for (var i = 1; i <= 8; i++) stepOpts += '<option value="' + i + '">' + fmt(i) + '</option>';
+  CARDS.forEach(function (c) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="t-' + c.id + '">' + c.t + '</p>' +
+      '<div class="grid2">' +
+      '<label class="field"><span class="lab">Place in</span><select id="lane-' + c.id + '" aria-describedby="t-' + c.id + '">' + laneOpts + '</select></label>' +
+      '<label class="field hidden" id="stepw-' + c.id + '"><span class="lab">Step</span><select id="step-' + c.id + '" aria-describedby="t-' + c.id + '">' + stepOpts + '</select></label>' +
+      '</div><div class="fbbox" id="fb-' + c.id + '" aria-live="polite"></div>';
+    pool.appendChild(d);
+  });
+
+  function laneOf(c) { return byId('lane-' + c.id).value; }
+  function stepOf(c) { var v = byId('step-' + c.id).value; return v ? parseInt(v, 10) : 0; }
+
+  function readout() {
+    var groups = { wrong: [], did: [], worked: [], out: [] }, left = 0;
+    CARDS.forEach(function (c) {
+      var l = laneOf(c);
+      if (!l) { left++; return; }
+      groups[l].push(c);
+    });
+    groups.did.sort(function (a, b) { return (stepOf(a) || 99) - (stepOf(b) || 99); });
+    function list(tag, arr, numbered) {
+      if (!arr.length) return '<p class="small muted">Nothing placed yet.</p>';
+      return '<' + tag + '>' + arr.map(function (c) {
+        var s = stepOf(c);
+        return '<li>' + c.s + (numbered && !s ? ' <span class="tag">no step</span>' : '') + (numbered && s ? ' <span class="small muted">step ' + fmt(s) + '</span>' : '') + '</li>';
+      }).join('') + '</' + tag + '>';
+    }
+    byId('asm').innerHTML =
+      '<div class="lane"><h3>What was wrong</h3>' + list('ul', groups.wrong) + '</div>' +
+      '<div class="lane"><h3>What the lead did</h3>' + list('ol', groups.did, true) + '</div>' +
+      '<div class="lane"><h3>What shows it worked</h3>' + list('ul', groups.worked) + '</div>' +
+      '<div class="lane"><h3>Left out</h3>' + list('ul', groups.out) + '</div>';
+    byId('count').textContent = left === 0 ? 'Every card is placed.' : 'Cards still unplaced: ' + fmt(left) + '.';
+  }
+
+  function syncSteps() {
+    CARDS.forEach(function (c) {
+      var show = laneOf(c) === 'did';
+      byId('stepw-' + c.id).classList.toggle('hidden', !show);
+      if (!show) byId('step-' + c.id).value = '';
+    });
+  }
+
+  function judgeCard(c, lane) {
+    if (!lane) return ['blank', 'Not placed yet. Choose a lane for this card.'];
+    if (c.lane === lane) return ['correct', c.lane === 'out' ? 'Left out, correctly. ' + c.why : c.ok];
+    if (c.lane === 'out') return ['wrong', c.why + ' ' + c.first];
+    if (lane === 'out') return ['wrong', GEN_OUT];
+    if (c.lane === 'worked' && lane === 'did') return ['near', NEAR_SIG];
+    if (c.lane === 'did' && lane === 'worked') return ['near', NEAR_MOVE];
+    return ['wrong', GEN_LANE];
+  }
+
+  function judgeOrder() {
+    var pos = {}, missing = false;
+    MOVE_IDS.forEach(function (id) {
+      var c = BYID[id];
+      if (laneOf(c) !== 'did' || !stepOf(c)) missing = true; else pos[id] = stepOf(c);
+    });
+    if (missing) return ['blank', 'The sequence cannot be checked yet. Place all five moves in the middle lane and give each a step.'];
+    var seen = {}, dup = 0;
+    MOVE_IDS.forEach(function (id) { if (seen[pos[id]]) dup = pos[id]; seen[pos[id]] = true; });
+    if (dup) return ['wrong', 'Two moves share step ' + fmt(dup) + '. Each step holds one move. First move: for the move you placed earliest, ask what it needs as input and which move makes that input.'];
+    var broken = DEPS.filter(function (d) { return pos[d[0]] > pos[d[1]]; });
+    if (broken.length === 0) {
+      return ['correct', 'The sequence respects every dependency, and here the order is fixed. Each move needs the one before it: the evidence owed shapes the contract, the contract makes results readable at a level, a defect matters only to the decision the evidence serves, and the disposition rests on all four.'];
+    }
+    if (broken.length === 1) {
+      var d = broken[0];
+      return ['near', 'The structure is right: most of the chain holds. One element is out of place: ' + MOVES[d[1]] + ' sits ahead of ' + MOVES[d[0]] + '. ' + d[2]];
+    }
+    return ['wrong', 'More than one move stands ahead of the work it depends on. A move cannot start until its inputs exist. First move: for the move you placed earliest, ask what it needs as input and which move makes that input.'];
+  }
+
+  function put(box, state, label, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', label);
+    if (state !== 'blank') d.setAttribute('data-state', state);
+    var t = state === 'correct' ? ' · Correct' : state === 'near' ? ' · Near' : state === 'wrong' ? ' · Not yet' : '';
+    d.innerHTML = '<span class="st">' + label + t + '</span>' + text;
+    box.appendChild(d);
+  }
+
+  var checked = false;
+  function checkAll() {
+    checked = true;
+    var bad = 0, near = 0;
+    CARDS.forEach(function (c) {
+      var box = byId('fb-' + c.id);
+      box.innerHTML = '';
+      var r = judgeCard(c, laneOf(c));
+      put(box, r[0], 'Placement', r[1]);
+      if (r[0] === 'near') near++; else if (r[0] !== 'correct') bad++;
+    });
+    var ob = byId('ofb');
+    ob.innerHTML = '';
+    var o = judgeOrder();
+    put(ob, o[0], 'Sequence', o[1]);
+    if (o[0] === 'near') near++; else if (o[0] !== 'correct') bad++;
+
+    var sum = byId('summary');
+    sum.innerHTML = '';
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', 'summary');
+    d.setAttribute('data-state', state);
+    d.innerHTML = state === 'correct'
+      ? '<span class="st">Assembly · Correct</span>The failure is stated in operational terms, the moves run in the order their inputs allow, and every sign of success can be checked on the finished evaluation record.'
+      : '<span class="st">Assembly · ' + (state === 'near' ? 'Close' : 'Review the flagged cards') + '</span>Cards marked amber or red need another look. Change a placement and the check runs again.';
+    sum.appendChild(d);
+    byId('second').classList.toggle('hidden', state !== 'correct');
+  }
+
+  function onChange() {
+    syncSteps();
+    readout();
+    if (checked) checkAll();
+  }
+  CARDS.forEach(function (c) {
+    byId('lane-' + c.id).addEventListener('change', onChange);
+    byId('step-' + c.id).addEventListener('change', onChange);
+  });
+  byId('check').addEventListener('click', checkAll);
+  byId('reset').addEventListener('click', function () {
+    checked = false;
+    CARDS.forEach(function (c) {
+      byId('lane-' + c.id).value = '';
+      byId('step-' + c.id).value = '';
+      byId('fb-' + c.id).innerHTML = '';
+    });
+    byId('ofb').innerHTML = '';
+    byId('summary').innerHTML = '';
+    byId('second').classList.add('hidden');
+    syncSteps();
+    readout();
+  });
+
+  // Second pass: news arrives, and the learner chooses where the path re-enters.
+  var RE = [['', 'Choose'], ['m1', 'Move 1 · Name the evidence owed'], ['m2', 'Move 2 · Write the contract'], ['m3', 'Move 3 · Read at the decision level'], ['m4', 'Move 4 · Screen for defects'], ['m5', 'Move 5 · Dispose with a named gap']];
+  var ORDER = { m1: 1, m2: 2, m3: 3, m4: 4, m5: 5 };
+  var RUNS = {
+    m1: 'Naming the evidence owed runs again, then the contract, the decision-level read, the screening, and the disposition.',
+    m2: 'The contract is rewritten, then the decision-level read, the screening, and the disposition run again.',
+    m3: 'The decision-level read runs again, then the screening and the disposition.',
+    m4: 'The screening runs again, then the disposition.'
+  };
+  var GEN_RE = 'The path re-enters at the first move whose input changed, and the moves after it run again. First move: ask which move takes this news as an input.';
+  var NEAR_LATE = 'The structure is right: the change shows up in that move. One element is out of place: it enters earlier, at the move whose input changed.';
+  var TRIGS = [
+    { id: 't1', kind: 'A method is disclosed',
+      t: 'Vendor A discloses what produces its forecast: an average of three separately built models.',
+      key: 'm1',
+      ok: 'Right. A disclosed method gives Vendor A a family, and the family decides the evidence it owes. ' },
+    { id: 't2', kind: 'A test period is spent',
+      t: 'The pilot team reports that it chose its final model using a quarter that sits inside the agreed test periods.',
+      key: 'm2',
+      ok: 'Right. Periods used to choose a model cannot test it, so the contract’s holdout must move for every candidate. ' },
+    { id: 't3', kind: 'Results arrive under the contract',
+      t: 'Vendor A delivers results under the contract, at item × location × month, beside the naive benchmark and the forecast of record.',
+      key: 'm3',
+      ok: 'Right. New results under the agreed terms are read at the decision level first. ' },
+    { id: 't4', kind: 'An input is dated',
+      t: 'Vendor B’s updated input list shows point-of-sale totals for the week being forecast.',
+      key: 'm4',
+      ok: 'Right. An input known only after the issue date is a pattern of leakage, which the screening catches. ' }
+  ];
+  var tdiv = byId('trig');
+  var reOpts = RE.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+  TRIGS.forEach(function (T) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="tt-' + T.id + '"><span class="tag">' + T.kind + '</span> ' + T.t + '</p>' +
+      '<label class="field"><span class="lab">The path re-enters at</span><select id="re-' + T.id + '" aria-describedby="tt-' + T.id + '">' + reOpts + '</select></label>' +
+      '<div class="fbbox" id="tf-' + T.id + '" aria-live="polite"></div>';
+    tdiv.appendChild(d);
+    byId('re-' + T.id).addEventListener('change', function () {
+      byId('tf-' + T.id).innerHTML = '';
+      byId('tsum').innerHTML = '';
+    });
+  });
+  byId('check2').addEventListener('click', function () {
+    var open = [], bad = 0, near = 0;
+    TRIGS.forEach(function (T, i) { if (!byId('re-' + T.id).value) open.push(fmt(i + 1)); });
+    var sum = byId('tsum');
+    sum.innerHTML = '';
+    if (open.length) {
+      put(sum, 'blank', 'Triggers', 'Choose where the path re-enters for each event first. Still open: ' + open.join(', ') + '.');
+      return;
+    }
+    TRIGS.forEach(function (T) {
+      var v = byId('re-' + T.id).value, box = byId('tf-' + T.id);
+      box.innerHTML = '';
+      if (v === T.key) { put(box, 'correct', 'Re-entry', T.ok + RUNS[T.key]); }
+      else if (ORDER[v] > ORDER[T.key]) { put(box, 'near', 'Re-entry', NEAR_LATE); near++; }
+      else { put(box, 'wrong', 'Re-entry', GEN_RE); bad++; }
+    });
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-state', state);
+    d.innerHTML = state === 'correct'
+      ? '<span class="st">Triggers · Correct</span>Each piece of news re-enters the path at the first move whose input it changes. Nothing earlier reruns without cause, and nothing later is skipped.'
+      : '<span class="st">Triggers · ' + (state === 'near' ? 'Close' : 'Review the flagged events') + '</span>Events marked amber or red need another look. Change a choice and check again.';
+    sum.appendChild(d);
+  });
+
+  syncSteps();
+  readout();
+})();
+</script>
+</body>
+</html>
