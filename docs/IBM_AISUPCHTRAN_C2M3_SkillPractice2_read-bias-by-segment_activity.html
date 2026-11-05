@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Read bias by segment</title>
+<style>:root{
+  --bg:#ffffff;--page:#f4f6f9;--ink:#1b2430;--muted:#4d5b6b;--line:#c9d1db;--panel:#f6f8fb;
+  --accent:#17508a;--accent-dark:#0f3a66;--accent-soft:#e6eff8;
+  --ok:#1a6a43;--ok-bg:#e8f4ed;--near:#7a5200;--near-bg:#fcf3dc;--bad:#9a2a2a;--bad-bg:#fbeaea;--focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.terms{margin:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+td.r,th.r{text-align:right}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.readout{border:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin:12px 0 0;font-variant-numeric:tabular-nums}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:8px 0}
+.hidden{display:none !important}
+.item{border-top:1px solid var(--line);padding:14px 0}
+.item:first-of-type{border-top:0;padding-top:0}
+.item h3 .tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent);margin-right:6px}
+.fbbox:empty{display:none}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2{grid-template-columns:1fr}
+  .stack thead{position:absolute;left:-9999px}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label) ": ";font-weight:700;color:var(--muted)}
+  td.r,th.r{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Skill practice · Forecast bias</p>
+  <h1>Read bias by segment</h1>
+  <p class="lede">An error measure tells you how far the forecast misses. It does not tell you which way. Signed error keeps the direction, and direction predicts where the cost lands: over-forecasts become write-offs, under-forecasts become cuts and deductions.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. You are setting the bias part of the measure set that will judge any change to the baseline forecast. Five rows from last year’s forecast report follow.</p>
+    <p class="note"><strong>Sign convention on this report:</strong> forecast minus actual, as a percentage of actual. A positive number means the forecast ran high (over-forecast). A negative number means it ran low (under-forecast).</p>
+    <dl class="terms">
+      <dt>Band</dt><dd>The range of signed bias a segment may show before a forecasting change is judged to have failed there.</dd>
+      <dt>Protected segment</dt><dd>A segment whose breach stops the change, whatever else improves.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="rows-h">
+    <h2 id="rows-h">Five rows</h2>
+    <p class="small muted">For each row, choose the direction, where its cost lands, and how the measure set should treat it. Check when you are ready; the check runs again as you change answers.</p>
+    <div id="rows"></div>
+    <div class="row"><button type="button" id="check">Check my reading</button><button type="button" class="secondary" id="reset">Clear all answers</button></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="second-h">
+    <h2 id="second-h">Move one assumption: the sign convention</h2>
+    <p>A second report on the same five rows arrives from another source. It calculates <strong>actual minus forecast</strong>, so a positive number now means the forecast ran low. Read the direction of each row again.</p>
+    <div id="rows2"></div>
+    <div class="row"><button type="button" id="check2">Check the second report</button></div>
+    <div id="summary2" aria-live="polite"></div>
+  </section>
+
+  <p class="small muted">The company and its figures are fictional case material.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function signed(n) { return (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toLocaleString('en-US') + '%'; }
+  function usd(n, d) { return 'USD ' + n.toLocaleString('en-US', { minimumFractionDigits: d === undefined ? 1 : d, maximumFractionDigits: d === undefined ? 1 : d }) + 'M'; }
+
+  // Case fixtures: bias, error, write-offs, fill rate.
+  var ROWS = [
+    { id: 'r1', name: 'Home Care, all weeks', bias: -3, err: '29%', wo: usd(1.1), fill: '96.0%', other: 'None reported at this level',
+      dir: 'd4', cost: 'c4', band: ['b4'],
+      ok: 'A small negative figure built from a large under-forecast in promotion weeks and slight over-forecasts elsewhere. Reported alone, it hides the next row.' },
+    { id: 'r2', name: 'Home Care, promotion weeks', bias: -18, err: 'Not reported separately', wo: '—', fill: '—', other: 'A promotion with the largest account ran out for three weeks; that account deducts ' + usd(6.1) + ' a year',
+      dir: 'd2', cost: 'c2', band: ['b1'], nearBand: { b2: 'The structure is right: this cut needs its own band. One element is out of place: this is where the largest account is cut, so a breach here should stop the change. Mark it protected.' },
+      ok: 'Forecasts run low every promotion week, and the cost arrives as cut orders and deductions. A breach here stops the change.' },
+    { id: 'r3', name: 'Personal Care', bias: 2, err: '36%', wo: usd(2.8), fill: '94.5%', other: '—',
+      dir: 'd3', cost: 'c3', band: ['b3', 'b2'],
+      ok: 'Close to zero, with a small cost. The overall band can cover it, or you can give it its own; either is defensible.' },
+    { id: 'r4', name: 'Seasonal & Outdoor', bias: 9, err: '52%', wo: usd(7.4), fill: '89.2% (84% at peak)', other: 'A cool, wet spring led to the write-off',
+      dir: 'd1', cost: 'c1', band: ['b2', 'b1'],
+      ok: 'The forecast runs high, and the excess is written off. This line needs its own band.' },
+    { id: 'r5', name: 'Premium & Natural', bias: 14, err: '61%', wo: usd(6.9), fill: '91.0%', other: 'Many launches each year',
+      dir: 'd1', cost: 'c1', band: ['b2', 'b1'],
+      ok: 'The forecast runs high, and the excess is written off. This line needs its own band.' }
+  ];
+  var DIR = [['', 'Choose'], ['d1', 'Over-forecast'], ['d2', 'Under-forecast'], ['d3', 'Near zero'], ['d4', 'Slightly under, with a larger miss cancelled inside it']];
+  var COST = [['', 'Choose'], ['c1', 'Excess stock, carrying cost, and write-offs'], ['c2', 'Cut orders, deductions, and lost contribution'], ['c3', 'Small; no concentrated cost'], ['c4', 'It conceals a cost that sits in one cut']];
+  var BAND = [['', 'Choose'], ['b1', 'Own band, protected: a breach stops the change'], ['b2', 'Own band'], ['b3', 'Covered by the overall band'], ['b4', 'Never reported alone']];
+  var CELL = { dir: 'direction', cost: 'where the cost lands', band: 'how the measure set treats it' };
+  var FIRST = {
+    dir: 'Read the sign against the convention on the report, then ask whether any row below breaks this one into parts.',
+    cost: 'Ask what a persistent miss in this direction does: stock that sits, or orders that cannot be filled.',
+    band: 'Ask whether an overall band could let this row’s cost cancel against another row.'
+  };
+  function opts(a) { return a.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join(''); }
+
+  function card(r, host, second) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    var bias = second ? -r.bias : r.bias;
+    var facts = second
+      ? '<p class="small" id="f' + (second ? '2' : '') + '-' + r.id + '">Actual minus forecast: <strong>' + signed(bias) + '</strong></p>'
+      : '<table class="stack small" id="f-' + r.id + '"><thead><tr><th>Signed bias</th><th>Forecast error</th><th>Write-offs a year</th><th>Fill rate</th><th>Other signal</th></tr></thead><tbody><tr>' +
+        '<td data-label="Signed bias"><strong>' + signed(bias) + '</strong></td><td data-label="Forecast error">' + r.err + '</td><td data-label="Write-offs a year">' + r.wo + '</td><td data-label="Fill rate">' + r.fill + '</td><td data-label="Other signal">' + r.other + '</td></tr></tbody></table>';
+    var pre = second ? 's' : '';
+    d.innerHTML = '<h3 id="' + pre + 't-' + r.id + '">' + r.name + '</h3>' + facts +
+      '<div class="grid2" style="margin-top:8px">' +
+      '<label class="field"><span class="lab">Direction</span><select id="' + pre + 'dir-' + r.id + '" aria-describedby="' + pre + 't-' + r.id + '">' + opts(DIR) + '</select></label>' +
+      (second ? '' :
+      '<label class="field"><span class="lab">Where the cost lands</span><select id="cost-' + r.id + '" aria-describedby="t-' + r.id + '">' + opts(COST) + '</select></label>' +
+      '<label class="field"><span class="lab">How the measure set treats it</span><select id="band-' + r.id + '" aria-describedby="t-' + r.id + '">' + opts(BAND) + '</select></label>') +
+      '</div><div class="fbbox" id="' + pre + 'fb-' + r.id + '" aria-live="polite"></div>';
+    host.appendChild(d);
+  }
+  ROWS.forEach(function (r) { card(r, byId('rows'), false); });
+  ROWS.forEach(function (r) { card(r, byId('rows2'), true); });
+
+  function put(el, state, label, html) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    if (state !== 'blank') d.setAttribute('data-state', state);
+    var t = state === 'correct' ? ' · Correct' : state === 'near' ? ' · Near' : state === 'wrong' ? ' · Not yet' : '';
+    d.innerHTML = '<span class="st">' + label + t + '</span>' + html;
+    el.appendChild(d);
+  }
+
+  function judge(r) {
+    var v = { dir: byId('dir-' + r.id).value, cost: byId('cost-' + r.id).value, band: byId('band-' + r.id).value };
+    if (!v.dir || !v.cost || !v.band) return ['blank', 'Choose all three for this row.'];
+    var wrong = [];
+    if (v.dir !== r.dir) wrong.push('dir');
+    if (v.cost !== r.cost) wrong.push('cost');
+    if (r.band.indexOf(v.band) < 0) wrong.push('band');
+    if (!wrong.length) return ['correct', r.ok];
+    if (wrong.length === 1) {
+      var c = wrong[0];
+      if (c === 'band' && r.nearBand && r.nearBand[v.band]) return ['near', r.nearBand[v.band]];
+      return ['near', 'The structure is right. One element is out of place: ' + CELL[c] + '. First move: ' + FIRST[c]];
+    }
+    return ['wrong', 'Direction comes from the sign and the convention; cost follows direction; a segment needs its own band where an overall figure could cancel its cost. First move: ' + FIRST[wrong[0]]];
+  }
+
+  var checked = false;
+  function checkAll() {
+    checked = true;
+    var bad = 0, near = 0;
+    ROWS.forEach(function (r) {
+      var el = byId('fb-' + r.id); el.innerHTML = '';
+      var res = judge(r); put(el, res[0], 'Row', res[1]);
+      if (res[0] === 'near') near++; else if (res[0] !== 'correct') bad++;
+    });
+    var s = byId('summary'); s.innerHTML = '';
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    var overWO = 7.4 + 6.9, allWO = 1.1 + 2.8 + 7.4 + 6.9;
+    var caseCost = 20 * 0.62, carry = caseCost * 0.22;
+    put(s, state, 'Bias reading', state === 'correct'
+      ? 'The two lines that run high hold ' + usd(overWO) + ' of ' + usd(allWO) + ' in write-offs, ' + Math.round(overWO / allWO * 100).toLocaleString('en-US') + '%. Error size alone could not show this: it says nothing about Home Care’s promotion cut, and it ranks Premium & Natural worst while Seasonal & Outdoor writes off more. The bands need not be symmetric either. A case short costs USD 5.40 in lost contribution. A case left over costs its carrying charge, 22% a year of about USD ' + caseCost.toLocaleString('en-US', { minimumFractionDigits: 2 }) + ', roughly USD ' + carry.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ', before any write-off. How wide each band should be is a judgment for the people who bear each cost.'
+      : 'Rows marked amber or red need another look. Change an answer and the check runs again.');
+    byId('second').classList.toggle('hidden', state !== 'correct');
+  }
+  ROWS.forEach(function (r) {
+    ['dir-', 'cost-', 'band-'].forEach(function (p) { byId(p + r.id).addEventListener('change', function () { if (checked) checkAll(); }); });
+  });
+  byId('check').addEventListener('click', checkAll);
+  byId('reset').addEventListener('click', function () {
+    checked = false;
+    ROWS.forEach(function (r) { ['dir-', 'cost-', 'band-', 'sdir-'].forEach(function (p) { byId(p + r.id).value = ''; }); byId('fb-' + r.id).innerHTML = ''; byId('sfb-' + r.id).innerHTML = ''; });
+    byId('summary').innerHTML = ''; byId('summary2').innerHTML = '';
+    byId('second').classList.add('hidden');
+  });
+
+  byId('check2').addEventListener('click', function () {
+    var bad = 0, open = 0;
+    ROWS.forEach(function (r) {
+      var el = byId('sfb-' + r.id); el.innerHTML = '';
+      var v = byId('sdir-' + r.id).value;
+      if (!v) { open++; put(el, 'blank', 'Direction', 'Choose a direction.'); return; }
+      if (v === r.dir) put(el, 'correct', 'Direction', 'Same row, same direction. The sign flipped because the convention did.');
+      else { bad++; put(el, 'wrong', 'Direction', 'On this report a positive number means the forecast ran low. First move: reverse the sign, then read it as you did on the first report.'); }
+    });
+    var s = byId('summary2'); s.innerHTML = '';
+    put(s, open ? 'blank' : bad ? 'wrong' : 'correct', 'Second report', open ? 'Some rows still need a direction.' : bad
+      ? 'Rows marked red read the sign without the convention.'
+      : 'Nothing about the forecast changed; only the convention did. A dashboard that mixes the two reads backwards, which is why the convention belongs on the page.');
+  });
+})();
+</script>
+</body>
+</html>

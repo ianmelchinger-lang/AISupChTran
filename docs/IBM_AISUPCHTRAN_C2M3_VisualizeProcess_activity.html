@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assemble the path to a signed criterion</title>
+<style>:root{
+  --bg:#ffffff;--page:#f4f6f9;--ink:#1b2430;--muted:#4d5b6b;--line:#c9d1db;--panel:#f6f8fb;
+  --accent:#17508a;--accent-dark:#0f3a66;--accent-soft:#e6eff8;
+  --ok:#1a6a43;--ok-bg:#e8f4ed;--near:#7a5200;--near-bg:#fcf3dc;--bad:#9a2a2a;--bad-bg:#fbeaea;--focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.terms{margin:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+td.r,th.r{text-align:right}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.readout{border:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin:12px 0 0;font-variant-numeric:tabular-nums}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:8px 0}
+.hidden{display:none !important}
+.item{border-top:1px solid var(--line);padding:14px 0}
+.item:first-of-type{border-top:0;padding-top:0}
+.item h3 .tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent);margin-right:6px}
+.fbbox:empty{display:none}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2{grid-template-columns:1fr}
+  .stack thead{position:absolute;left:-9999px}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label) ": ";font-weight:700;color:var(--muted)}
+  td.r,th.r{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
+</style>
+<style>
+.item p.ctext{margin:0 0 8px}
+.item .grid2{margin-top:6px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.lane ol,.lane ul{margin:4px 0 0;padding-left:20px}
+.lane li{margin:2px 0}
+.lane h3{margin:0 0 2px}
+.lane{margin:0 0 8px}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Visualize the process</p>
+  <h1>Assemble the path from three measures to one signed criterion</h1>
+  <p class="lede">A measure set holds up when the problem is stated in operational terms, the moves run in the order their inputs require, and each sign of success can be checked on the finished criterion. Sort the cards, then sequence the moves.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. The steering group wants to know how any change to the baseline forecast will be judged. Three functions each named a different measure, and a forecasting pilot reported a large gain on its headline. Fifteen cards follow. Some belong on the path to a criterion you can defend. Some are tempting moves that the path rules out.</p>
+    <dl class="terms">
+      <dt>What was wrong</dt><dd>A failure of the current situation, true before any work begins.</dd>
+      <dt>What the lead did</dt><dd>A move the lead performs, in sequence. Give each a step number. Here, each move takes the one before it as an input, so the order is fixed.</dd>
+      <dt>What shows it worked</dt><dd>Something an observer can verify on the finished criterion or its verdict.</dd>
+      <dt>Leave out</dt><dd>A card that breaks a rule of the criterion. It belongs in no lane.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="pool-h">
+    <h2 id="pool-h">The cards</h2>
+    <p class="small muted" id="count"></p>
+    <div id="pool"></div>
+  </section>
+
+  <section class="card" aria-labelledby="asm-h">
+    <h2 id="asm-h">Your assembly so far</h2>
+    <div class="grid2" id="asm"></div>
+    <div class="row">
+      <button type="button" id="check">Check my assembly</button>
+      <button type="button" class="secondary" id="reset">Clear all placements</button>
+    </div>
+    <div id="ofb" aria-live="polite"></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="second-h">
+    <h2 id="second-h">Return the verdict</h2>
+    <p>The criterion is signed. Four readouts arrive. For each, return the verdict the criterion gives. The first is the pilot; the other three are hypothetical and carry no case figures.</p>
+    <div id="reads"></div>
+    <div class="row"><button type="button" id="check2">Check my verdicts</button></div>
+    <div id="vsum" aria-live="polite"></div>
+  </section>
+
+  <p class="small muted">The company and its figures are fictional case material.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+
+  // Set to false to ship the register fallback: the pilot readout without restated figures.
+  var SHOW_FIGURES = true;
+
+  var LANES = [['', 'Choose'], ['wrong', 'What was wrong'], ['did', 'What the lead did'], ['worked', 'What shows it worked'], ['out', 'Leave out']];
+
+  var GEN_LANE = 'Ask three questions of this card. Would it be true before any work began? Does the lead act in it? Could an observer verify it on the finished criterion? Placement follows the question that gets a yes. First move: read the card for its actor and its tense.';
+  var GEN_OUT = 'A card leaves the assembly only if it breaks a rule of the criterion: it lets one measure buy back another, leaves a term open until results are visible, or stretches a test until it passes. First move: check this card against those three.';
+  var NEAR_SIG = 'The structure is right: this card belongs on the path. One element is out of place: it describes a state an observer would verify on the finished criterion, and it names no move the lead makes.';
+  var NEAR_MOVE = 'The structure is right: this card belongs on the path. One element is out of place: it names a move the lead makes, and an observer cannot verify a move by looking at the finished criterion.';
+
+  var CARDS = [
+    { id: 'm3', s: 'Bound the benefit', lane: 'did', move: 3,
+      t: 'Limit the inventory claim to safety stock at cost, taken once as a smaller buffer or as higher service, and only where the buffer is reset in every place it is set.',
+      ok: 'Right. The lead is the actor, and the output, a bounded inventory claim, is what the inventory guardrail later names.' },
+    { id: 's2', s: 'Bias bands with a convention', lane: 'worked',
+      t: 'Home Care promotion weeks, Seasonal & Outdoor, and Premium & Natural each carry their own signed-bias band, with the sign convention stated on the page.',
+      ok: 'Right. An observer can verify it by reading the bias section of the criterion.' },
+    { id: 'd2', s: 'Weights at the readout', lane: 'out',
+      t: 'Let the steering group settle the weights at the readout, once each function can see its results.',
+      why: 'Weights agreed after results invite each function to argue for the weighting it wins, and a flat result can be weighted into a pass.',
+      first: 'First move: ask what could still change once the results are on the table.' },
+    { id: 'p2', s: 'A headline at two levels', lane: 'wrong',
+      t: 'The pilot’s headline compares the model across the national network with the current forecast at each location, and promotion weeks are hidden inside the total.',
+      ok: 'Right. It is true before any work begins: the headline was produced on mixed levels.' },
+    { id: 'm1', s: 'Choose the measure', lane: 'did', move: 1,
+      t: 'Give each candidate error measure a job (primary, reporting with a named pairing, or reject) by what it hides at the level where the forecast is used.',
+      ok: 'Right. The lead is the actor, and the output, a primary measure with its level and population, is what every later move is measured on.' },
+    { id: 's4', s: 'Stop on a good headline', lane: 'worked',
+      t: 'The criterion’s verdict on the pilot reads stop, although the pilot’s headline improved.',
+      ok: 'Right. An observer can verify it on the recorded verdict. A criterion that cannot return stop on a flattering headline is not doing its job.' },
+    { id: 'd3', s: 'Extend until clear', lane: 'out',
+      t: 'If a readout is unclear, extend the test until the result is clear.',
+      why: 'A test stretched until it passes has its window chosen after the result. An inconclusive test is rerun under a new criterion, dated before the rerun.',
+      first: 'First move: ask who decides when an extended test has run long enough.' },
+    { id: 'p3', s: 'Nothing fixed in advance', lane: 'wrong',
+      t: 'Nothing about how a change will be judged is written down before results arrive, so the measure, the comparator, and the weights stay open to argument.',
+      ok: 'Right. It is true before any work begins: no criterion exists yet.' },
+    { id: 'm4', s: 'Write the criterion', lane: 'did', move: 4,
+      t: 'Fix the primary measure, comparator, threshold, guardrails, value-added line, and a go-or-stop rule, dated and signed before results.',
+      ok: 'Right. The lead writes and circulates it; the signatures make it binding before anyone sees a result.' },
+    { id: 'd1', s: 'One weighted composite', lane: 'out',
+      t: 'Combine forecast error, inventory dollars, and the service score into one weighted composite, so every function’s measure counts.',
+      why: 'A weighted total lets an accuracy gain buy back a service loss, so a change can pass while the largest account is cut.',
+      first: 'First move: ask whether any result on one measure could force a stop on its own.' },
+    { id: 's1', s: 'Primary written in full', lane: 'worked',
+      t: 'The primary measure is written with its level, calculation, weights, and benchmark, and each reporting measure names the cut shown beside it.',
+      ok: 'Right. An observer can verify it by reading the measure lines of the criterion.' },
+    { id: 'p1', s: 'Three measures of better', lane: 'wrong',
+      t: 'Demand planning, finance, and the commercial team each judge “better” by a different measure, and any one can pass while another function absorbs the cost.',
+      ok: 'Right. It is true before any work begins: three accurate, partial views of the same change.' },
+    { id: 'm2', s: 'Read the bias', lane: 'did', move: 2,
+      t: 'Report signed error beside accuracy for every segment where cancellation could hide a cost, and give those segments their own bands.',
+      ok: 'Right. The lead is the actor, and the output, bias by segment, is what lets the next move separate bias from spread.' },
+    { id: 's3', s: 'Dated and signed', lane: 'worked',
+      t: 'The criterion carries a date earlier than the readout, the owner’s name, and the signatures of planning, finance, inventory, and the account owner.',
+      ok: 'Right. An observer can verify it by comparing the criterion’s date with the readout’s.' },
+    { id: 'm5', s: 'Return the verdict', lane: 'did', move: 5,
+      t: 'Run the signed criterion on the restated result and record go, stop, or insufficient evidence, with one sentence on why.',
+      ok: 'Right. The lead applies the rule as written; the verdict is valid only against a criterion dated before the result.' }
+  ];
+  var BYID = {}; CARDS.forEach(function (c) { BYID[c.id] = c; });
+
+  var MOVES = { m1: 'choosing the measure', m2: 'reading the bias', m3: 'bounding the benefit', m4: 'writing the criterion', m5: 'returning the verdict' };
+  var DEPS = [
+    ['m1', 'm2', 'Bias is measured on the primary measure’s level and population, and choosing the measure is what shows that every error measure discards direction.'],
+    ['m2', 'm3', 'Bounding the benefit separates bias from spread, so the bias read comes first.'],
+    ['m3', 'm4', 'The inventory guardrail must name the buffer and its cost basis, so the bound comes before the criterion.'],
+    ['m4', 'm5', 'A verdict is valid only against a criterion dated before the result.']
+  ];
+
+  var pool = byId('pool');
+  var laneOpts = LANES.map(function (l) { return '<option value="' + l[0] + '">' + l[1] + '</option>'; }).join('');
+  var stepOpts = '<option value="">Choose</option>';
+  for (var i = 1; i <= 8; i++) stepOpts += '<option value="' + i + '">' + fmt(i) + '</option>';
+  CARDS.forEach(function (c) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="t-' + c.id + '">' + c.t + '</p>' +
+      '<div class="grid2">' +
+      '<label class="field"><span class="lab">Place in</span><select id="lane-' + c.id + '" aria-describedby="t-' + c.id + '">' + laneOpts + '</select></label>' +
+      '<label class="field hidden" id="stepw-' + c.id + '"><span class="lab">Step</span><select id="step-' + c.id + '" aria-describedby="t-' + c.id + '">' + stepOpts + '</select></label>' +
+      '</div><div class="fbbox" id="fb-' + c.id + '" aria-live="polite"></div>';
+    pool.appendChild(d);
+  });
+
+  function laneOf(c) { return byId('lane-' + c.id).value; }
+  function stepOf(c) { var v = byId('step-' + c.id).value; return v ? parseInt(v, 10) : 0; }
+
+  function readout() {
+    var groups = { wrong: [], did: [], worked: [], out: [] }, left = 0;
+    CARDS.forEach(function (c) { var l = laneOf(c); if (!l) { left++; return; } groups[l].push(c); });
+    groups.did.sort(function (a, b) { return (stepOf(a) || 99) - (stepOf(b) || 99); });
+    function list(tag, arr, numbered) {
+      if (!arr.length) return '<p class="small muted">Nothing placed yet.</p>';
+      return '<' + tag + '>' + arr.map(function (c) {
+        var s = stepOf(c);
+        return '<li>' + c.s + (numbered && !s ? ' <span class="tag">no step</span>' : '') + (numbered && s ? ' <span class="small muted">step ' + fmt(s) + '</span>' : '') + '</li>';
+      }).join('') + '</' + tag + '>';
+    }
+    byId('asm').innerHTML =
+      '<div class="lane"><h3>What was wrong</h3>' + list('ul', groups.wrong) + '</div>' +
+      '<div class="lane"><h3>What the lead did</h3>' + list('ol', groups.did, true) + '</div>' +
+      '<div class="lane"><h3>What shows it worked</h3>' + list('ul', groups.worked) + '</div>' +
+      '<div class="lane"><h3>Left out</h3>' + list('ul', groups.out) + '</div>';
+    byId('count').textContent = left === 0 ? 'Every card is placed.' : 'Cards still unplaced: ' + fmt(left) + '.';
+  }
+  function syncSteps() {
+    CARDS.forEach(function (c) {
+      var show = laneOf(c) === 'did';
+      byId('stepw-' + c.id).classList.toggle('hidden', !show);
+      if (!show) byId('step-' + c.id).value = '';
+    });
+  }
+  function judgeCard(c, lane) {
+    if (!lane) return ['blank', 'Not placed yet. Choose a lane for this card.'];
+    if (c.lane === lane) return ['correct', c.lane === 'out' ? 'Left out, correctly. ' + c.why : c.ok];
+    if (c.lane === 'out') return ['wrong', c.why + ' ' + c.first];
+    if (lane === 'out') return ['wrong', GEN_OUT];
+    if (c.lane === 'worked' && lane === 'did') return ['near', NEAR_SIG];
+    if (c.lane === 'did' && lane === 'worked') return ['near', NEAR_MOVE];
+    return ['wrong', GEN_LANE];
+  }
+  function judgeOrder() {
+    var ids = ['m1', 'm2', 'm3', 'm4', 'm5'], pos = {}, missing = false;
+    ids.forEach(function (id) { var c = BYID[id]; if (laneOf(c) !== 'did' || !stepOf(c)) missing = true; else pos[id] = stepOf(c); });
+    if (missing) return ['blank', 'The sequence cannot be checked yet. Place all five moves in the middle lane and give each a step.'];
+    var seen = {}, dup = 0;
+    ids.forEach(function (id) { if (seen[pos[id]]) dup = pos[id]; seen[pos[id]] = true; });
+    if (dup) return ['wrong', 'Two moves share step ' + fmt(dup) + '. Each step holds one move. First move: for the move you placed earliest, ask what it needs as input and which move makes that input.'];
+    var broken = DEPS.filter(function (d) { return pos[d[0]] > pos[d[1]]; });
+    if (broken.length === 0) return ['correct', 'The sequence respects every dependency, and here that fixes the whole order. Each move takes the one before it as an input: the measure sets the level bias is read at, the bias read separates bias from spread, the bounded benefit names the inventory guardrail, and the signed criterion is the only thing a verdict can be read against.'];
+    if (broken.length === 1) { var d = broken[0]; return ['near', 'The structure is right: most moves are in order. One element is out of place: ' + MOVES[d[1]] + ' sits ahead of ' + MOVES[d[0]] + '. ' + d[2]]; }
+    return ['wrong', 'More than one move stands ahead of the work it depends on. A move cannot start until its inputs exist. First move: for the move you placed earliest, ask what it needs as input and which move makes that input.'];
+  }
+  function put(box, state, label, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    if (state !== 'blank') d.setAttribute('data-state', state);
+    var t = state === 'correct' ? ' · Correct' : state === 'near' ? ' · Near' : state === 'wrong' ? ' · Not yet' : '';
+    d.innerHTML = '<span class="st">' + label + t + '</span>' + text;
+    box.appendChild(d);
+  }
+
+  var checked = false;
+  function checkAll() {
+    checked = true;
+    var bad = 0, near = 0;
+    CARDS.forEach(function (c) {
+      var box = byId('fb-' + c.id); box.innerHTML = '';
+      var r = judgeCard(c, laneOf(c)); put(box, r[0], 'Placement', r[1]);
+      if (r[0] === 'near') near++; else if (r[0] !== 'correct') bad++;
+    });
+    var ob = byId('ofb'); ob.innerHTML = '';
+    var o = judgeOrder(); put(ob, o[0], 'Sequence', o[1]);
+    if (o[0] === 'near') near++; else if (o[0] !== 'correct') bad++;
+    var sum = byId('summary'); sum.innerHTML = '';
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    put(sum, state, 'Assembly', state === 'correct'
+      ? 'The failure is stated in operational terms, the moves run in the order their inputs require, and every sign of success can be checked on the finished criterion or its verdict.'
+      : 'Cards marked amber or red need another look. Change a placement and the check runs again.');
+    byId('second').classList.toggle('hidden', state !== 'correct');
+  }
+  function onChange() { syncSteps(); readout(); if (checked) checkAll(); }
+  CARDS.forEach(function (c) {
+    byId('lane-' + c.id).addEventListener('change', onChange);
+    byId('step-' + c.id).addEventListener('change', onChange);
+  });
+  byId('check').addEventListener('click', checkAll);
+  byId('reset').addEventListener('click', function () {
+    checked = false;
+    CARDS.forEach(function (c) { byId('lane-' + c.id).value = ''; byId('step-' + c.id).value = ''; byId('fb-' + c.id).innerHTML = ''; });
+    byId('ofb').innerHTML = ''; byId('summary').innerHTML = '';
+    byId('second').classList.add('hidden');
+    syncSteps(); readout();
+  });
+
+  // Second pass: return the verdict on four readouts.
+  var VERDICTS = [['', 'Choose'], ['go', 'Go'], ['stop', 'Stop'], ['ie', 'Insufficient evidence: rerun under a new dated criterion'], ['ext', 'Extend the test until the result is clear']];
+  var READS = [
+    { id: 'r1', kind: 'The pilot',
+      t: SHOW_FIGURES
+        ? 'The pilot summary reports error down from 29% to 24%. Restated for each product at each location, by month, the candidate scores 29% and the forecast of record 29%.'
+        : 'The pilot summary reports a large fall in error. Restated for each product at each location, by month, the candidate is flat against the forecast of record.',
+      key: 'stop',
+      ok: 'Right. The primary measure is missed against the forecast of record, so the rule returns stop. The headline was measured on a basis the criterion does not accept.',
+      near: { ie: 'The structure is right: you did not pass it. One element is out of place: the evidence is sufficient. The restated result is clear, and it misses the threshold.' } },
+    { id: 'r2', kind: 'Hypothetical',
+      t: 'A candidate beats the forecast of record by more than the threshold. Over the same weeks, on time in full on the largest account’s definition falls below the agreed margin.',
+      key: 'stop',
+      ok: 'Right. A breached guardrail stops the change, however strong the primary. The rule does not let the forecast gain buy back the service loss.',
+      near: { ie: 'The structure is right: you did not pass it. One element is out of place: the evidence is sufficient. A guardrail was measured, and it breached.' } },
+    { id: 'r3', kind: 'Hypothetical',
+      t: 'A candidate beats the forecast of record by more than the threshold, and every bias band, the service guardrail, and the inventory guardrail hold.',
+      key: 'go',
+      ok: 'Right. The primary passes and every guardrail holds. A criterion that can return stop must also be able to return go.' },
+    { id: 'r4', kind: 'Hypothetical',
+      t: 'A plant outage cuts the test window short. The window holds too few promotion weeks to read the promotion-week bias band.',
+      key: 'ie',
+      ok: 'Right. A protected band that cannot be read is not a pass. The test is rerun under a new criterion, dated before the rerun.',
+      near: { stop: 'The structure is right: you did not pass it. One element is out of place: nothing has failed yet. The band could not be read, which is insufficient evidence, not a breach.' } }
+  ];
+  var GEN_V = 'The rule is non-compensatory: go only if the primary and every guardrail pass, stop if any fails, and a rerun under a new dated criterion when a required reading is missing. First move: check the primary, then each guardrail, against the readout.';
+  var rhost = byId('reads');
+  var vOpts = VERDICTS.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+  READS.forEach(function (R) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="rt-' + R.id + '"><span class="tag">' + R.kind + '</span> ' + R.t + '</p>' +
+      '<label class="field"><span class="lab">Verdict</span><select id="v-' + R.id + '" aria-describedby="rt-' + R.id + '">' + vOpts + '</select></label>' +
+      '<div class="fbbox" id="vf-' + R.id + '" aria-live="polite"></div>';
+    rhost.appendChild(d);
+    byId('v-' + R.id).addEventListener('change', function () { byId('vf-' + R.id).innerHTML = ''; byId('vsum').innerHTML = ''; });
+  });
+  byId('check2').addEventListener('click', function () {
+    var open = [], bad = 0, near = 0;
+    READS.forEach(function (R, i) { if (!byId('v-' + R.id).value) open.push(fmt(i + 1)); });
+    var sum = byId('vsum'); sum.innerHTML = '';
+    if (open.length) { put(sum, 'blank', 'Verdicts', 'Choose a verdict for each readout first. Still open: ' + open.join(', ') + '.'); return; }
+    READS.forEach(function (R) {
+      var v = byId('v-' + R.id).value, box = byId('vf-' + R.id); box.innerHTML = '';
+      if (v === R.key) put(box, 'correct', 'Verdict', R.ok);
+      else if (v === 'ext') { put(box, 'wrong', 'Verdict', 'A test is never extended until it passes; that chooses the window after the result. ' + GEN_V); bad++; }
+      else if (R.near && R.near[v]) { put(box, 'near', 'Verdict', R.near[v]); near++; }
+      else { put(box, 'wrong', 'Verdict', GEN_V); bad++; }
+    });
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    put(sum, state, 'Verdicts', state === 'correct'
+      ? 'Each readout gets the verdict the signed rule gives, including stop on the pilot whose headline improved. Nothing was reopened to reach it.'
+      : 'Readouts marked amber or red need another look. Change a verdict and check again.');
+  });
+
+  syncSteps();
+  readout();
+})();
+</script>
+</body>
+</html>

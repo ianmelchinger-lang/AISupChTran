@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assign each measure a job</title>
+<style>:root{
+  --bg:#ffffff;--page:#f4f6f9;--ink:#1b2430;--muted:#4d5b6b;--line:#c9d1db;--panel:#f6f8fb;
+  --accent:#17508a;--accent-dark:#0f3a66;--accent-soft:#e6eff8;
+  --ok:#1a6a43;--ok-bg:#e8f4ed;--near:#7a5200;--near-bg:#fcf3dc;--bad:#9a2a2a;--bad-bg:#fbeaea;--focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.terms{margin:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+td.r,th.r{text-align:right}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.readout{border:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin:12px 0 0;font-variant-numeric:tabular-nums}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:8px 0}
+.hidden{display:none !important}
+.item{border-top:1px solid var(--line);padding:14px 0}
+.item:first-of-type{border-top:0;padding-top:0}
+.item h3 .tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent);margin-right:6px}
+.fbbox:empty{display:none}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2{grid-template-columns:1fr}
+  .stack thead{position:absolute;left:-9999px}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label) ": ";font-weight:700;color:var(--muted)}
+  td.r,th.r{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Skill practice · Error measure choice</p>
+  <h1>Assign each measure a job</h1>
+  <p class="lede">Every forecast error measure decides which misses count most. Before a measure judges a forecasting change, you need to know what it hides at the level where the forecast is used, and give it a job to match.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. The steering group wants a measure set for judging any change to the baseline forecast across all four product lines. Planners set that forecast for each product at each location, month by month. Five candidate measures are on the table.</p>
+    <dl class="terms">
+      <dt>Primary</dt><dd>The one measure that judges the change.</dd>
+      <dt>Reporting only, with cuts</dt><dd>Kept for context, always shown beside the line or segment results it could otherwise hide.</dd>
+      <dt>Reject for this decision</dt><dd>Not fit to judge a forecast used for each product at each location.</dd>
+      <dt>Naive forecast</dt><dd>Demand in the same period last year, used as a fixed benchmark.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="facts-h">
+    <h2 id="facts-h">The portfolio</h2>
+    <table class="stack">
+      <caption>Forecast error is measured for each product at each location, by month, one month ahead.</caption>
+      <thead><tr><th>Line</th><th class="r">Share of revenue</th><th class="r">Forecast error</th><th class="r">Write-offs a year</th></tr></thead>
+      <tbody id="lines"></tbody>
+    </table>
+    <p class="small" style="margin-top:10px">Personal Care sells 880 products with a long tail: many product-location combinations sell little or nothing in a given month. Measured for each product family by month, enterprise error is 14%. For Home Care, the naive forecast's error is 36%.</p>
+  </section>
+
+  <section class="card" aria-labelledby="m-h">
+    <h2 id="m-h">Five candidate measures</h2>
+    <p class="small muted">For each measure, choose what it hides in this portfolio, then the job it should have. Check when you are ready; the check runs again as you change answers.</p>
+    <div id="measures"></div>
+    <div class="row"><button type="button" id="check">Check my jobs</button><button type="button" class="secondary" id="reset">Clear all answers</button></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="second-h">
+    <h2 id="second-h">Move one assumption: which line improves</h2>
+    <p>The revenue-weighted total gives each line a say equal to its share of revenue. Choose a line and a size of improvement, and watch what the total does. Nothing here is graded.</p>
+    <div class="grid2">
+      <label class="field"><span class="lab">Line that improves</span><select id="sp-line"></select></label>
+      <label class="field"><span class="lab">Improvement in that line's error</span><select id="sp-gain"></select></label>
+    </div>
+    <div class="readout" id="sp-out" aria-live="polite"></div>
+  </section>
+
+  <p class="small muted">The company and its figures are fictional case material.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function pct(n, d) { return n.toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }) + '%'; }
+  function usd(n) { return 'USD ' + n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + 'M'; }
+
+  // Case fixtures.
+  var LINES = [
+    { k: 'hc', name: 'Home Care', share: 44, err: 29, wo: 1.1 },
+    { k: 'pc', name: 'Personal Care', share: 31, err: 36, wo: 2.8 },
+    { k: 'so', name: 'Seasonal & Outdoor', share: 15, err: 52, wo: 7.4 },
+    { k: 'pn', name: 'Premium & Natural', share: 10, err: 61, wo: 6.9 }
+  ];
+  function weighted(errs) { var s = 0; LINES.forEach(function (l) { s += l.share / 100 * errs[l.k]; }); return s; }
+  var baseErr = {}; LINES.forEach(function (l) { baseErr[l.k] = l.err; });
+  var ENTERPRISE = weighted(baseErr);
+  var WO_TOTAL = LINES.reduce(function (a, l) { return a + l.wo; }, 0);
+  var SMALL_SHARE = 15 + 10;
+  var SMALL_WO = 7.4 + 6.9;
+
+  var tb = byId('lines');
+  LINES.forEach(function (l) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td data-label="Line">' + l.name + '</td><td class="r" data-label="Share of revenue">' + pct(l.share) + '</td><td class="r" data-label="Forecast error">' + pct(l.err) + '</td><td class="r" data-label="Write-offs a year">' + usd(l.wo) + '</td>';
+    tb.appendChild(tr);
+  });
+  var tr2 = document.createElement('tr');
+  tr2.innerHTML = '<td data-label="Line"><strong>Enterprise, revenue-weighted</strong></td><td class="r" data-label="Share of revenue">' + pct(100) + '</td><td class="r" data-label="Forecast error"><strong>' + pct(Math.round(ENTERPRISE)) + '</strong></td><td class="r" data-label="Write-offs a year">' + usd(WO_TOTAL) + '</td>';
+  tb.appendChild(tr2);
+
+  var HIDES = [
+    ['', 'Choose'],
+    ['h1', 'It swings or fails where Personal Care’s long tail sells little or nothing'],
+    ['h2', 'It lets Home Care set the total while the lines holding most write-offs barely move it'],
+    ['h3', 'It lets misses for single products and locations cancel inside a family total'],
+    ['h4', 'It gives low-volume and strategic products little say in the total'],
+    ['h5', 'It is only as good as its benchmark: if the naive rule changes, the score changes'],
+    ['x1', 'Nothing: it reports both the size and the direction of each miss'],
+    ['x2', 'It lets a few very large misses dominate the result']
+  ];
+  var ROLES = [['', 'Choose'], ['p', 'Primary'], ['r', 'Reporting only, with cuts'], ['x', 'Reject for this decision']];
+  var RNAME = { p: 'primary', r: 'reporting only, with cuts', x: 'reject for this decision' };
+
+  var M = [
+    { id: 'm1', t: 'Average of percentage errors', d: 'Each product-location miss is divided by that combination’s actual demand, and the percentages are averaged.',
+      hide: 'h1', roles: ['x'],
+      okH: 'Dividing by actual demand makes the percentage explode where actuals are small, and the calculation fails at zero.',
+      okR: 'With a long tail of sparse series, it cannot judge the change alone.' },
+    { id: 'm2', t: 'Revenue-weighted error by line', d: 'Each line’s error weighted by its share of revenue. Today it reads ' + pct(Math.round(ENTERPRISE)) + '.',
+      hide: 'h2', roles: ['r'],
+      okH: 'Seasonal & Outdoor and Premium & Natural carry ' + pct(SMALL_SHARE) + ' of the weight but ' + pct(Math.round(SMALL_WO / WO_TOTAL * 100)) + ' of write-offs.',
+      okR: 'It keeps continuity with the figure people know, as long as each line’s result sits beside it.' },
+    { id: 'm3', t: 'Family-by-month error', d: 'Forecasts added up to product family and month before the error is calculated. Today it reads 14%.',
+      hide: 'h3', roles: ['x'],
+      okH: 'An over-forecast for one product offsets an under-forecast for another before the error is counted.',
+      okR: 'The forecast is used for each product at each location, so a family total cannot judge it.' },
+    { id: 'm4', t: 'Volume-weighted absolute error', d: 'For each product at each location, by month, with the volume weights frozen before the test starts.',
+      hide: 'h4', roles: ['p', 'r'],
+      okH: 'Series with little volume barely move a volume-weighted total, including strategic ones.',
+      okR: 'Either job can hold, provided segment results are always shown beside it.' },
+    { id: 'm5', t: 'Error relative to the naive forecast', d: 'At the same level, the forecast’s error divided by the naive forecast’s error. Below 1 beats last year’s demand.',
+      hide: 'h5', roles: ['p'],
+      okH: 'A scaled score means something only while the benchmark stays fixed.',
+      okR: 'It compares every line on the same footing, so no line’s size sets the result.' }
+  ];
+
+  var GEN_HIDE = 'A measure hides whatever its calculation lets other series outweigh or cancel. First move: ask what the calculation divides by, weights by, or adds up before it counts a miss.';
+  var GEN_ROLE = 'A measure’s job follows from what it hides at the level where the forecast is used. First move: ask whether this measure can see a miss for one product at one location.';
+
+  var hideOpts = HIDES.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+  var roleOpts = ROLES.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+  var box = byId('measures');
+  M.forEach(function (m, i) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<h3 id="t-' + m.id + '"><span class="tag">M' + (i + 1) + '</span>' + m.t + '</h3>' +
+      '<p class="small" id="d-' + m.id + '">' + m.d + '</p>' +
+      '<div class="grid2">' +
+      '<label class="field"><span class="lab">What it hides here</span><select id="h-' + m.id + '" aria-describedby="t-' + m.id + ' d-' + m.id + '">' + hideOpts + '</select></label>' +
+      '<label class="field"><span class="lab">Its job</span><select id="r-' + m.id + '" aria-describedby="t-' + m.id + ' d-' + m.id + '">' + roleOpts + '</select></label>' +
+      '</div><div class="fbbox" id="fb-' + m.id + '" aria-live="polite"></div>';
+    box.appendChild(d);
+  });
+
+  function put(el, state, label, html) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    if (state !== 'blank') d.setAttribute('data-state', state);
+    var t = state === 'correct' ? ' · Correct' : state === 'near' ? ' · Near' : state === 'wrong' ? ' · Not yet' : '';
+    d.innerHTML = '<span class="st">' + label + t + '</span>' + html;
+    el.appendChild(d);
+  }
+
+  function judge(m) {
+    var h = byId('h-' + m.id).value, r = byId('r-' + m.id).value;
+    if (!h || !r) return ['blank', 'Choose both what it hides and its job.'];
+    var hOK = h === m.hide, rOK = m.roles.indexOf(r) >= 0;
+    if (m.id === 'm2' && r === 'p') {
+      var move = 10 * 0.10;
+      return [hOK ? 'near' : 'wrong', (hOK ? 'The structure is right: you found the blind spot. One element is out of place: the job. ' : GEN_HIDE + ' ') +
+        'As primary, this measure would judge Premium & Natural at a tenth of its say: a 10-point gain there moves the total by 0.10 × 10 = ' + move.toLocaleString('en-US', { minimumFractionDigits: 1 }) + ' point, while that line writes off ' + usd(6.9) + ' a year. Whether a scaled or a weighted measure should lead is a judgment forecasting specialists differ on; this portfolio’s write-offs are why the weighted one reports here rather than judges.'];
+    }
+    if (hOK && rOK) return ['correct', m.okH + ' ' + m.okR];
+    if (hOK) return ['near', 'The structure is right: you found the blind spot. One element is out of place: the job. ' + RNAME[r].charAt(0).toUpperCase() + RNAME[r].slice(1) + ' does not fit a measure that hides this. ' + GEN_ROLE];
+    if (rOK) return ['near', 'The structure is right: the job fits. One element is out of place: what it hides. ' + (h === 'x1' ? 'No accuracy measure reports direction. ' : '') + GEN_HIDE];
+    return ['wrong', (h === 'x1' ? 'No accuracy measure reports direction. ' : '') + GEN_HIDE];
+  }
+
+  var checked = false;
+  function checkAll() {
+    checked = true;
+    var bad = 0, near = 0, blank = 0;
+    M.forEach(function (m) {
+      var el = byId('fb-' + m.id); el.innerHTML = '';
+      var res = judge(m);
+      put(el, res[0], 'Measure', res[1]);
+      if (res[0] === 'near') near++; else if (res[0] === 'blank') blank++; else if (res[0] !== 'correct') bad++;
+    });
+    var s = byId('summary'); s.innerHTML = '';
+    var state = bad || blank ? 'wrong' : near ? 'near' : 'correct';
+    put(s, state, 'Measure set',
+      state === 'correct'
+        ? 'Each measure has a job that matches what it hides. One gap remains in all five: none reports whether misses run high or low. An error total can look acceptable while the forecast misses the same way every week, so direction needs a measure of its own.'
+        : blank ? 'Some measures still need answers. Rows marked amber or red need another look.'
+        : 'Rows marked amber or red need another look. Change an answer and the check runs again.');
+    byId('second').classList.toggle('hidden', state !== 'correct');
+  }
+  M.forEach(function (m) {
+    ['h-', 'r-'].forEach(function (p) { byId(p + m.id).addEventListener('change', function () { if (checked) checkAll(); }); });
+  });
+  byId('check').addEventListener('click', checkAll);
+  byId('reset').addEventListener('click', function () {
+    checked = false;
+    M.forEach(function (m) { byId('h-' + m.id).value = ''; byId('r-' + m.id).value = ''; byId('fb-' + m.id).innerHTML = ''; });
+    byId('summary').innerHTML = '';
+    byId('second').classList.add('hidden');
+  });
+
+  // Second pass: move which line improves.
+  var sl = byId('sp-line'), sg = byId('sp-gain');
+  sl.innerHTML = LINES.map(function (l) { return '<option value="' + l.k + '">' + l.name + '</option>'; }).join('');
+  sg.innerHTML = [5, 10, 15, 20].map(function (g) { return '<option value="' + g + '">' + g.toLocaleString('en-US') + ' points</option>'; }).join('');
+  sl.value = 'pn'; sg.value = '10';
+  function sandbox() {
+    var k = sl.value, g = parseInt(sg.value, 10), errs = {};
+    LINES.forEach(function (l) { errs[l.k] = l.k === k ? l.err - g : l.err; });
+    var after = weighted(errs), drop = ENTERPRISE - after;
+    var line = LINES.filter(function (l) { return l.k === k; })[0];
+    byId('sp-out').innerHTML = line.name + ' error falls from ' + pct(line.err) + ' to ' + pct(line.err - g) + '. The revenue-weighted total moves from ' +
+      pct(ENTERPRISE, 1) + ' to ' + pct(after, 1) + ', a fall of ' + drop.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' points. ' +
+      'That line writes off ' + usd(line.wo) + ' a year, ' + pct(line.wo / WO_TOTAL * 100) + ' of the total. ' +
+      (line.share >= 40 ? 'A modest gain in the largest, steadiest line moves the total more than a large gain in a small one.' : 'A large gain where write-offs concentrate barely registers in a total weighted by revenue.');
+  }
+  sl.addEventListener('change', sandbox); sg.addEventListener('change', sandbox);
+  sandbox();
+})();
+</script>
+</body>
+</html>

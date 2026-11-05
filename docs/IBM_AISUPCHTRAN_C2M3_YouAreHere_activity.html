@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Judge the next forecast change</title>
+<style>
+:root {
+  --navy: #001d6c;
+  --sky: #d0e2ff;
+  --cobalt: #0043c3;
+  --periwinkle: #78a9ff;
+  --mist: #edf5ff;
+  --white: #ffffff;
+  --bad-ink: #a2191f;
+  --ink: #001d6c;
+  --page: #edf5ff;
+  --paper: #ffffff;
+  --accent: #0043c3;
+  --accent-soft: #d0e2ff;
+  --rule: #78a9ff;
+  --on-dark: #ffffff;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+main { max-width: 760px; margin: 0 auto; padding: 32px 24px 56px; }
+.panel { background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 28px; }
+.eyebrow { margin: 0 0 6px; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+h1, h2, h3 { font-weight: 600; line-height: 1.2; margin: 0 0 14px; }
+h1 { font-size: 30px; }
+h2 { font-size: 22px; margin-top: 8px; }
+h3 { font-size: 17px; margin-bottom: 6px; }
+p { margin: 0 0 14px; }
+strong, b { font-weight: 600; }
+.terms { margin: 0 0 18px; padding: 14px 16px; background: var(--page); border-left: 4px solid var(--rule); border-radius: 6px; font-size: 15.5px; }
+.terms dt { font-weight: 600; margin-top: 8px; }
+.terms dt:first-child { margin-top: 0; }
+.terms dd { margin: 0; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; font-weight: 600; margin-bottom: 10px; }
+.option { display: flex; align-items: flex-start; gap: 12px; border: 1.5px solid var(--accent); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: var(--paper); cursor: pointer; }
+.option:hover { background: var(--page); }
+.option.selected { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.option input[type="radio"] { flex: 0 0 auto; width: 20px; height: 20px; margin: 3px 0 0; accent-color: var(--accent); }
+.option span { display: block; }
+fieldset:disabled .option { cursor: default; }
+fieldset:disabled .option:hover { background: var(--paper); }
+fieldset:disabled .option.selected { background: var(--accent-soft); }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn { appearance: none; border: 1.5px solid var(--accent); border-radius: 10px; background: var(--accent); color: var(--on-dark); font: inherit; font-weight: 600; min-height: 46px; padding: 10px 22px; cursor: pointer; }
+.btn:hover { background: var(--navy); border-color: var(--navy); }
+.btn[disabled] { background: var(--navy); border-color: var(--navy); cursor: default; }
+.msg { min-height: 1.55em; margin: 10px 0 0; color: var(--bad-ink); font-weight: 600; }
+.hint { margin: 12px 0 0; font-size: 15px; }
+.dark { background: var(--navy); color: var(--on-dark); border-radius: 10px; padding: 20px 22px; }
+.dark h2 { color: var(--on-dark); margin-top: 0; }
+.dark p:last-child { margin-bottom: 0; }
+.footnote { margin: 18px 0 0; font-size: 14px; }
+ul.facts { margin: 0 0 18px; padding-left: 22px; }
+ul.facts li { margin-bottom: 6px; }
+.prompt { font-weight: 600; margin-top: 22px; }
+.score { width: 100%; border-collapse: collapse; font-size: 15px; margin: 0 0 12px; font-variant-numeric: tabular-nums; }
+.score caption { text-align: left; font-weight: 600; padding: 0 0 8px; }
+.score th, .score td { text-align: left; vertical-align: top; padding: 8px; border-bottom: 1px solid var(--rule); }
+.score th { font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); border-bottom: 2px solid var(--accent); }
+.score .n { text-align: center; white-space: nowrap; }
+.score tfoot td { font-weight: 600; border-bottom: 0; }
+.scale { font-size: 15px; margin: 0 0 18px; }
+#reveal { margin-top: 24px; border-top: 2px solid var(--rule); padding-top: 22px; }
+#reveal:focus, #reveal h2:focus { outline: none; }
+.reveal-in { animation: rise 320ms ease-out both; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.echo { background: var(--accent-soft); border-left: 6px solid var(--accent); border-radius: 6px; padding: 12px 14px; margin-bottom: 18px; }
+.echo strong { display: block; margin-bottom: 2px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.scope { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+.role { background: var(--page); border: 1.5px solid var(--accent); border-radius: 10px; padding: 12px 14px; }
+.role h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.3; }
+.role p { margin: 0; font-size: 15px; }
+.capability { margin-top: 22px; }
+@media (max-width: 700px) {
+  .roles { grid-template-columns: 1fr; }
+  .score thead { position: absolute; left: -9999px; }
+  .score, .score tbody, .score tfoot { display: block; }
+  .score tr { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; border: 1px solid var(--rule); border-radius: 8px; margin: 0 0 10px; padding: 8px 10px; }
+  .score td { display: block; border: 0; padding: 3px 0; text-align: left; }
+  .score td.name, .score td.read { grid-column: 1 / -1; }
+  .score td[data-label]::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); }
+}
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  main { padding: 16px 16px 40px; }
+  .panel { padding: 20px 16px; }
+  h1 { font-size: 26px; }
+  .btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <p class="eyebrow">Situation</p>
+    <h1 id="title">Judge the next forecast change</h1>
+
+    <p>You lead supply chain transformation at Sample Enterprise Goods, a manufacturer of household and personal-care consumables. An internal pilot forecast the Home Care line for two quarters. Nobody acted on its forecasts. Its summary reports that forecast error fell from 29% to 24%.</p>
+
+    <p>Before the next phase, the steering group wants to know how any change to the baseline forecast will be judged. Three functions each named the measure they trust. The group drafted one scorecard that combines them.</p>
+
+    <dl class="terms">
+      <dt>Forecast error</dt><dd>How far the forecast missed actual demand, as a percentage. Lower is better.</dd>
+      <dt>On time in full</dt><dd>The share of orders delivered on time and complete.</dd>
+      <dt>Composite</dt><dd>Each measure's movement multiplied by its weight, then added. A positive composite means the change helped overall.</dd>
+    </dl>
+
+    <table class="score" id="score">
+      <caption>Steering group's draft scorecard for the pilot. The weights and movement scores are illustrative.</caption>
+      <thead id="score-head"></thead>
+      <tbody id="score-body"></tbody>
+      <tfoot id="score-foot"></tfoot>
+    </table>
+    <p class="scale">Movement runs from −2 (much worse) to +2 (much better).</p>
+
+    <p>Here is what you know so far.</p>
+    <ul class="facts">
+      <li>Demand planning, finance, and the commercial team each agreed to the weights.</li>
+      <li>The largest retail account brings in about a sixth of revenue.</li>
+      <li>The senior vice president wants a way to judge forecasting changes that the steering group can adopt this month.</li>
+    </ul>
+
+    <p class="prompt">The senior vice president asks how the steering group should judge this change and the next. Commit to a first move before you read on.</p>
+
+    <form id="commit" novalidate>
+      <fieldset id="choices">
+        <legend>The first move I would make</legend>
+        <label class="option" for="pick-a"><input type="radio" name="pick" id="pick-a" value="a"><span>Adopt the scorecard as drafted. The composite is positive, so the pilot moves forward.</span></label>
+        <label class="option" for="pick-b"><input type="radio" name="pick" id="pick-b" value="b"><span>Raise the weight on service so the largest account is protected, then recompute.</span></label>
+        <label class="option" for="pick-c"><input type="radio" name="pick" id="pick-c" value="c"><span>Judge on forecast error alone, since the forecast is what changed.</span></label>
+        <label class="option" for="pick-d"><input type="radio" name="pick" id="pick-d" value="d"><span>Settle the weights at the readout, once each function can see its results.</span></label>
+        <label class="option" for="pick-e"><input type="radio" name="pick" id="pick-e" value="e"><span>I would want to know more before choosing.</span></label>
+      </fieldset>
+      <p class="msg" id="message" role="alert"></p>
+      <button type="submit" class="btn" id="lock">Lock in my choice</button>
+      <p class="hint" id="hint">Once you lock it in, you will see what the scorecard left out.</p>
+    </form>
+
+    <section id="reveal" tabindex="-1" aria-labelledby="reveal-title" hidden>
+      <div class="echo"><strong>You committed to</strong><span id="echo-text"></span></div>
+
+      <h2 id="reveal-title" tabindex="-1">What the scorecard left out</h2>
+      <p>Three facts sat behind the three rows. Each was true before you chose.</p>
+
+      <p class="scope">Three measures. Three facts.</p>
+      <div class="roles">
+        <div class="role">
+          <h3>Two true numbers for on time</h3>
+          <p>The 94% counts orders shipped by their ship date. The largest account counts delivery inside its appointment window, complete, and scores the company at 88% against a 95% requirement. It deducts on its own number.</p>
+        </div>
+        <div class="role">
+          <h3>A headline measured at two levels</h3>
+          <p>The pilot's 24% measured the model across the national network. The 29% measured the current forecast at each location, where planners actually decide. Restated at one level, the gain is gone.</p>
+        </div>
+        <div class="role">
+          <h3>Inventory that cannot move on its own</h3>
+          <p>A better forecast can shrink only the safety stock, a fraction of the line's inventory. That buffer is set in three places, by three different people. Unless all three settings change, it stays where it is.</p>
+        </div>
+      </div>
+
+      <p>Each measure was right for the function that chose it. A weighted total lets a gain on one buy back a loss on another, and weights still open at the readout invite each function to argue for the weighting it wins.</p>
+
+      <h2>What your choice does</h2>
+      <p id="consequence"></p>
+
+      <div class="dark capability">
+        <h2>The capability this depends on</h2>
+        <p>Each option was a reasonable move inside one scorecard. None began by fixing, before anyone saw a result, which measure judges the change, how it is calculated and against what, which costs it may not push onto another function, and what result would force a stop.</p>
+        <p>That is a paired measure set with a decision criterion: one primary measure, guardrails that hold the costs it could shift, and a go-or-stop rule, signed before the readout. It has to be in place before any forecasting change can be piloted, scaled, or funded.</p>
+      </div>
+
+      <p class="footnote">The company, roles, and situation in this exercise are fictional case material. The scorecard's weights and movement scores are illustrative.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // Illustrative scorecard. Weights and movement scores belong to this exercise alone.
+  var ROWS = [
+    { k: 'acc', name: 'Forecast error', owner: 'Demand planning', reading: 'Error down from 29% to 24%, as the pilot summary reports', weight: 40, move: 2 },
+    { k: 'inv', name: 'Inventory dollars', owner: 'Finance', reading: 'Projected lower; no figure yet', weight: 30, move: 1 },
+    { k: 'svc', name: 'On time in full', owner: 'Commercial', reading: '94%, unchanged', weight: 30, move: 0 }
+  ];
+  var SHIFTED = { acc: 25, inv: 25, svc: 50 };
+
+  function composite(weights) {
+    var s = 0;
+    ROWS.forEach(function (r) { s += r.move * weights[r.k] / 100; });
+    return s;
+  }
+  function baseWeights() { var w = {}; ROWS.forEach(function (r) { w[r.k] = r.weight; }); return w; }
+  function fmtSigned(n) {
+    var s = Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return (n > 0 ? '+' : n < 0 ? '−' : '') + s;
+  }
+  function fmtMove(n) { return (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toLocaleString('en-US'); }
+
+  var head = document.getElementById('score-head');
+  var body = document.getElementById('score-body');
+  var foot = document.getElementById('score-foot');
+  head.innerHTML = '<tr><th scope="col">Measure</th><th scope="col">Owner</th><th scope="col">Pilot reading</th><th scope="col" class="n">Weight</th><th scope="col" class="n">Movement</th></tr>';
+  ROWS.forEach(function (r) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="name" data-label="Measure"><strong>' + r.name + '</strong></td>' +
+      '<td data-label="Owner">' + r.owner + '</td>' +
+      '<td class="read" data-label="Pilot reading">' + r.reading + '</td>' +
+      '<td class="n" data-label="Weight">' + r.weight.toLocaleString('en-US') + '%</td>' +
+      '<td class="n" data-label="Movement">' + fmtMove(r.move) + '</td>';
+    body.appendChild(tr);
+  });
+  var base = composite(baseWeights());
+  var shifted = composite(SHIFTED);
+  foot.innerHTML = '<tr><td class="name" colspan="4" data-label="">Composite</td><td class="n" data-label="Composite">' + fmtSigned(base) + '</td></tr>';
+
+  var picks = {
+    a: { label: 'Adopt the scorecard as drafted. The composite is positive, so the pilot moves forward.',
+      does: 'The composite of ' + fmtSigned(base) + ' would carry the pilot forward on a headline measured at two levels, an inventory projection that only part of the stock can deliver, and a service figure the largest account does not use. Nothing in the scorecard could have returned stop.' },
+    b: { label: 'Raise the weight on service so the largest account is protected, then recompute.',
+      does: 'With service at 50% and the other two at 25%, the composite falls from ' + fmtSigned(base) + ' to ' + fmtSigned(shifted) + ' and stays positive. Service scores zero on the internal 94%, so more weight on it changes nothing. The account deducts on its own definition, where the company reads 88%, and that number is not on the card.' },
+    c: { label: 'Judge on forecast error alone, since the forecast is what changed.',
+      does: 'Judging on error alone keeps the headline, which compares the model and the current forecast at different levels, and it says nothing about direction. A forecast can miss low in every promotion week and still post a respectable error, while the largest account is cut and deducts.' },
+    d: { label: 'Settle the weights at the readout, once each function can see its results.',
+      does: 'Once results are visible, each function can see which weighting makes its own measure carry the day. The weights become the argument, and a flat result can be weighted into a pass. The measure, its level, and its comparator would still be open as well.' },
+    e: { label: 'I would want to know more before choosing.',
+      does: 'Wanting to know more is a sound instinct. The questions that matter are which definition each measure uses, at what level the pilot was scored, and which part of inventory a forecast can move. The scorecard did not say, and nothing in it invited those questions.' }
+  };
+
+  var form = document.getElementById('commit');
+  var fieldset = document.getElementById('choices');
+  var message = document.getElementById('message');
+  var lockButton = document.getElementById('lock');
+  var hint = document.getElementById('hint');
+  var reveal = document.getElementById('reveal');
+  var revealTitle = document.getElementById('reveal-title');
+  var options = form.querySelectorAll('.option');
+  var inputs = form.querySelectorAll('input[name="pick"]');
+  var committed = null;
+
+  function markSelected() {
+    for (var i = 0; i < options.length; i += 1) {
+      options[i].classList.toggle('selected', options[i].querySelector('input').checked);
+    }
+  }
+  function currentPick() {
+    for (var i = 0; i < inputs.length; i += 1) { if (inputs[i].checked) { return inputs[i].value; } }
+    return null;
+  }
+  for (var j = 0; j < inputs.length; j += 1) {
+    inputs[j].addEventListener('change', function () { message.textContent = ''; markSelected(); });
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (committed !== null) { return; }
+    var value = currentPick();
+    if (value === null) { message.textContent = 'Choose one answer to lock in.'; return; }
+    committed = value;
+    fieldset.disabled = true;
+    lockButton.disabled = true;
+    lockButton.textContent = 'Choice locked';
+    hint.hidden = true;
+    message.textContent = '';
+    document.getElementById('echo-text').textContent = picks[committed].label;
+    document.getElementById('consequence').textContent = picks[committed].does;
+    reveal.hidden = false;
+    reveal.classList.add('reveal-in');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    revealTitle.focus({ preventScroll: true });
+    if (reveal.scrollIntoView) { reveal.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
+  });
+})();
+</script>
+</body>
+</html>
