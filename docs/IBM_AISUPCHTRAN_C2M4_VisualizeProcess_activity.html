@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assemble the decision record in an order its inputs allow</title>
+<style>:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px;color:var(--ink)}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.card.soft{background:var(--panel)}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.num{font-variant-numeric:tabular-nums}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.hidden{display:none !important}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-of-type{border-top:0}
+.item p.ctext{margin:0 0 8px}
+.item .grid2{margin-top:6px}
+.fbbox:empty{display:none}
+.lane ol,.lane ul{margin:4px 0 0;padding-left:20px}
+.lane li{margin:2px 0}
+.lane h3{margin:0 0 2px}
+.lane{margin:0 0 8px}
+.cname{font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Visualize the process</p>
+  <h1>Assemble the decision record in an order its inputs allow</h1>
+  <p class="lede">A decision record holds up when each step is written after the steps it draws on. Sort the cards, then give each step you keep a number.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. The senior vice president needs the demand-planning decision record: whether, where, and on what conditions to scale a forecasting change, and what any commitment would cost to undo. The pilot has been read by segment, and a vendor has proposed a three-year term. Ten cards follow. Some are steps on the path to a record you can defend. Others break a rule of the record.</p>
+    <dl class="terms">
+      <dt>In the order</dt><dd>A step the lead takes while building the record. Give each one a step number. Several orders can be sound, and the check flags only the ones that break a dependency.</dd>
+      <dt>Leave out</dt><dd>A card that breaks a rule of the record: it commits the company beyond what the evidence supports, or it writes a trigger outside the measures the record uses. It belongs in no step.</dd>
+      <dt>Dependency</dt><dd>A step that needs the output of another step before it can be written.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="pool-h">
+    <h2 id="pool-h">The cards</h2>
+    <p class="small muted" id="count"></p>
+    <div id="pool"></div>
+  </section>
+
+  <section class="card" aria-labelledby="asm-h">
+    <h2 id="asm-h">Your assembly so far</h2>
+    <div class="grid2" id="asm"></div>
+    <div class="row">
+      <button type="button" id="check">Check my assembly</button>
+      <button type="button" class="secondary" id="reset">Clear all placements</button>
+    </div>
+    <div id="ofb" aria-live="polite"></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="second-h">
+    <h2 id="second-h">Fire a revision trigger</h2>
+    <p>The record is not final. Four kinds of news reopen it. For each one, choose the card where the path re-enters. The cards that draw on it run again.</p>
+    <div id="trig"></div>
+    <div class="row">
+      <button type="button" id="check2">Check where the path re-enters</button>
+    </div>
+    <div id="tsum" aria-live="polite"></div>
+  </section>
+
+  <p class="small muted">The company, roles, and situation in this exercise are fictional case material.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+
+  var LANES = [['', 'Choose'], ['in', 'In the order'], ['out', 'Leave out']];
+  var STEPS = 8;
+
+  var GEN_IN = 'Criterion: a card belongs on the path when the decision record could not be defended without the step it describes. First move: ask what the record would lack if this card were missing, and whether a rule of the record stops the card.';
+
+  var CARDS = [
+    { id: 'comm', s: 'State the commitment', lane: 'in',
+      t: 'State what the company commits to: the scaled segment only, no three-year term for Vendor A, and a bounded evaluation offered on amended terms.',
+      ok: 'Right. The lead writes the commitment once the oversight that keeps the rollout cheap to reverse and the contract reading that shapes the offer are both in hand.' },
+    { id: 'd1', s: 'Scale all of Home Care and sign', lane: 'out',
+      t: 'Record the rollout as all of Home Care, and sign Vendor A’s three-year term while the calendar is repaired.',
+      no: 'That commits the company beyond the evidence: the model lost in promoted weeks, and a three-year term would outlast the retest that decides them.',
+      crit: 'Criterion: a decision record commits the company only as far as the evidence reaches, and only where the commitment can be undone when new evidence arrives.',
+      first: 'First move: ask which segments earned a verdict, and what a long term would bind past the retest.' },
+    { id: 'rev', s: 'State the reversal evidence', lane: 'in',
+      t: 'State the result that sends the segment back to the forecast of record, written in one of those measures.',
+      ok: 'Right. The trigger is written in a measure, so the lead states it once the measures are named.' },
+    { id: 'm2', s: 'Read the contract', lane: 'in',
+      t: 'Read each clause of Vendor A’s proposed term sheet against the evidence still due, and name the term that would make each one cheap to undo.',
+      ok: 'Right. The lead is the actor, and the output, a term for each clause that binds past the evidence, is what the commitment line takes its shape from.' },
+    { id: 'cond', s: 'Attach the conditions', lane: 'in',
+      t: 'Attach conditions to the scaled segment: the old forecast still computed in parallel, and a new dated criterion for the segment.',
+      ok: 'Right. Conditions attach to a scaled segment, so the lead writes them once the decision line names it.' },
+    { id: 'over', s: 'Name the oversight', lane: 'in',
+      t: 'Name who is accountable for the decision, who owns exceptions with reason codes, who attests that the model is technically valid, and who applies the criterion.',
+      ok: 'Right. The lead assigns the roles that keep the rollout reviewable and reversible, and the commitment relies on them.' },
+    { id: 'd2', s: 'Trigger from the vendor’s own figure', lane: 'out',
+      t: 'Write the reversal trigger as an accuracy figure that Vendor A reports from its own platform.',
+      no: 'A figure the vendor reports from its own platform cannot show that the model trails the forecast of record, so it cannot be the trigger.',
+      crit: 'Criterion: a reversal trigger is written in a measure the company computes itself, against its own forecast of record.',
+      first: 'First move: ask which measure the trigger is written in, and who computes it.' },
+    { id: 'm1', s: 'Read the pilot by segment', lane: 'in',
+      t: 'Read the pilot by segment and give each segment a verdict: scale on conditions, keep the forecast of record and repair the input, hold as a hypothesis, or leave untested.',
+      ok: 'Right. The lead is the actor, and the output, a verdict for each segment, is what the decision line and the contract reading both draw on.' },
+    { id: 'dec', s: 'Write the decision line', lane: 'in',
+      t: 'Write the decision by segment: scale where the change won, keep the forecast of record in promoted weeks while the calendar is repaired and retested, and hold the other lines and the vendor at not yet.',
+      ok: 'Right. The decision line is the segment verdicts written down, so the lead writes it once they exist.' },
+    { id: 'meas', s: 'Name the measures', lane: 'in',
+      t: 'Name the measures the decision will be judged on: the primary measure against the forecast of record, a bias band, a service guardrail on the largest account’s definition, and safety stock at cost.',
+      ok: 'Right. The lead picks the measures from the set the company already computes, so that a trigger can be written in one of them.' }
+  ];
+  var BYID = {}; CARDS.forEach(function (c) { BYID[c.id] = c; });
+  var REAL = CARDS.filter(function (c) { return c.lane === 'in'; }).map(function (c) { return c.id; });
+
+  var NAMES = {
+    m1: 'reading the pilot by segment', m2: 'reading the contract', dec: 'the decision line', cond: 'the conditions',
+    meas: 'the measures', rev: 'the reversal evidence', over: 'the oversight', comm: 'the commitment'
+  };
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  // [needed first, comes after, reason]
+  var DEPS = [
+    ['m1', 'm2', 'The evidence a term must outlast, the promoted retest and the untested lines, is known only once the segments are read.'],
+    ['m1', 'dec', 'The decision line is the segment verdicts written down, so it waits for them.'],
+    ['dec', 'cond', 'Conditions attach to a scaled segment, so they wait for the decision line that names it.'],
+    ['meas', 'rev', 'A trigger is written in a measure, so it waits for the measures.'],
+    ['over', 'comm', 'The running benchmark and the exception path are what keep the internal rollout cheap to reverse, so the commitment waits for the oversight.'],
+    ['m2', 'comm', 'The commitment line takes its shape from the contract reading, so it waits for that reading.']
+  ];
+
+  // Count the orders of the eight steps that respect every dependency.
+  var IDX = {}; REAL.forEach(function (id, i) { IDX[id] = i; });
+  var PRE = REAL.map(function () { return 0; });
+  DEPS.forEach(function (d) { PRE[IDX[d[1]]] |= (1 << IDX[d[0]]); });
+  function countOrders() {
+    var n = REAL.length, full = (1 << n) - 1, ways = new Array(full + 1);
+    var m, i;
+    for (m = 0; m <= full; m += 1) { ways[m] = 0; }
+    ways[0] = 1;
+    for (m = 0; m < full; m += 1) {
+      if (!ways[m]) { continue; }
+      for (i = 0; i < n; i += 1) {
+        if ((m & (1 << i)) === 0 && (PRE[i] & m) === PRE[i]) { ways[m | (1 << i)] += ways[m]; }
+      }
+    }
+    return ways[full];
+  }
+  var VALID = countOrders();
+  var TOTAL = 1; (function () { var k; for (k = 2; k <= REAL.length; k += 1) { TOTAL *= k; } })();
+
+  function closure(start, forward) {
+    var seen = {}, queue = [start], out = [];
+    while (queue.length) {
+      var cur = queue.shift();
+      DEPS.forEach(function (d) {
+        var from = forward ? d[0] : d[1], to = forward ? d[1] : d[0];
+        if (from === cur && !seen[to]) { seen[to] = true; out.push(to); queue.push(to); }
+      });
+    }
+    return out;
+  }
+
+  // Build the pool.
+  var pool = byId('pool');
+  var laneOpts = LANES.map(function (l) { return '<option value="' + l[0] + '">' + l[1] + '</option>'; }).join('');
+  var stepOpts = '<option value="">Choose</option>';
+  var i;
+  for (i = 1; i <= STEPS; i++) { stepOpts += '<option value="' + i + '">' + fmt(i) + '</option>'; }
+  CARDS.forEach(function (c) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="t-' + c.id + '"><span class="cname">' + c.s + '.</span> ' + c.t + '</p>' +
+      '<div class="grid2">' +
+      '<label class="field"><span class="lab">Place in</span><select id="lane-' + c.id + '" aria-describedby="t-' + c.id + '">' + laneOpts + '</select></label>' +
+      '<label class="field hidden" id="stepw-' + c.id + '"><span class="lab">Step</span><select id="step-' + c.id + '" aria-describedby="t-' + c.id + '">' + stepOpts + '</select></label>' +
+      '</div><div class="fbbox" id="fb-' + c.id + '" aria-live="polite"></div>';
+    pool.appendChild(d);
+  });
+
+  function laneOf(c) { return byId('lane-' + c.id).value; }
+  function stepOf(c) { var v = byId('step-' + c.id).value; return v ? parseInt(v, 10) : 0; }
+
+  function readout() {
+    var groups = { 'in': [], out: [] }, left = 0;
+    CARDS.forEach(function (c) {
+      var l = laneOf(c);
+      if (!l) { left++; return; }
+      groups[l].push(c);
+    });
+    groups['in'].sort(function (a, b) {
+      var sa = stepOf(a) || 99, sb = stepOf(b) || 99;
+      return sa - sb;
+    });
+    function list(tag, arr, numbered) {
+      if (!arr.length) return '<p class="small muted">Nothing placed yet.</p>';
+      return '<' + tag + '>' + arr.map(function (c) {
+        var s = stepOf(c);
+        return '<li>' + c.s + (numbered && !s ? ' <span class="tag">no step</span>' : '') + (numbered && s ? ' <span class="small muted">step ' + fmt(s) + '</span>' : '') + '</li>';
+      }).join('') + '</' + tag + '>';
+    }
+    byId('asm').innerHTML =
+      '<div class="lane"><h3>In the order</h3>' + list('ol', groups['in'], true) + '</div>' +
+      '<div class="lane"><h3>Left out</h3>' + list('ul', groups.out) + '</div>';
+    byId('count').textContent = left === 0 ? 'Every card is placed.' : 'Cards still unplaced: ' + fmt(left) + '.';
+  }
+
+  function syncSteps() {
+    CARDS.forEach(function (c) {
+      var show = laneOf(c) === 'in';
+      byId('stepw-' + c.id).classList.toggle('hidden', !show);
+      if (!show) byId('step-' + c.id).value = '';
+    });
+  }
+
+  function judgeCard(c, lane) {
+    if (!lane) return ['blank', 'Not placed yet. Choose where this card goes.'];
+    if (c.lane === lane) return ['correct', c.lane === 'out' ? 'Left out, correctly. ' + c.no : c.ok];
+    if (c.lane === 'out') return ['wrong', c.crit + ' ' + c.first];
+    return ['wrong', GEN_IN];
+  }
+
+  function judgeOrder() {
+    var pos = {}, missing = false;
+    REAL.forEach(function (id) {
+      var c = BYID[id];
+      if (laneOf(c) !== 'in' || !stepOf(c)) missing = true; else pos[id] = stepOf(c);
+    });
+    if (missing) return ['blank', 'The sequence cannot be checked yet. Place all eight steps in the order and give each a step number.'];
+    var seen = {}, dup = 0;
+    CARDS.forEach(function (c) {
+      if (laneOf(c) === 'in' && stepOf(c)) {
+        if (seen[stepOf(c)]) dup = stepOf(c);
+        seen[stepOf(c)] = true;
+      }
+    });
+    if (dup) return ['wrong', 'Two cards share step ' + fmt(dup) + '. Each step holds one card. First move: for the card you placed earliest, ask what it needs as input and which card makes that input.'];
+    var broken = DEPS.filter(function (d) { return pos[d[0]] > pos[d[1]]; });
+    if (broken.length === 0) {
+      return ['correct', 'The sequence respects every dependency. Of the ' + fmt(TOTAL) + ' possible orders of these eight steps, ' + fmt(VALID) +
+        ' respect all of them, and yours is one. Only part of the order is fixed. Reading the pilot by segment comes before both the decision line and the contract reading, the conditions follow the decision line, the reversal evidence follows the measures, and the commitment follows both the contract reading and the oversight.'];
+    }
+    if (broken.length === 1) {
+      var d = broken[0];
+      return ['near', 'The structure is right: all eight steps belong on the path. One element is out of place: ' + NAMES[d[1]] + ' sits ahead of ' + NAMES[d[0]] + '. ' + d[2]];
+    }
+    return ['wrong', 'More than one step stands ahead of the work it draws on (' + fmt(broken.length) + ' flags). A step cannot be written until its inputs exist. First move: for the step you placed earliest, ask what it needs as input and which step makes that input.'];
+  }
+
+  function put(box, state, label, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', label);
+    if (state !== 'blank') d.setAttribute('data-state', state);
+    var t = state === 'correct' ? ' · Correct' : state === 'near' ? ' · Near' : state === 'wrong' ? ' · Not yet' : '';
+    d.innerHTML = '<span class="st">' + label + t + '</span>' + text;
+    box.appendChild(d);
+  }
+
+  var checked = false;
+  function checkAll() {
+    checked = true;
+    var bad = 0, near = 0;
+    CARDS.forEach(function (c) {
+      var box = byId('fb-' + c.id);
+      box.innerHTML = '';
+      var r = judgeCard(c, laneOf(c));
+      put(box, r[0], 'Placement', r[1]);
+      if (r[0] === 'near') near++; else if (r[0] !== 'correct') bad++;
+    });
+    var ob = byId('ofb');
+    ob.innerHTML = '';
+    var o = judgeOrder();
+    put(ob, o[0], 'Sequence', o[1]);
+    if (o[0] === 'near') near++; else if (o[0] !== 'correct') bad++;
+
+    var sum = byId('summary');
+    sum.innerHTML = '';
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', 'summary');
+    d.setAttribute('data-state', state);
+    d.innerHTML = state === 'correct'
+      ? '<span class="st">Assembly · Correct</span>Two cards are left out, eight steps are in the order, and every step has the inputs it needs when it is written.'
+      : '<span class="st">Assembly · ' + (state === 'near' ? 'Close' : 'Review the flagged cards') + '</span>Cards marked amber or red need another look. Change a placement and the check runs again.';
+    sum.appendChild(d);
+    byId('second').classList.toggle('hidden', state !== 'correct');
+  }
+
+  function onChange() {
+    syncSteps();
+    readout();
+    if (checked) checkAll();
+  }
+  CARDS.forEach(function (c) {
+    byId('lane-' + c.id).addEventListener('change', onChange);
+    byId('step-' + c.id).addEventListener('change', onChange);
+  });
+  byId('check').addEventListener('click', checkAll);
+  byId('reset').addEventListener('click', function () {
+    checked = false;
+    CARDS.forEach(function (c) {
+      byId('lane-' + c.id).value = '';
+      byId('step-' + c.id).value = '';
+      byId('fb-' + c.id).innerHTML = '';
+    });
+    byId('ofb').innerHTML = '';
+    byId('summary').innerHTML = '';
+    byId('second').classList.add('hidden');
+    syncSteps();
+    readout();
+  });
+
+  // Second pass: news arrives, and the learner chooses where the path re-enters.
+  function runsAgain(key) {
+    var after = closure(key, true);
+    var ordered = REAL.filter(function (id) { return after.indexOf(id) > -1; });
+    if (!ordered.length) { return 'No other card draws on it, so nothing else runs again.'; }
+    return 'The cards that run again after it: ' + ordered.map(function (id) { return BYID[id].s.toLowerCase(); }).join(', ') + '.';
+  }
+  var GEN_RE = 'Criterion: the path re-enters at the first card whose input changed, and the cards that draw on it run again. First move: ask which card takes this news as an input.';
+  var NEAR_EARLY = 'The structure is right: the path reaches the changed card from there. One element is out of place: it re-enters earlier than the news requires, so cards run again without cause.';
+  var NEAR_LATE = 'The structure is right: the news shows up in the result of that card. One element is out of place: the path enters earlier, at the card whose input changed.';
+  var TRIGS = [
+    { id: 't1', kind: 'A result arrives',
+      t: 'The promoted-weeks retest reports. With the promotion calendar supplied as it was known at each issue date, the model beats the forecast of record at every monthly origin.',
+      key: 'm1',
+      ok: 'Right. A new result changes the verdict on a segment, so the path re-enters at the segment reading. ' },
+    { id: 't2', kind: 'A term is refused',
+      t: 'Vendor A will not agree to any exit tied to a test at the company’s decision level.',
+      key: 'm2',
+      ok: 'Right. What a clause can be amended to has changed, so the path re-enters at the contract reading. ' },
+    { id: 't3', kind: 'A definition changes',
+      t: 'The largest account changes its definition of on-time delivery, so the service guardrail must use the new definition.',
+      key: 'meas',
+      ok: 'Right. The guardrail is one of the measures, so the path re-enters there. ' },
+    { id: 't4', kind: 'A control is overloaded',
+      t: 'The demand planners find that they cannot review exceptions at the volume the rollout produces.',
+      key: 'over',
+      ok: 'Right. Exception review is part of the oversight, so the path re-enters there. ' }
+  ];
+  var tdiv = byId('trig');
+  var reOpts = '<option value="">Choose</option>' + REAL.map(function (id) { return '<option value="' + id + '">' + BYID[id].s + '</option>'; }).join('');
+  TRIGS.forEach(function (T) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="tt-' + T.id + '"><span class="tag">' + T.kind + '</span> ' + T.t + '</p>' +
+      '<label class="field"><span class="lab">The path re-enters at</span><select id="re-' + T.id + '" aria-describedby="tt-' + T.id + '">' + reOpts + '</select></label>' +
+      '<div class="fbbox" id="tf-' + T.id + '" aria-live="polite"></div>';
+    tdiv.appendChild(d);
+    byId('re-' + T.id).addEventListener('change', function () {
+      byId('tf-' + T.id).innerHTML = '';
+      byId('tsum').innerHTML = '';
+    });
+  });
+  byId('check2').addEventListener('click', function () {
+    var open = [], bad = 0, near = 0;
+    TRIGS.forEach(function (T, k) { if (!byId('re-' + T.id).value) open.push(fmt(k + 1)); });
+    var sum = byId('tsum');
+    sum.innerHTML = '';
+    if (open.length) {
+      put(sum, 'blank', 'Triggers', 'Choose where the path re-enters for each piece of news first. Still open: ' + open.join(', ') + '.');
+      return;
+    }
+    TRIGS.forEach(function (T) {
+      var v = byId('re-' + T.id).value, box = byId('tf-' + T.id);
+      box.innerHTML = '';
+      if (v === T.key) { put(box, 'correct', 'Re-entry', T.ok + runsAgain(T.key)); }
+      else if (closure(T.key, false).indexOf(v) > -1) { put(box, 'near', 'Re-entry', NEAR_EARLY); near++; }
+      else if (closure(T.key, true).indexOf(v) > -1) { put(box, 'near', 'Re-entry', NEAR_LATE); near++; }
+      else { put(box, 'wrong', 'Re-entry', GEN_RE); bad++; }
+    });
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-state', state);
+    d.innerHTML = state === 'correct'
+      ? '<span class="st">Triggers · Correct</span>Each piece of news re-enters the path at the first card whose input it changes. Nothing earlier reruns without cause, and nothing later is skipped.'
+      : '<span class="st">Triggers · ' + (state === 'near' ? 'Close' : 'Review the flagged news') + '</span>Items marked amber or red need another look. Change a choice and check again.';
+    sum.appendChild(d);
+  });
+
+  syncSteps();
+  readout();
+})();
+</script>
+</body>
+</html>
