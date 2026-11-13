@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contest the placement</title>
+<style>:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px;color:var(--ink)}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.card.soft{background:var(--panel)}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.num{font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+td.r,th.r{text-align:right}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:12px 14px}
+legend{font-weight:700;padding:0 6px}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+input[type=checkbox],input[type=radio]{width:22px;height:22px;margin:0;flex:none;accent-color:var(--accent)}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;min-height:44px}
+.opt span{flex:1}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.readout{border:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin:0 0 14px}
+.readout strong{font-variant-numeric:tabular-nums}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:8px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.pick{background:var(--accent-soft)}
+.hidden{display:none !important}
+.ledger td.bad,.bad{color:var(--bad);font-weight:700}
+.good{color:var(--ok);font-weight:700}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .stack thead{position:absolute;left:-9999px}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label) ": ";font-weight:700;color:var(--muted)}
+  td.r,th.r{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+
+.quote{border-left:4px solid var(--line);padding:2px 12px;margin:0 0 10px;font-style:italic}
+.item dl.terms dt{font-size:14px;color:var(--muted)}
+.item .grid3{margin-top:12px}
+@media (max-width:480px){.item .grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Skill practice</p>
+  <h1>Test what each claim supplies before it moves the map</h1>
+  <p class="lede">A map earns trust when each placement can be challenged on a named factor. A statement counts as evidence only when it supplies a factor and a source. Conviction, speed, and a total with no baseline are preference, and the card should say so.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. Six items reach you from the steering group's view of the map. For each, decide which factor it supplies, what the evidence card is missing first, and what you would do with the placement.</p>
+    <dl class="terms">
+      <dt>Evidence card</dt><dd>The factors behind a placement, with unit, period, source, and range, plus who owns each assumption and the observation that would move it.</dd>
+      <dt>Factors</dt><dd>Frequency (how many occasions), cost of error (what one wrong call costs), improvable share (the part a form could remove), readiness, and oversight need.</dd>
+      <dt>No map factor</dt><dd>A true statement that enters none of the factors, such as how fast a task runs.</dd>
+      <dt>Preference only</dt><dd>Conviction, or a total with no baseline behind it.</dd>
+      <dt>Measured baseline</dt><dd>A count or amount of the loss as it stands today.</dd>
+    </dl>
+  </section>
+
+  <div id="items"></div>
+
+  <section class="card" aria-labelledby="chk-h">
+    <h2 id="chk-h">Check your rulings</h2>
+    <div class="row"><button type="button" id="check">Check my rulings</button></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section id="pass2" class="card hidden" aria-labelledby="p2-h">
+    <h2 id="p2-h">Run it again with one assumption moved</h2>
+    <p>The rulings above stay in force. Choose what arrives, and see which card moves.</p>
+    <fieldset>
+      <legend>What arrives</legend>
+      <label class="opt"><input type="radio" name="arrive" id="a-none" value="none" checked><span>Nothing new</span></label>
+      <label class="opt"><input type="radio" name="arrive" id="a-review" value="review"><span>A review traces the late-inbound freight to its causes and judges a share removable</span></label>
+      <label class="opt"><input type="radio" name="arrive" id="a-restate" value="restate"><span>A sponsor restates a claim with more confidence</span></label>
+    </fieldset>
+    <table id="p2table" class="stack">
+      <thead><tr><th scope="col">Item</th><th scope="col">Before</th><th scope="col">After</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p id="p2note" class="note"></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function fmt(n, d) { return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function usd(n) { return 'USD ' + fmt(n, 1) + 'M'; }
+
+  var SUP = [['', 'Choose'], ['freq', 'Frequency'], ['cost', 'Cost of error'], ['share', 'Improvable share'], ['ready', 'Readiness'], ['oversight', 'Oversight need'], ['nofactor', 'No map factor'], ['pref', 'Preference only'], ['none', 'Nothing submitted']];
+  var MIS = [['', 'Choose'], ['freq', 'Frequency'], ['cost', 'Cost of error'], ['share', 'Improvable share'], ['ready', 'Readiness'], ['oversight', 'Oversight need'], ['baseline', 'A measured baseline'], ['card', 'The whole card: nobody has built it'], ['nothing', 'Nothing: the card is complete']];
+  var RUL = [['', 'Choose'], ['place', 'Place on the cited records'], ['holdshare', 'Hold: pending a reviewed share the form could remove'], ['holdclause', 'Hold: pending clause extraction that gives a baseline'], ['holdprice', 'Hold: pending a price for the error'], ['record', 'Record without moving the placement'], ['add', 'Add though unsponsored']];
+  var RW = {}; RUL.forEach(function (o) { RW[o[0]] = o[1]; });
+
+  var FIRST_SUP = 'First move: ask what number the record lets you write on the card, and where it came from.';
+  var FIRST_RUL = 'First move: ask what the card holds, and what single observation would change it.';
+
+  var ITEMS = [
+    { n: 1, title: 'Inbound supplier visibility', who: 'Procurement director', dec: 'DEC-08 Material purchase quantity and timing',
+      quote: 'Cut the expedites that late materials cause.',
+      record: 'Late inbound materials cause ' + usd(8.0) + ' of premium freight a year. The sponsor\'s own estimate of how much better inbound visibility could remove is the only support for the share, and no pilot has measured it.',
+      sup: { ok: { cost: 'The ' + usd(8.0) + ' freight pool comes from the books and is a cost-of-error figure with a source. It supplies the pool and not the share.' },
+        near: { share: 'The structure is right: you looked at what the sponsor claims. One element is out of place: that estimate stands alone, with no source behind it, so it supplies no share. The sourced pool is what supplies a factor.' } },
+      rul: { ok: { place: 'The pool is sourced, so the decision goes on the map. Mark the range low-confidence, because the share is the sponsor\'s estimate alone.', holdshare: 'Accepted. The missing factor is the share, and you named the observation that would supply it. The sourced pool stays on the card meanwhile.' },
+        near: { record: 'The structure is right: you kept the claim visible. One element is out of place: the claim does supply a sourced pool, so the decision belongs on the map, at low confidence.', holdclause: 'The structure is right: you held for an observation. One element is out of place: clause extraction concerns supplier contracts, and what is missing here is a reviewed share.', holdprice: 'The structure is right: you held for an observation. One element is out of place: the freight pool is already priced, and what is missing is a reviewed share.' },
+        wrong: { add: 'This decision already has a sponsor, so there is nothing to add.' } },
+      cmp: 'First missing: the improvable share. The sponsor\'s estimate stands alone.' },
+    { n: 2, title: 'Agent that issues small purchase orders', who: 'Procurement director', dec: 'DEC-08 Material purchase quantity and timing',
+      quote: 'Purchase-order cycle time from two days to 20 minutes.',
+      record: 'A pilot dashboard reports the cycle time. One in ' + fmt(120, 0) + ' purchase orders carries a material error, and three went to a supplier on quality hold. Nobody has priced what an error costs.',
+      sup: { ok: { nofactor: 'Speed reduces no purchasing loss in the record. It describes how fast orders go out, and it enters no factor.' },
+        near: { pref: 'The structure is right: the claim does not move the map. One element is out of place: the dashboard measured the speed, so this is a real statement. It simply supplies no factor.' } },
+      rul: { ok: { record: 'Speed supplies no factor, so DEC-08 does not move. Record the claim so it stays visible, and let the pool and the error cost decide the placement.' },
+        near: { holdprice: 'The structure is right: error cost is the missing piece. One element is out of place: this claim supplies no factor, so there is no placement change to hold. Record it instead.' },
+        wrong: { place: 'Placing it on speed would credit DEC-08 with a benefit that reduces no purchasing loss. First move: ask which loss falls if orders go out faster.' } },
+      cmp: 'First missing: cost of error. The incidence is known (one in ' + fmt(120, 0) + ') and nobody has priced it.' },
+    { n: 3, title: 'Supplier-contract analysis assistant', who: 'Procurement director', dec: 'DEC-09 Supplier selection and volume split',
+      quote: 'Find price-adjustment leakage.',
+      record: fmt(120, 0) + ' supplier contracts are held as PDFs, and price-adjustment clauses are not tracked, so no baseline of today\'s leakage exists.',
+      sup: { ok: { pref: 'A hope of finding leakage supplies no factor. No baseline of the loss exists, because no clause is tracked.' },
+        near: { nofactor: 'The structure is right: the claim moves no factor. One element is out of place: this is not a true statement that happens to miss the factors. It is a belief about a loss nobody has counted, which is preference.' } },
+      rul: { ok: { holdclause: 'Nobody can count the loss until the clauses are extracted. Hold the placement and name that observation.' },
+        near: { record: 'The structure is right: the claim moves nothing today. One element is out of place: a hold names the observation that would move it, and a bare record does not.', holdshare: 'The structure is right: you held for an observation. One element is out of place: what is missing is a count of today\'s loss, which needs the clauses extracted first.', holdprice: 'The structure is right: you held for an observation. One element is out of place: nothing can be priced until the clauses are extracted.' },
+        wrong: { place: 'Placing it would put a preference on the map as if it were a measured loss. First move: ask whether anyone can count today\'s leakage.' } },
+      cmp: 'First missing: a measured baseline. Clauses are untracked, so nobody can count today\'s leakage.' },
+    { n: 4, title: 'New-product forecasting assistant', who: 'Brand marketing director, Premium & Natural', dec: 'DEC-03 New-product launch quantity',
+      quote: 'Faster, better launch forecasts.',
+      record: fmt(180, 0) + ' SKUs launch a year, and forecast error is ' + fmt(68, 0) + '% in their first ' + fmt(13, 0) + ' weeks. Premium & Natural, a line with high launch churn, carries ' + usd(6.9) + ' of the ' + usd(18.2) + ' in yearly write-offs.',
+      sup: { ok: { pref: 'The sponsor\'s words are preference. They carry no number and no source.' }, near: {} },
+      rul: { ok: { place: 'The sponsor\'s words are preference, but the records supply the factors: launch frequency, the first-weeks error, and the write-off pool. Place the decision on those records, not on the sponsor\'s say-so.' },
+        near: { holdshare: 'The structure is right: you looked for evidence. One element is out of place: the records already supply frequency, error, and a write-off pool, so there is nothing to wait for.', holdclause: 'The structure is right: you looked for evidence. One element is out of place: the records already supply the factors, so there is nothing to wait for.', holdprice: 'The structure is right: you looked for evidence. One element is out of place: the records already supply the factors, so there is nothing to wait for.', record: 'The structure is right: you did not let the sponsor\'s words move the map. One element is out of place: the records do supply factors, and recording the claim alone leaves the decision off the map.' },
+        wrong: { add: 'This decision already has a sponsor, so there is nothing to add.' } },
+      cmp: 'First missing: nothing. The records supply frequency, error, and the write-off pool. Separately, readiness is blocked for want of structured product attributes.' },
+    { n: 5, title: 'Safety-stock record', who: 'Inventory analyst', dec: 'DEC-05 Safety stock level',
+      quote: 'Safety stock is set in three places, and the effective buffer is unknown.',
+      record: 'A system parameter, DC minimum levels, and planners\' spreadsheet buffers each set a level. Nobody can state the buffer in force.',
+      sup: { ok: { ready: 'Three places set the level, so the record supplies a readiness fact: a decision-rights blocker.' }, near: {} },
+      rul: null,
+      cmp: 'First missing: nothing on the card. Place the decision with readiness marked blocked by decision rights.' },
+    { n: 6, title: 'No submission', who: 'Nobody', dec: 'DEC-12 Allocation under shortage',
+      quote: 'Nothing. No proposal addresses this decision.',
+      record: 'Retailer deductions run ' + usd(14.6) + ' a year, ' + usd(6.1) + ' of it from the largest account, which requires ' + fmt(95, 0) + '% OTIF. No allocation objective is written, and priority is set shortage by shortage.',
+      sup: null,
+      rul: { ok: { add: 'A decision keeps losing money whether or not anyone submits it, and leaving it off places it at zero. Add it and build its card from the records.' },
+        near: { place: 'The structure is right: the records do supply factors. One element is out of place: with no submission, someone must first add the decision and build its card.' },
+        wrong: { record: 'Nothing was submitted, so there is nothing to record, and the decision still carries the loss.', holdshare: 'Waiting for a proposal leaves the decision at zero while the loss continues.', holdclause: 'Waiting for a proposal leaves the decision at zero while the loss continues.', holdprice: 'Waiting for a proposal leaves the decision at zero while the loss continues.' } },
+      cmp: 'First missing: the card itself. The records supply cost of error (the deductions) and oversight need (priority set per shortage).' }
+  ];
+
+  var host = byId('items');
+  ITEMS.forEach(function (it) {
+    var s = document.createElement('section');
+    s.className = 'card item';
+    s.setAttribute('aria-labelledby', 'h' + it.n);
+    function opts(list) { return list.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join(''); }
+    s.innerHTML = '<h2 id="h' + it.n + '">' + it.title + (it.who !== 'Nobody' ? ' · ' + it.who : '') + '</h2>' +
+      '<p class="small muted">Decision: ' + it.dec + '</p>' +
+      '<p class="quote">' + it.quote + '</p>' +
+      '<p><strong>What the record holds.</strong> ' + it.record + '</p>' +
+      '<div class="grid3">' +
+      '<label class="field"><span class="lab">What it supplies</span><select id="sup-' + it.n + '">' + opts(SUP) + '</select></label>' +
+      '<label class="field"><span class="lab">First thing missing</span><select id="mis-' + it.n + '">' + opts(MIS) + '</select></label>' +
+      '<label class="field"><span class="lab">Your ruling</span><select id="rul-' + it.n + '">' + opts(RUL) + '</select></label>' +
+      '</div><div class="fbbox" id="fb-' + it.n + '" aria-live="polite"></div>';
+    host.appendChild(s);
+  });
+
+  function fb(box, state, label, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', label);
+    if (state !== 'blank') d.setAttribute('data-state', state);
+    var t = state === 'correct' ? ' · Correct' : state === 'near' ? ' · Near' : state === 'wrong' ? ' · Not yet' : '';
+    d.innerHTML = '<span class="st">' + label + t + '</span>' + text;
+    box.appendChild(d);
+  }
+  function judge(spec, v, first) {
+    if (!v) return ['blank', 'Choose a value for this field, then check again.'];
+    if (spec.ok && spec.ok[v]) return ['correct', spec.ok[v]];
+    if (spec.near && spec.near[v]) return ['near', spec.near[v]];
+    var w = spec.wrong && spec.wrong[v];
+    return ['wrong', (w ? w + ' ' : 'A statement is evidence only when it supplies a factor with a source. ') + first];
+  }
+
+  var bad = 0;
+  function checkAll() {
+    bad = 0;
+    ITEMS.forEach(function (it) {
+      var box = byId('fb-' + it.n);
+      box.innerHTML = '';
+      if (it.sup) {
+        var a = judge(it.sup, byId('sup-' + it.n).value, FIRST_SUP);
+        fb(box, a[0], 'What it supplies', a[1]);
+        if (a[0] !== 'correct') bad++;
+      }
+      if (it.rul) {
+        var b = judge(it.rul, byId('rul-' + it.n).value, FIRST_RUL);
+        fb(box, b[0], 'Your ruling', b[1]);
+        if (b[0] !== 'correct') bad++;
+      } else {
+        var c = document.createElement('div');
+        c.className = 'note';
+        c.setAttribute('data-cell', 'ruling note');
+        c.textContent = 'The ruling here is a judgment, so nothing is scored. Placing the decision with readiness marked blocked is the usual call.';
+        box.appendChild(c);
+      }
+      var n = document.createElement('div');
+      n.className = 'note';
+      n.setAttribute('data-cell', 'comparison');
+      n.innerHTML = '<strong>For comparison.</strong> ' + it.cmp;
+      box.appendChild(n);
+    });
+    var sum = byId('summary');
+    sum.innerHTML = '';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', 'summary');
+    d.setAttribute('data-state', bad === 0 ? 'correct' : 'near');
+    d.innerHTML = bad === 0
+      ? '<span class="st">Map · Correct</span>Each claim moved the map only as far as its evidence reaches, and the decision nobody sponsored is on it.'
+      : '<span class="st">Map · Review the flagged fields</span>Fields in amber or red need another look. Change them and check again.';
+    sum.appendChild(d);
+    byId('pass2').classList.remove('hidden');
+    pass2();
+  }
+  byId('check').addEventListener('click', checkAll);
+
+  var BEFORE = [
+    ['INI-08 Inbound supplier visibility', 'Place; range low-confidence. Missing: the improvable share.'],
+    ['INI-11 Agent for small purchase orders', 'Record; DEC-08 does not move. Missing: the cost of an error.'],
+    ['INI-15 Supplier-contract analysis assistant', 'Hold pending clause extraction. Missing: a measured baseline.'],
+    ['INI-04 New-product forecasting assistant', 'Place on the cited records.'],
+    ['Safety-stock record', 'Place, with readiness blocked by decision rights.'],
+    ['DEC-12 Allocation under shortage', 'Add though unsponsored.']
+  ];
+  function pass2() {
+    var v = document.querySelector('input[name="arrive"]:checked').value;
+    var body = byId('p2table').querySelector('tbody');
+    body.innerHTML = '';
+    BEFORE.forEach(function (r, i) {
+      var after = r[1], moved = false;
+      if (v === 'review' && i === 0) { after = 'Place; the range is now supported. Missing: nothing.'; moved = true; }
+      var tr = document.createElement('tr');
+      if (moved) tr.className = 'pick';
+      tr.innerHTML = '<td data-label="Item">' + r[0] + '</td><td data-label="Before">' + r[1] + '</td><td data-label="After">' + after + (moved ? ' <span class="tag">moved</span>' : '') + '</td>';
+      body.appendChild(tr);
+    });
+    byId('p2note').textContent = v === 'none'
+      ? 'Choose what arrives to see which card moves.'
+      : v === 'review'
+        ? 'One observation moved one placement. The review supplied the factor INI-08 was missing, and no other card named that factor, so no other card moved.'
+        : 'Nothing moved. A restated claim supplies no factor and no source, so it is still preference, however confident it sounds.';
+  }
+  document.querySelectorAll('input[name="arrive"]').forEach(function (r) { r.addEventListener('change', pass2); });
+})();
+</script>
+</body>
+</html>

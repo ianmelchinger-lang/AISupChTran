@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trace the loss</title>
+<style>:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px;color:var(--ink)}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.card.soft{background:var(--panel)}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.num{font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+td.r,th.r{text-align:right}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:12px 14px}
+legend{font-weight:700;padding:0 6px}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+input[type=checkbox],input[type=radio]{width:22px;height:22px;margin:0;flex:none;accent-color:var(--accent)}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;min-height:44px}
+.opt span{flex:1}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.readout{border:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin:0 0 14px}
+.readout strong{font-variant-numeric:tabular-nums}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:8px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.pick{background:var(--accent-soft)}
+.hidden{display:none !important}
+.ledger td.bad,.bad{color:var(--bad);font-weight:700}
+.good{color:var(--ok);font-weight:700}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .stack thead{position:absolute;left:-9999px}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label) ": ";font-weight:700;color:var(--muted)}
+  td.r,th.r{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+
+.mx td.c,.mx th.c{text-align:center;width:92px}
+.mx td:first-child{width:46%}
+.rec{margin:0 0 10px}
+.big{font-size:20px;font-weight:700}
+@media (max-width:480px){.mx td.c,.mx th.c{width:auto;text-align:left}.mx td:first-child{width:auto;font-weight:700}}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Skill practice</p>
+  <h1>Record each loss once, where a different choice would have prevented it</h1>
+  <p class="lede">A loss appears where money is booked, often far from the choice that caused it. When every linked decision claims the loss, a function's AI case adds up to more than the company lost.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. Four consequences sit on your map. For each, mark the decision where a different choice would have prevented it, the decisions the error passed through, and the decision where it was booked. Then check the ledger against what the books recorded.</p>
+    <dl class="terms">
+      <dt>Origin</dt><dd>The decision where a controllable error starts. It is the only decision that claims the loss.</dd>
+      <dt>Transmitter</dt><dd>A decision the error passes through on its way to being booked.</dd>
+      <dt>Booking point</dt><dd>The decision where the money shows up in the books.</dd>
+      <dt>Ledger</dt><dd>The total credited to origins, compared with what was booked.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="links-h">
+    <h2 id="links-h">How decisions hand work to each other</h2>
+    <dl class="terms small">
+      <dt>DEC-02 Promotion volume</dt><dd>Hands the promotion calendar to the forecast and to the consensus plan.</dd>
+      <dt>DEC-01 Baseline demand forecast</dt><dd>Feeds the consensus plan, safety stock, and deployment.</dd>
+      <dt>DEC-04 Consensus demand plan</dt><dd>Sets the commitments that the production schedule and purchasing carry out.</dd>
+      <dt>DEC-06 Master production schedule and DEC-08 Material purchase quantity and timing</dt><dd>Build and buy the stock that order promising and allocation draw on. Surplus ages until disposition. Late materials are brought in by expedite.</dd>
+      <dt>DEC-10 Deployment across DCs and the e-commerce center</dt><dd>Positions stock where orders will be promised and allocated. When stock lands in the wrong place, transport moves it by expedite.</dd>
+      <dt>DEC-11 Order promising and fulfilling location, and DEC-12 Allocation under shortage</dt><dd>Decide who is served and who is cut. Cuts and deductions follow.</dd>
+      <dt>DEC-13 Transport mode and expedite</dt><dd>Where premium freight is paid.</dd>
+      <dt>DEC-15 Excess and obsolete disposition</dt><dd>Where surplus stock is written off.</dd>
+    </dl>
+  </section>
+
+  <div id="rows"></div>
+
+  <section class="card" aria-labelledby="led-h">
+    <h2 id="led-h">The ledger</h2>
+    <div class="readout" id="ledstat" role="status" aria-live="polite"></div>
+    <table class="ledger stack" id="led">
+      <thead><tr><th scope="col">Decision</th><th class="r" scope="col">Credited as origin (USD M)</th><th class="r" scope="col">Booked here (USD M)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="small muted" style="margin-top:8px">The promotion stockout has no price in the record, so it sits outside the ledger. The other three losses are parts of the USD 21.0M of premium freight and the USD 18.2M of write-offs.</p>
+    <div class="row" style="margin-top:12px"><button type="button" id="check">Check my trace</button></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section id="pass2" class="card hidden" aria-labelledby="p2-h">
+    <h2 id="p2-h">Run it again with one assumption moved</h2>
+    <p>Your marks stay as they are. Only the rule for who may claim a loss changes.</p>
+    <label class="field"><span class="lab">Who claims a loss in the ledger</span>
+      <select id="rule">
+        <option value="origin">Only the origin</option>
+        <option value="every">Every decision the loss touches</option>
+        <option value="booked">Only the decision where it was booked</option>
+      </select>
+    </label>
+    <div class="readout" id="p2stat" role="status" aria-live="polite" style="margin-top:12px"></div>
+    <table class="ledger stack" id="l2">
+      <thead><tr><th scope="col">Decision</th><th class="r" scope="col">Credited (USD M)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p id="p2note" class="note"></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function fmt(n, d) { return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function usd(n) { return 'USD ' + fmt(n, 1) + 'M'; }
+
+  var NAME = {
+    'DEC-01': 'Baseline demand forecast', 'DEC-02': 'Promotion volume', 'DEC-04': 'Consensus demand plan',
+    'DEC-06': 'Master production schedule', 'DEC-08': 'Material purchase quantity and timing',
+    'DEC-09': 'Supplier selection and volume split', 'DEC-10': 'Deployment across DCs and the e-commerce center',
+    'DEC-11': 'Order promising and fulfilling location', 'DEC-12': 'Allocation under shortage',
+    'DEC-13': 'Transport mode and expedite', 'DEC-15': 'Excess and obsolete disposition'
+  };
+  var ROWS = [
+    { id: 'r1', title: 'Imbalance freight', amount: 9.2,
+      record: 'Deployment sent stock to locations from a location-level forecast. Stock ended up in the wrong place ' + fmt(2300, 0) + ' times, and a premium shipment fixed each one at about USD ' + fmt(4000, 0) + ' above planned freight. A review traced ' + fmt(45, 0) + '% of these to location-level forecast error at deployment. The cost is booked as premium freight.',
+      cand: ['DEC-01', 'DEC-10', 'DEC-11', 'DEC-13'], key: { o: ['DEC-10'], t: [], b: ['DEC-13'] } },
+    { id: 'r2', title: 'Late-inbound freight', amount: 8.0,
+      record: 'Materials arrived after the dates the plan needed them, and a premium shipment brought them in. Purchase quantity and timing are set against supplier lead times. The cost is booked as premium freight.',
+      cand: ['DEC-06', 'DEC-08', 'DEC-09', 'DEC-13'], key: { o: ['DEC-08'], t: [], b: ['DEC-13'] } },
+    { id: 'r3', title: 'Seasonal write-off', amount: 7.4,
+      record: 'A cool, wet spring left the seasonal line over-forecast, with forecast running ' + fmt(9, 0) + '% above actual. The monthly consensus plan carried that forecast into production commitments and material purchases. The surplus aged, and the company wrote it off at quarter-end.',
+      cand: ['DEC-01', 'DEC-04', 'DEC-06', 'DEC-08', 'DEC-15'], key: { o: ['DEC-01'], t: ['DEC-04', 'DEC-06', 'DEC-08'], b: ['DEC-15'] } },
+    { id: 'r4', title: 'Promotion stockout and deductions', amount: null,
+      record: 'A promotion with the largest account ran out of stock for three weeks. Planners had raised the forecast, but the calendar change reached supply planning late. The consensus plan and the production schedule were built on the old calendar. Orders were cut, and the account took deductions.',
+      cand: ['DEC-01', 'DEC-02', 'DEC-04', 'DEC-06', 'DEC-11', 'DEC-12'], key: { o: ['DEC-02'], t: ['DEC-04', 'DEC-06'], b: ['DEC-11', 'DEC-12'] } }
+  ];
+  var BOOKED_TOTAL = 24.6; // 9.2 + 8.0 + 7.4
+  var KIND = { o: 'Origin', t: 'Passes it on', b: 'Booked here' };
+
+  var host = byId('rows');
+  ROWS.forEach(function (r) {
+    var s = document.createElement('section');
+    s.className = 'card';
+    s.setAttribute('aria-labelledby', 'h-' + r.id);
+    var head = r.title + (r.amount ? ' · ' + usd(r.amount) + ' a year' : ' · not priced in the record');
+    var html = '<h2 id="h-' + r.id + '">' + head + '</h2><p class="rec">' + r.record + '</p>' +
+      '<table class="mx stack"><thead><tr><th scope="col">Decision</th><th class="c" scope="col">Origin</th><th class="c" scope="col">Passes it on</th><th class="c" scope="col">Booked here</th></tr></thead><tbody>';
+    r.cand.forEach(function (d) {
+      html += '<tr><td>' + d + ' ' + NAME[d] + '</td>';
+      ['o', 't', 'b'].forEach(function (k) {
+        html += '<td class="c" data-label="' + KIND[k] + '"><input type="checkbox" id="' + k + '-' + r.id + '-' + d + '" aria-label="' + KIND[k] + ': ' + d + ' ' + NAME[d] + ', for ' + r.title.toLowerCase() + '"></td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table><div class="fbbox" id="fb-' + r.id + '" aria-live="polite"></div>';
+    s.innerHTML = html;
+    host.appendChild(s);
+  });
+
+  function ticks(r, k) { return r.cand.filter(function (d) { return byId(k + '-' + r.id + '-' + d).checked; }); }
+  function same(a, b) { return a.slice().sort().join('|') === b.slice().sort().join('|'); }
+  function minus(a, b) { return a.filter(function (x) { return b.indexOf(x) < 0; }); }
+  function within(a, b) { return a.length > 0 && a.every(function (x) { return b.indexOf(x) >= 0; }); }
+
+  // rule: 'origin' | 'booked' | 'every'
+  function credits(rule) {
+    var map = {}, total = 0;
+    ROWS.forEach(function (r) {
+      if (!r.amount) return;
+      var set;
+      if (rule === 'origin') set = ticks(r, 'o');
+      else if (rule === 'booked') set = ticks(r, 'b');
+      else {
+        set = [];
+        ['o', 't', 'b'].forEach(function (k) { ticks(r, k).forEach(function (d) { if (set.indexOf(d) < 0) set.push(d); }); });
+      }
+      set.forEach(function (d) { map[d] = (map[d] || 0) + r.amount; total += r.amount; });
+    });
+    return { map: map, total: total };
+  }
+
+  function ledger() {
+    var o = credits('origin'), b = credits('booked');
+    var ids = Object.keys(NAME).filter(function (d) { return o.map[d] || b.map[d]; });
+    var body = byId('led').querySelector('tbody');
+    body.innerHTML = '';
+    ids.forEach(function (d) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td data-label="Decision">' + d + ' ' + NAME[d] + '</td><td class="r num" data-label="Credited as origin (USD M)">' + (o.map[d] ? fmt(o.map[d], 1) : '') + '</td><td class="r num" data-label="Booked here (USD M)">' + (b.map[d] ? fmt(b.map[d], 1) : '') + '</td>';
+      body.appendChild(tr);
+    });
+    var st = byId('ledstat');
+    var t = o.total;
+    var cls, msg;
+    if (Math.abs(t - BOOKED_TOTAL) < 0.0001) { cls = 'good'; msg = 'Each loss is counted once.'; }
+    else if (t > BOOKED_TOTAL) { cls = 'bad'; msg = 'Some loss is counted more than once. This ledger is rejected.'; }
+    else if (t === 0) { cls = ''; msg = 'Mark an origin for each priced loss to build the ledger.'; }
+    else { cls = 'bad'; msg = 'At least one priced loss has no origin yet.'; }
+    st.innerHTML = 'Credited <strong>' + usd(t) + '</strong> against <strong>' + usd(BOOKED_TOTAL) + '</strong> booked. <span class="' + cls + '">' + msg + '</span>';
+    return { credited: t, state: (Math.abs(t - BOOKED_TOTAL) < 0.0001) ? 'correct' : 'wrong', above: t > BOOKED_TOTAL + 0.0001 };
+  }
+  document.querySelectorAll('#rows input').forEach(function (i) { i.addEventListener('change', function () { ledger(); if (!byId('pass2').classList.contains('hidden')) pass2(); }); });
+  ledger();
+
+  function fb(box, state, label, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-state', state);
+    d.setAttribute('data-cell', label);
+    var t = state === 'correct' ? 'Correct' : state === 'near' ? 'Near' : 'Not yet';
+    d.innerHTML = '<span class="st">' + label + ' · ' + t + '</span>' + text;
+    box.appendChild(d);
+  }
+  function names(list) { return list.map(function (d) { return d + ' ' + NAME[d]; }).join('; '); }
+  var FIRST_O = 'First move: ask which choice, made differently at the time, would have prevented the loss.';
+  var GOOD_O = {
+    r1: 'The choice that could have changed this loss sits at deployment, where stock is sent to locations. The forecast contributes, and the card records it as a contributor, not as a second claim.',
+    r2: 'Purchase quantity and timing set when materials arrive. A different choice there would have prevented the late-inbound expedite.',
+    r3: 'The over-forecast started in the demand forecast, which ran above actual. The decisions after it carried the error and did not start it.',
+    r4: 'The calendar change reached supply planning late. The error began at the promotion handoff, before the forecast or the plan.'
+  };
+
+  var results = {};
+  function gradeRow(r) {
+    var box = byId('fb-' + r.id);
+    box.innerHTML = '';
+    var o = ticks(r, 'o'), t = ticks(r, 't'), b = ticks(r, 'b');
+    var res = { o: 'wrong', t: 'wrong', b: 'wrong' };
+
+    // Origin
+    if (!o.length) fb(box, 'wrong', 'Origin', 'No decision is credited yet. ' + FIRST_O);
+    else if (same(o, r.key.o)) { res.o = 'correct'; fb(box, 'correct', 'Origin', GOOD_O[r.id]); }
+    else if (r.id === 'r1' && same(o, ['DEC-01'])) { res.o = 'near'; fb(box, 'near', 'Origin', 'Accepted with a note. Forecast error does contribute, since a review traced ' + fmt(45, 0) + '% of these expedites to it. But the choice that could have changed the outcome sits at deployment. Credit that decision and record the forecast as a contributor.'); }
+    else if (o.length > 1) fb(box, 'wrong', 'Origin', 'More than one decision claims this loss, so the ledger counts it more than once. Keep the single decision where a different choice would have prevented it.' + (r.id === 'r1' ? ' Forecast error belongs on the card as a contributor, not as a second claim.' : ''));
+    else if (r.id === 'r3' && o[0] === 'DEC-15') fb(box, 'wrong', 'Origin', 'Disposition books the write-off. It sees only stock that already exists and did not create the surplus. ' + FIRST_O);
+    else if (r.key.b.indexOf(o[0]) >= 0) fb(box, 'wrong', 'Origin', 'A booking point shows where money lands, not where a choice could have changed it. ' + FIRST_O);
+    else fb(box, 'wrong', 'Origin', 'The record does not show a choice here that could have prevented this loss. ' + FIRST_O);
+
+    // Transmitters
+    if (!r.key.t.length) {
+      if (!t.length) { res.t = 'correct'; fb(box, 'correct', 'Passes it on', 'No transmitter. The error went from the choice to the booking without passing through another decision.'); }
+      else if (r.id === 'r1' && same(t, ['DEC-01'])) { res.t = 'near'; fb(box, 'near', 'Passes it on', 'The forecast does feed deployment, but here it is a contributor to the same choice, not a decision the error passed through before it was booked.'); }
+      else fb(box, 'wrong', 'Passes it on', 'The record shows no decision between the choice and the booking. First move: ask whether any decision sat between the two.');
+    } else {
+      var off = minus(t, r.key.t), hit = t.filter(function (d) { return r.key.t.indexOf(d) >= 0; });
+      if (off.length) fb(box, 'wrong', 'Passes it on', 'Off the path: ' + names(off) + '. A transmitter is a decision the error passed through, and the record of this loss does not show that. An origin starts the error and does not transmit it. First move: follow what the origin handed on, one decision at a time.');
+      else if (!hit.length) fb(box, 'wrong', 'Passes it on', 'No transmitter named. The error did not stay where it started. First move: follow what the origin handed on, one decision at a time, until the money was booked.');
+      else if (same(hit, r.key.t)) { res.t = 'correct'; fb(box, 'correct', 'Passes it on', 'The error passed through ' + names(r.key.t) + ' on its way to being booked.'); }
+      else { res.t = 'near'; fb(box, 'near', 'Passes it on', 'Right so far. One element is missing: the record also passes through ' + names(minus(r.key.t, hit)) + '.'); }
+    }
+
+    // Booking point
+    if (same(b, r.key.b)) { res.b = 'correct'; fb(box, 'correct', 'Booked here', 'The books record this loss at ' + names(r.key.b) + '.'); }
+    else if (within(b, r.key.b)) { res.b = 'near'; fb(box, 'near', 'Booked here', 'Right so far. One element is missing: it is also booked at ' + names(minus(r.key.b, b)) + '.'); }
+    else fb(box, 'wrong', 'Booked here', 'Money is booked where the record says it landed. First move: ask where the cost or the write-off appears in the books.');
+    results[r.id] = res;
+    return res;
+  }
+
+  function checkAll() {
+    var all = true;
+    ROWS.forEach(function (r) {
+      var x = gradeRow(r);
+      if (x.o !== 'correct' || x.t !== 'correct' || x.b !== 'correct') all = false;
+    });
+    var L = ledger();
+    var sum = byId('summary');
+    sum.innerHTML = '';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', 'ledger');
+    if (L.above) {
+      d.setAttribute('data-state', 'wrong');
+      d.innerHTML = '<span class="st">Ledger · Rejected</span>The ledger credits ' + usd(L.credited) + ' against ' + usd(BOOKED_TOTAL) + ' booked. Remove duplicate claims so each loss has one origin.';
+    } else if (all) {
+      d.setAttribute('data-state', 'correct');
+      d.innerHTML = '<span class="st">Ledger · Correct</span>The ledger closes at ' + usd(BOOKED_TOTAL) + ', and each origin is right. Three losses are counted once: ' + usd(9.2) + ' at deployment, ' + usd(8.0) + ' at purchasing, and ' + usd(7.4) + ' at the forecast.';
+    } else {
+      d.setAttribute('data-state', Math.abs(L.credited - BOOKED_TOTAL) < 0.0001 ? 'near' : 'wrong');
+      d.innerHTML = '<span class="st">Ledger · ' + (Math.abs(L.credited - BOOKED_TOTAL) < 0.0001 ? 'Closes, rows need work' : 'Does not close') + '</span>' +
+        (Math.abs(L.credited - BOOKED_TOTAL) < 0.0001
+          ? 'A ledger can close with the wrong origins, so closing is necessary and not sufficient. The rows above decide whether each origin is right.'
+          : 'Credit each priced loss to one origin, then check again.');
+    }
+    sum.appendChild(d);
+    byId('pass2').classList.remove('hidden');
+    pass2();
+  }
+  byId('check').addEventListener('click', checkAll);
+
+  function pass2() {
+    var rule = byId('rule').value;
+    var c = credits(rule);
+    var body = byId('l2').querySelector('tbody');
+    body.innerHTML = '';
+    Object.keys(NAME).filter(function (d) { return c.map[d]; }).forEach(function (d) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td data-label="Decision">' + d + ' ' + NAME[d] + '</td><td class="r num" data-label="Credited (USD M)">' + fmt(c.map[d], 1) + '</td>';
+      body.appendChild(tr);
+    });
+    var over = c.total > BOOKED_TOTAL + 0.0001;
+    byId('p2stat').innerHTML = 'Credited <strong>' + usd(c.total) + '</strong> against <strong>' + usd(BOOKED_TOTAL) + '</strong> booked' +
+      (c.total > 0 ? ': <span class="' + (over ? 'bad' : 'good') + '">' + fmt(c.total / BOOKED_TOTAL, 1) + '× what was booked.</span>' : '.');
+    var note;
+    if (rule === 'origin') note = 'Each loss is claimed once, by the decision that could have changed it. The total cannot exceed what was booked.';
+    else if (rule === 'every') note = 'Each decision a loss touches claims all of it. The same loss is counted once for every decision on its path, so the total outruns what the company lost.';
+    else note = 'The total holds, but the credit sits where nothing could have been done. Transport and disposition see the loss and did not cause it, so the decisions that could have prevented it show no value.';
+    byId('p2note').textContent = note;
+  }
+  byId('rule').addEventListener('change', pass2);
+})();
+</script>
+</body>
+</html>

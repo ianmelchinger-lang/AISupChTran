@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rate the fit</title>
+<style>:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px;color:var(--ink)}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.card.soft{background:var(--panel)}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.num{font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+td.r,th.r{text-align:right}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:12px 14px}
+legend{font-weight:700;padding:0 6px}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+input[type=checkbox],input[type=radio]{width:22px;height:22px;margin:0;flex:none;accent-color:var(--accent)}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;min-height:44px}
+.opt span{flex:1}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.readout{border:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin:0 0 14px}
+.readout strong{font-variant-numeric:tabular-nums}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:8px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.pick{background:var(--accent-soft)}
+.hidden{display:none !important}
+.ledger td.bad,.bad{color:var(--bad);font-weight:700}
+.good{color:var(--ok);font-weight:700}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .stack thead{position:absolute;left:-9999px}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label) ": ";font-weight:700;color:var(--muted)}
+  td.r,th.r{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+
+.dec dl.terms dt{font-size:14px;color:var(--muted);text-transform:none}
+.dec .grid2{margin-top:12px}
+.maprow{margin:0 0 6px}
+.maprow .band{font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Skill practice</p>
+  <h1>Rate fit, readiness, and oversight as separate marks</h1>
+  <p class="lede">A single AI score averages away the reason a decision is stuck. Rate each mark on its own, so each one points to a different action.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. Five recurring decisions are on your map, each with the loss it carries. Rate how well AI fits each one, how ready the company is today, and how much review a wrong call needs. Value is already placed. Do not read fit from it.</p>
+    <dl class="terms">
+      <dt>Form of AI</dt>
+      <dd>What AI does to the decision. <em>Predict</em> estimates an uncertain outcome. <em>Sense</em> flags a condition. <em>Optimize and recommend</em> compares feasible options against a stated objective. <em>Generate</em> produces content that informs a choice. <em>Act within bounds</em> carries out an authorized choice.</dd>
+      <dt>Fit</dt>
+      <dd>How far some form could change the choice at the moment it is made. It needs repeated occasions, an uncertainty or set of options the form can address, an objective that can be stated, and a route from output to action. <em>Outside current reach</em> means no form can change the choice yet because one of those is missing.</dd>
+      <dt>Readiness</dt>
+      <dd>The present state of data, process and decision rights, people, and route to action. A blocker is the one missing prerequisite.</dd>
+      <dt>Oversight need</dt>
+      <dd>The review a wrong call requires, given its consequence, how reversible it is, the time to review, and who bears the error.</dd>
+    </dl>
+  </section>
+
+  <div id="cards"></div>
+
+  <section class="card" aria-labelledby="map-h">
+    <h2 id="map-h">Your map so far</h2>
+    <div class="readout" id="map" role="status" aria-live="polite">Rate a decision to see it placed.</div>
+    <div class="row"><button type="button" id="check">Check my ratings</button></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section id="pass2" class="card hidden" aria-labelledby="p2-h">
+    <h2 id="p2-h">Run it again with one assumption moved</h2>
+    <p>Safety stock is set in three places today. Change that one fact and watch which marks move.</p>
+    <label class="opt"><input type="checkbox" id="one-owner"><span>One owner now sets the effective safety stock buffer</span></label>
+    <table id="p2table">
+      <thead><tr><th scope="col">Mark</th><th scope="col">Set in three places</th><th scope="col">One owner</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p id="p2note" class="note"></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function fmt(n, d) { return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function usd(n) { return 'USD ' + fmt(n, 1) + 'M'; }
+
+  var D = [
+    { id: 'DEC-01', name: 'Baseline demand forecast',
+      loss: 'Last spring the seasonal line was over-forecast and ' + usd(7.4) + ' was written off.',
+      have: 'Shipment history for every SKU-location. The statistical engine was configured nine years ago and never retuned, so planners work in spreadsheets. The promotion calendar lives in those spreadsheets and never reaches the forecast.',
+      review: 'Reviewed weekly. Purchases and production follow only after the monthly consensus plan.' },
+    { id: 'DEC-03', name: 'New-product launch quantity',
+      loss: 'About ' + fmt(180, 0) + ' SKUs launch each year, with ' + fmt(68, 0) + '% forecast error in their first ' + fmt(13, 0) + ' weeks. Write-offs concentrate in the premium line: ' + usd(6.9) + ' of ' + usd(18.2) + ' a year.',
+      have: 'Planners set launch quantities by judgment, by analogy to earlier products. A proposal would find analog products automatically, but no structured product attributes exist to match them on.',
+      review: 'The brand marketing director, Premium & Natural, sets the quantity with the demand planning manager, launch by launch.' },
+    { id: 'DEC-05', name: 'Safety stock level',
+      loss: 'Nobody knows the effective buffer, so the company carries excess in some places and cuts in others. Carrying cost is ' + usd(63.1) + ' a year on the whole inventory balance, not on this decision alone.',
+      have: 'Forecast error, lead times, and service targets are recorded by SKU-location. The buffer is set in three places: an inventory analyst sets a system parameter, DC managers set minimum levels, and demand planners keep spreadsheet buffers. A proposal would calculate buffers by mathematical optimization, which is not learned from data.',
+      review: 'Quarterly in the system, ad hoc in the other two places. Nobody reviews the effective buffer.' },
+    { id: 'DEC-08', name: 'Material purchase quantity and timing',
+      loss: 'Late inbound materials cause ' + usd(8.0) + ' of premium freight a year.',
+      have: 'Material requirements and supplier lead times are in the ERP. A pilot agent issues small purchase orders on its own. One in ' + fmt(120, 0) + ' carries a material error: a quantity off by more than ' + fmt(20, 0) + '%, a supplier on hold, or a superseded price. Three orders went to a supplier on quality hold.',
+      review: 'A buyer reviews pilot orders. Errors reach suppliers.' },
+    { id: 'DEC-12', name: 'Allocation under shortage',
+      loss: 'Retailer deductions run ' + usd(14.6) + ' a year, ' + usd(6.1) + ' of it from the largest account. That account requires ' + fmt(95, 0) + '% OTIF.',
+      have: 'Stock by SKU and each account\'s orders are recorded, and account priority is known. No allocation objective is written: in each shortage, the key account director and the senior vice president, supply chain weigh contractual priority, margin, and service to smaller accounts.',
+      review: 'The S&OP process lead convenes. The two executives decide, one shortage at a time.' }
+  ];
+  var NAME = {}; D.forEach(function (d) { NAME[d.id] = d.name; });
+
+  var OPT = {
+    fit: [['', 'Choose'], ['high', 'High'], ['medium', 'Medium'], ['low', 'Low'], ['outside', 'Outside current reach']],
+    form: [['', 'Choose'], ['predict', 'Predict'], ['sense', 'Sense'], ['optimize', 'Optimize and recommend'], ['generate', 'Generate'], ['act', 'Act within bounds'], ['none', 'None yet']],
+    rdy: [['', 'Choose'], ['ready', 'Ready'], ['partial', 'Partial'], ['blocked', 'Blocked']],
+    blk: [['', 'Choose'], ['data', 'Data: missing, unstructured, or unreconciled'], ['objective', 'Objective: no agreed rule for a good choice'], ['rights', 'Decision rights: no single owner'], ['people', 'People or route to action'], ['none', 'None that blocks today']],
+    ovs: [['', 'Choose'], ['low', 'Low'], ['medium', 'Medium'], ['high', 'High']]
+  };
+  var LAB = { fit: 'Fit', form: 'Form of AI', rdy: 'Readiness', blk: 'Blocker', ovs: 'Oversight need' };
+  var WORD = {};
+  Object.keys(OPT).forEach(function (k) { WORD[k] = {}; OPT[k].forEach(function (o) { WORD[k][o[0]] = o[1]; }); });
+
+  var host = byId('cards');
+  D.forEach(function (d) {
+    var s = document.createElement('section');
+    s.className = 'card dec';
+    s.setAttribute('aria-labelledby', 'h-' + d.id);
+    var html = '<h3 id="h-' + d.id + '">' + d.id + ' · ' + d.name + '</h3>' +
+      '<dl class="terms"><dt>Loss in the record</dt><dd>' + d.loss + '</dd><dt>What exists today</dt><dd>' + d.have + '</dd><dt>Who reviews</dt><dd>' + d.review + '</dd></dl>' +
+      '<div class="grid2">';
+    ['fit', 'form', 'rdy', 'blk', 'ovs'].forEach(function (k) {
+      html += '<label class="field"><span class="lab">' + LAB[k] + '</span><select id="' + k + '-' + d.id + '">' +
+        OPT[k].map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></label>';
+    });
+    html += '</div><div class="fbbox" id="fb-' + d.id + '" aria-live="polite"></div>';
+    s.innerHTML = html;
+    host.appendChild(s);
+  });
+
+  function val(k, id) { return byId(k + '-' + id).value; }
+
+  function renderMap() {
+    var bands = [['high', 'High fit'], ['medium', 'Medium fit'], ['low', 'Low fit'], ['outside', 'Outside current reach'], ['', 'Fit not yet rated']];
+    var out = '';
+    bands.forEach(function (b) {
+      var items = D.filter(function (d) { return val('fit', d.id) === b[0]; });
+      if (!items.length) return;
+      out += '<p class="maprow"><span class="band">' + b[1] + '</span></p>';
+      items.forEach(function (d) {
+        var f = val('form', d.id), r = val('rdy', d.id), bl = val('blk', d.id), o = val('ovs', d.id);
+        out += '<p class="maprow small">' + d.id + ' · ' + d.name + ': form ' + (f ? WORD.form[f].toLowerCase() : 'not rated') +
+          '; readiness ' + (r ? r : 'not rated') + (bl && r && r !== 'ready' ? ' (' + WORD.blk[bl].split(':')[0].toLowerCase() + ')' : '') +
+          '; oversight ' + (o ? o : 'not rated') + '.</p>';
+      });
+    });
+    byId('map').innerHTML = out || 'Rate a decision to see it placed.';
+  }
+  document.querySelectorAll('.dec select').forEach(function (s) { s.addEventListener('change', renderMap); });
+
+  function cell(box, state, label, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-state', state);
+    d.setAttribute('data-cell', label);
+    var t = state === 'correct' ? 'Correct' : state === 'near' ? 'Near' : 'Not yet';
+    d.innerHTML = '<span class="st">' + label + ' · ' + t + '</span>' + text;
+    box.appendChild(d);
+  }
+  function blank(box, label) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', label);
+    d.innerHTML = '<span class="st">' + label + '</span>Choose a rating for this mark, then check again.';
+    box.appendChild(d);
+  }
+  function note(box, html) {
+    var d = document.createElement('div');
+    d.className = 'note';
+    d.setAttribute('data-cell', 'commentary');
+    d.innerHTML = html;
+    box.appendChild(d);
+  }
+
+  var FIRST_FIT = 'First move: check the four requirements, which are repeated occasions, an uncertainty or option set a form addresses, a statable objective, and a route to action.';
+
+  function gradeAll() {
+    var all = 0, good = 0;
+    function mark(state) { all++; if (state === 'correct') good++; }
+    D.forEach(function (d) { byId('fb-' + d.id).innerHTML = ''; });
+
+    // DEC-01
+    (function () {
+      var b = byId('fb-DEC-01'), fit = val('fit', 'DEC-01');
+      if (!fit) { blank(b, 'Fit'); all++; }
+      else if (fit === 'high') { cell(b, 'correct', 'Fit', 'Occasions repeat, outcomes are recorded, a prediction addresses the uncertainty, and the forecast feeds a plan. Fit is high.'); mark('correct'); }
+      else if (fit === 'medium') { cell(b, 'near', 'Fit', 'The structure is right: you saw the decision fits. One element is out of place: the promotion calendar that never reaches the forecast is a readiness gap, not a reason to lower fit.'); mark('near'); }
+      else { cell(b, 'wrong', 'Fit', 'Fit belongs to the decision, and this one repeats, records its outcomes, and has a route to action. ' + FIRST_FIT); mark('wrong'); }
+      note(b, '<strong>For comparison.</strong> Form: predict. Readiness: partial, because the promotion calendar lives in spreadsheets. Oversight: medium, since the forecast is reviewed weekly and can change before any commitment.');
+    })();
+
+    // DEC-03
+    (function () {
+      var b = byId('fb-DEC-03'), fit = val('fit', 'DEC-03'), rdy = val('rdy', 'DEC-03'), blk = val('blk', 'DEC-03');
+      if (!fit) { blank(b, 'Fit'); all++; }
+      else if (fit === 'low') { cell(b, 'correct', 'Fit', 'A prediction by analogy could change the choice, but launches carry little history, so fit is low.'); mark('correct'); }
+      else if (fit === 'medium' && rdy === 'blocked') { cell(b, 'correct', 'Fit', 'Accepted. Medium is defensible when you also mark readiness blocked, because the blocker is recorded separately.'); mark('correct'); }
+      else if (fit === 'medium') { cell(b, 'near', 'Fit', 'The structure is right. One element is out of place: medium fit holds only if readiness is marked blocked, so the missing prerequisite stays visible.'); mark('near'); }
+      else if (fit === 'outside') { cell(b, 'near', 'Fit', 'The structure is right: something is missing. One element is out of place: launches recur 180 times a year and a form could change the choice, so the gap belongs in readiness, not in fit.'); mark('near'); }
+      else { cell(b, 'wrong', 'Fit', 'A new product has almost no history, so a high mark overstates what a form could change. ' + FIRST_FIT); mark('wrong'); }
+      if (!blk) { blank(b, 'Blocker'); all++; }
+      else if (blk === 'data') { cell(b, 'correct', 'Blocker', 'Matching a launch to analogs needs structured product attributes, and none exist. The blocker is data.'); mark('correct'); }
+      else { cell(b, 'wrong', 'Blocker', 'The record shows what the form would need as input and does not have. First move: ask what the form needs to match a new product to earlier ones, and whether it exists today.'); mark('wrong'); }
+      note(b, '<strong>For comparison.</strong> Form: predict by analogy. Readiness: blocked, for want of structured product attributes. Oversight: medium.');
+    })();
+
+    // DEC-05
+    (function () {
+      var b = byId('fb-DEC-05'), form = val('form', 'DEC-05'), blk = val('blk', 'DEC-05');
+      if (!form) { blank(b, 'Form of AI'); all++; }
+      else if (form === 'optimize') { cell(b, 'correct', 'Form of AI', 'The choice is how much to hold, given lead times, forecast error, and a service target. That is a comparison of options against an objective.'); mark('correct'); }
+      else if (form === 'predict') { cell(b, 'wrong', 'Form of AI', 'A forecast is an input to the buffer. The choice itself is how much to hold, which weighs options rather than estimates an outcome. First move: ask whether the decision needs an estimate or a comparison of options.'); mark('wrong'); }
+      else { cell(b, 'wrong', 'Form of AI', 'That form does not match what this choice does. First move: ask whether the decision needs an estimate, a flag, a comparison of options, content, or an action.'); mark('wrong'); }
+      if (!blk) { blank(b, 'Blocker'); all++; }
+      else if (blk === 'rights') { cell(b, 'correct', 'Blocker', 'Three places set the buffer, so a new calculation would be overridden twice. The objective exists, and the owner does not. That is a decision-rights blocker.'); mark('correct'); }
+      else if (blk === 'data') { cell(b, 'near', 'Blocker', 'The structure is right: you named a real prerequisite. One element is out of place: the inputs are recorded by SKU-location, and what is missing is a single owner.'); mark('near'); }
+      else if (blk === 'objective') { cell(b, 'wrong', 'Blocker', 'A service target already exists. A missing objective lowers fit, and a missing owner blocks readiness, and they are different problems. First move: ask whether people disagree about what a good buffer is, or about who sets it.'); mark('wrong'); }
+      else { cell(b, 'wrong', 'Blocker', 'First move: ask who sets this decision today, and whether one person can be named.'); mark('wrong'); }
+      note(b, '<strong>For comparison.</strong> Fit: high. Readiness: blocked by decision rights, which makes current reach zero even though fit is high. Oversight: medium.');
+    })();
+
+    // DEC-08
+    (function () {
+      var b = byId('fb-DEC-08'), o = val('ovs', 'DEC-08');
+      if (!o) { blank(b, 'Oversight need'); all++; }
+      else if (o === 'high') { cell(b, 'correct', 'Oversight need', 'Errors reach suppliers, where they are hard to reverse, and one order in 120 carries a material error. Oversight need is high even though the form fits.'); mark('correct'); }
+      else if (o === 'medium') { cell(b, 'near', 'Oversight need', 'The structure is right: you weighed consequence. One element is out of place: an order that reaches a supplier is hard to take back, so the need is high.'); mark('near'); }
+      else { cell(b, 'wrong', 'Oversight need', 'Oversight follows consequence, reversibility, review time, and who bears the error. First move: ask where an error lands and whether the company can undo it.'); mark('wrong'); }
+      note(b, '<strong>For comparison.</strong> Fit: high, for sensing late supply and for acting within bounds. Readiness: partial. A decision can fit action and still need heavy review.');
+    })();
+
+    // DEC-12
+    (function () {
+      var b = byId('fb-DEC-12'), fit = val('fit', 'DEC-12'), o = val('ovs', 'DEC-12');
+      if (!fit) { blank(b, 'Fit'); all++; }
+      else if (fit === 'outside') { cell(b, 'correct', 'Fit', 'The data exist, and no objective does. Leaders have not reconciled contractual priority, margin, and service to smaller accounts, so no form can change the choice yet. A large loss and an outside-reach mark can sit together.'); mark('correct'); }
+      else if (fit === 'low') { cell(b, 'near', 'Fit', 'The structure is right: this decision does not fit now. One element is out of place: low fit says a form could help somewhat, but here none can change the choice until an objective is written.'); mark('near'); }
+      else { cell(b, 'wrong', 'Fit', 'Clean data do not supply an objective. A model needs a stated rule for a good choice, and leaders have not agreed one. First move: ask whether anyone has written down what a good allocation means.'); mark('wrong'); }
+      if (!o) { blank(b, 'Oversight need'); all++; }
+      else if (o === 'high') { cell(b, 'correct', 'Oversight need', 'Priority is set shortage by shortage, and the deductions land on the largest account. Review need is high.'); mark('correct'); }
+      else if (o === 'medium') { cell(b, 'near', 'Oversight need', 'The structure is right: you weighed consequence. One element is out of place: each call lands on the largest account\'s deductions and is set by two executives per event, so the need is high.'); mark('near'); }
+      else { cell(b, 'wrong', 'Oversight need', 'First move: ask who bears the error when one account is cut so another can be served.'); mark('wrong'); }
+      note(b, '<strong>For comparison.</strong> Form: none until an allocation objective is written. Readiness: partial. If the objective were agreed and nobody owned the decision, the form would fit and decision rights would block readiness instead.');
+    })();
+
+    var sum = byId('summary');
+    sum.innerHTML = '';
+    var s = document.createElement('div');
+    s.className = 'fb';
+    var allGood = good === all && all === 8;
+    s.setAttribute('data-state', allGood ? 'correct' : 'near');
+    s.innerHTML = allGood
+      ? '<span class="st">Map · Correct</span>Every scored mark holds. Allocation under shortage sits on the map with a large loss and no reachable form, and that is a correct finding, not a gap in the map.'
+      : '<span class="st">Map · Review the flagged marks</span>Marks in amber or red need another look. Change them and check again.';
+    sum.appendChild(s);
+    byId('pass2').classList.remove('hidden');
+    pass2();
+  }
+  byId('check').addEventListener('click', gradeAll);
+
+  function pass2() {
+    var one = byId('one-owner').checked;
+    var body = byId('p2table').querySelector('tbody');
+    body.innerHTML = '';
+    function row(a, b, c, moved) {
+      var tr = document.createElement('tr');
+      if (moved) tr.className = 'pick';
+      tr.innerHTML = '<td>' + a + '</td><td>' + b + '</td><td>' + c + (moved ? ' <span class="tag">moved</span>' : '') + '</td>';
+      body.appendChild(tr);
+    }
+    row('Fit', 'High', 'High', false);
+    row('Form', 'Optimize and recommend', 'Optimize and recommend', false);
+    row('Readiness', 'Blocked: decision rights', one ? 'Partial: the owner gap clears, and the data and people gaps remain' : 'Blocked: decision rights', one);
+    row('Oversight need', 'Medium', 'Medium', false);
+    byId('p2note').textContent = one
+      ? 'Only readiness moved. Fit and oversight stand, so one blended score would have mixed one changed mark with two unchanged ones.'
+      : 'Tick the box to give safety stock one owner.';
+  }
+  byId('one-owner').addEventListener('change', pass2);
+})();
+</script>
+</body>
+</html>

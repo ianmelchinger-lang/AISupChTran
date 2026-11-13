@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assemble the path to a defensible map</title>
+<style>:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px;color:var(--ink)}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.card.soft{background:var(--panel)}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.num{font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+td.r,th.r{text-align:right}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:12px 14px}
+legend{font-weight:700;padding:0 6px}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+input[type=checkbox],input[type=radio]{width:22px;height:22px;margin:0;flex:none;accent-color:var(--accent)}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;min-height:44px}
+.opt span{flex:1}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.readout{border:2px solid var(--accent);background:var(--accent-soft);border-radius:8px;padding:12px 14px;margin:0 0 14px}
+.readout strong{font-variant-numeric:tabular-nums}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:8px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.pick{background:var(--accent-soft)}
+.hidden{display:none !important}
+.ledger td.bad,.bad{color:var(--bad);font-weight:700}
+.good{color:var(--ok);font-weight:700}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .stack thead{position:absolute;left:-9999px}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label) ": ";font-weight:700;color:var(--muted)}
+  td.r,th.r{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-of-type{border-top:0}
+.item p.ctext{margin:0 0 8px}
+.item .grid2{margin-top:6px}
+.fbbox:empty{display:none}
+.lane ol,.lane ul{margin:4px 0 0;padding-left:20px}
+.lane li{margin:2px 0}
+.lane h3{margin:0 0 2px}
+.lane{margin:0 0 8px}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Visualize the process</p>
+  <h1>Assemble the path from a failed view to a defensible map</h1>
+  <p class="lede">A decision map holds up when the problem is stated in operational terms, the actions run in an order their inputs allow, and each sign of success can be looked up on the finished map. Sort the cards, then sequence the actions.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. The company holds a catalog of seventeen recurring decisions and sixteen AI initiatives. The steering group wants to see where AI creates value before it plans spending. Fifteen cards follow. Some belong on the path to a map you can defend, and some are tempting moves that the path rules out.</p>
+    <dl class="terms">
+      <dt>What was wrong</dt><dd>A failure of the steering group's current view, true before any work begins.</dd>
+      <dt>What the lead did</dt><dd>An action the lead performs, in a sequence. Give each a step number. Several orders can be sound, and the check flags only the ones that break a dependency.</dd>
+      <dt>What shows it worked</dt><dd>Something an observer can verify on the finished map.</dd>
+      <dt>Leave out</dt><dd>A card that breaks a rule of the map. It does not belong in any lane.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="pool-h">
+    <h2 id="pool-h">The cards</h2>
+    <p class="small muted" id="count"></p>
+    <div id="pool"></div>
+  </section>
+
+  <section class="card" aria-labelledby="asm-h">
+    <h2 id="asm-h">Your assembly so far</h2>
+    <div class="grid2" id="asm"></div>
+    <div class="row">
+      <button type="button" id="check">Check my assembly</button>
+      <button type="button" class="secondary" id="reset">Clear all placements</button>
+    </div>
+    <div id="ofb" aria-live="polite"></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+
+  var LANES = [['', 'Choose'], ['wrong', 'What was wrong'], ['did', 'What the lead did'], ['worked', 'What shows it worked'], ['out', 'Leave out']];
+  var LNAME = {}; LANES.forEach(function (l) { LNAME[l[0]] = l[1]; });
+
+  var GEN_LANE = 'Ask three questions of this card. Would it be true before any work began? Does the lead act in it? Could an observer verify it on the finished map? Placement follows the question that gets a yes. First move: read the card for its actor and its tense.';
+  var GEN_OUT = 'A card leaves the assembly only if it breaks a rule of the map: it ranks, converts, averages, or omits. First move: check this card against those four.';
+  var NEAR_SIG = 'The structure is right: this card belongs on the path. One element is out of place: it describes a state an observer would verify on the finished map, and it names no action the lead takes.';
+  var NEAR_MOVE = 'The structure is right: this card belongs on the path. One element is out of place: it names an action the lead takes, and an observer cannot verify an action by looking at the finished map.';
+
+  var CARDS = [
+    { id: 'm3', s: 'Trace losses to origins', lane: 'did', move: 3,
+      t: 'Trace each booked loss to one originating decision, naming the decisions that pass it on and the point where it is booked.',
+      ok: 'Right. The lead is the actor, and the output, one origin per booked loss, is what a later action audits.' },
+    { id: 's2', s: 'Each loss counted once', lane: 'worked',
+      t: 'No loss is credited twice, and the credited total stays within the losses actually booked.',
+      ok: 'Right. An observer can verify it by summing the credits against what was booked.' },
+    { id: 'd2', s: 'Convert benefits to dollars', lane: 'out',
+      t: 'Convert every initiative\'s benefit to dollars so that one scale can compare them.',
+      why: 'Converting folds a revenue figure, a one-time balance, and a speed into one currency, and it still scores initiatives instead of decisions.',
+      first: 'First move: ask whether each benefit is a loss that occurred or a claim about a proposal.' },
+    { id: 'p2', s: 'Same loss claimed twice', lane: 'wrong',
+      t: 'Two initiatives can claim the same loss, while decisions nobody sponsors never appear.',
+      ok: 'Right. It fails before any work begins: initiatives are not decisions, so a loss can be claimed twice and an unsponsored decision never shows.' },
+    { id: 'm1', s: 'Bound value at stake', lane: 'did', move: 1,
+      t: 'Bound each decision\'s value at stake as a range, from its occasions, the cost of an error, and the share a form of AI could remove, in the decision\'s own units.',
+      ok: 'Right. The lead is the actor, and the output, a bounded range per decision, is what later actions use.' },
+    { id: 's4', s: 'Nothing ranked', lane: 'worked',
+      t: 'Nothing on the map is ranked. Decisions are placed, and ordering is left for later.',
+      ok: 'Right. An observer can verify it by looking for a rank or a priority order anywhere on the map.' },
+    { id: 'd4', s: 'Only sponsored decisions', lane: 'out',
+      t: 'Show only the decisions that a submitted initiative addresses.',
+      why: 'Leaving off a decision for want of a sponsor sets its value at zero while its loss continues.',
+      first: 'First move: ask which decision would be missing, and whether its loss stopped.' },
+    { id: 'p3', s: 'Grid hides fit, readiness, review', lane: 'wrong',
+      t: 'A grid of value against effort cannot show whether AI can change a decision, whether the company is ready for it, or how much review a wrong call needs.',
+      ok: 'Right. It states what the familiar grid cannot show, which is true before the lead does anything.' },
+    { id: 'm4', s: 'Evidence cards', lane: 'did', move: 4,
+      t: 'Put an evidence card behind each placement, so that every claim shows what it supplies, what is still missing, and what ruling follows.',
+      ok: 'Right. The lead builds the card that lets a placement be challenged on a named factor.' },
+    { id: 'd1', s: 'Rank by submitted benefit', lane: 'out',
+      t: 'Rank the sixteen initiatives by submitted benefit and fund the top five.',
+      why: 'Ranking orders items by one number, and these benefits share neither a unit nor a baseline. The map places decisions first and leaves ordering for later.',
+      first: 'First move: ask whether the amounts being ranked share a unit and a baseline.' },
+    { id: 's1', s: 'Allocation on the map', lane: 'worked',
+      t: 'Allocation under shortage is on the map: high on value at stake, outside current reach, and high on oversight need.',
+      ok: 'Right. An observer can verify it on that decision\'s card. A decision with a large loss and no initiative stays on the map, and outside current reach is a result, not a gap.' },
+    { id: 'p1', s: 'Incompatible units', lane: 'wrong',
+      t: 'Sixteen initiatives state their benefits in incompatible units: saved revenue, a one-time inventory balance, and a purchase-order cycle time.',
+      ok: 'Right. It fails before any work begins: amounts in different units cannot be added or compared.' },
+    { id: 'm2', s: 'Rate fit and marks', lane: 'did', move: 2,
+      t: 'Rate each decision\'s fit by form of AI, record readiness and oversight need as separate marks, and let a decision sit outside current reach.',
+      ok: 'Right. The lead rates and records, and readiness and oversight stay on marks of their own.' },
+    { id: 's3', s: 'Every decision carded', lane: 'worked',
+      t: 'Every recurring decision has a card, whether or not an initiative addresses it.',
+      ok: 'Right. An observer can verify it by counting the cards against the list of recurring decisions.' },
+    { id: 'd3', s: 'Average readiness into fit', lane: 'out',
+      t: 'Average readiness into each decision\'s fit so that every decision carries a single number.',
+      why: 'Averaging lets a blocker vanish into a middling score, and a decision that is not ready has no current reach however good its fit.',
+      first: 'First move: ask what happens to a blocker when it is averaged with strong marks.' }
+  ];
+  var BYID = {}; CARDS.forEach(function (c) { BYID[c.id] = c; });
+
+  var MOVES = { m1: 'bounding value', m2: 'rating fit', m3: 'tracing losses', m4: 'building the evidence cards' };
+  var DEPS = [
+    ['m1', 'm3', 'Tracing checks for double counting, and that needs each pool bounded and what it excludes named.'],
+    ['m1', 'm4', 'An evidence card can be audited only once its fields exist, and value is one of them.'],
+    ['m2', 'm4', 'An evidence card can be audited only once its fields exist, and the marks are among them.'],
+    ['m3', 'm4', 'An evidence card can be audited only once its fields exist, and the origins are among them.']
+  ];
+
+  // Build the pool.
+  var pool = byId('pool');
+  var laneOpts = LANES.map(function (l) { return '<option value="' + l[0] + '">' + l[1] + '</option>'; }).join('');
+  var stepOpts = '<option value="">Choose</option>';
+  for (var i = 1; i <= 8; i++) stepOpts += '<option value="' + i + '">' + fmt(i) + '</option>';
+  CARDS.forEach(function (c) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="t-' + c.id + '">' + c.t + '</p>' +
+      '<div class="grid2">' +
+      '<label class="field"><span class="lab">Place in</span><select id="lane-' + c.id + '" aria-describedby="t-' + c.id + '">' + laneOpts + '</select></label>' +
+      '<label class="field hidden" id="stepw-' + c.id + '"><span class="lab">Step</span><select id="step-' + c.id + '" aria-describedby="t-' + c.id + '">' + stepOpts + '</select></label>' +
+      '</div><div class="fbbox" id="fb-' + c.id + '" aria-live="polite"></div>';
+    pool.appendChild(d);
+  });
+
+  function laneOf(c) { return byId('lane-' + c.id).value; }
+  function stepOf(c) { var v = byId('step-' + c.id).value; return v ? parseInt(v, 10) : 0; }
+
+  function readout() {
+    var groups = { wrong: [], did: [], worked: [], out: [] }, left = 0;
+    CARDS.forEach(function (c) {
+      var l = laneOf(c);
+      if (!l) { left++; return; }
+      groups[l].push(c);
+    });
+    groups.did.sort(function (a, b) {
+      var sa = stepOf(a) || 99, sb = stepOf(b) || 99;
+      return sa - sb;
+    });
+    function list(tag, arr, numbered) {
+      if (!arr.length) return '<p class="small muted">Nothing placed yet.</p>';
+      return '<' + tag + '>' + arr.map(function (c) {
+        var s = stepOf(c);
+        return '<li>' + c.s + (numbered && !s ? ' <span class="tag">no step</span>' : '') + (numbered && s ? ' <span class="small muted">step ' + fmt(s) + '</span>' : '') + '</li>';
+      }).join('') + '</' + tag + '>';
+    }
+    byId('asm').innerHTML =
+      '<div class="lane"><h3>What was wrong</h3>' + list('ul', groups.wrong) + '</div>' +
+      '<div class="lane"><h3>What the lead did</h3>' + list('ol', groups.did, true) + '</div>' +
+      '<div class="lane"><h3>What shows it worked</h3>' + list('ul', groups.worked) + '</div>' +
+      '<div class="lane"><h3>Left out</h3>' + list('ul', groups.out) + '</div>';
+    byId('count').textContent = left === 0 ? 'Every card is placed.' : 'Cards still unplaced: ' + fmt(left) + '.';
+  }
+
+  function syncSteps() {
+    CARDS.forEach(function (c) {
+      var show = laneOf(c) === 'did';
+      byId('stepw-' + c.id).classList.toggle('hidden', !show);
+      if (!show) byId('step-' + c.id).value = '';
+    });
+  }
+
+  function judgeCard(c, lane) {
+    if (!lane) return ['blank', 'Not placed yet. Choose a lane for this card.'];
+    if (c.lane === lane) return ['correct', c.lane === 'out' ? 'Left out, correctly. ' + c.why : c.ok];
+    if (c.lane === 'out') return ['wrong', c.why + ' ' + c.first];
+    if (lane === 'out') return ['wrong', GEN_OUT];
+    if (c.lane === 'worked' && lane === 'did') return ['near', NEAR_SIG];
+    if (c.lane === 'did' && lane === 'worked') return ['near', NEAR_MOVE];
+    return ['wrong', GEN_LANE];
+  }
+
+  function judgeOrder() {
+    var ids = ['m1', 'm2', 'm3', 'm4'], pos = {}, missing = false;
+    ids.forEach(function (id) {
+      var c = BYID[id];
+      if (laneOf(c) !== 'did' || !stepOf(c)) missing = true; else pos[id] = stepOf(c);
+    });
+    if (missing) return ['blank', 'The sequence cannot be checked yet. Place all four actions in the middle lane and give each a step.'];
+    var seen = {}, dup = 0;
+    ids.forEach(function (id) { if (seen[pos[id]]) dup = pos[id]; seen[pos[id]] = true; });
+    if (dup) return ['wrong', 'Two actions share step ' + fmt(dup) + '. Each step holds one action. First move: for the action you placed earliest, ask what it needs as input and which action makes that input.'];
+    var broken = DEPS.filter(function (d) { return pos[d[0]] > pos[d[1]]; });
+    if (broken.length === 0) {
+      return ['correct', 'The sequence respects every dependency. Only part of the order is fixed. Bounding value and rating fit are separate axes, so either may come first. Tracing waits for bounded pools. The evidence cards come last, because a card can be audited only once its fields exist.'];
+    }
+    if (broken.length === 1) {
+      var d = broken[0];
+      return ['near', 'The structure is right: the actions that can swap are sound. One element is out of place: ' + MOVES[d[1]] + ' sits ahead of ' + MOVES[d[0]] + '. ' + d[2]];
+    }
+    return ['wrong', 'More than one action stands ahead of the work it depends on. A step cannot start until its inputs exist. First move: for the action you placed earliest, ask what it needs as input and which action makes that input.'];
+  }
+
+  function put(box, state, label, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', label);
+    if (state !== 'blank') d.setAttribute('data-state', state);
+    var t = state === 'correct' ? ' · Correct' : state === 'near' ? ' · Near' : state === 'wrong' ? ' · Not yet' : '';
+    d.innerHTML = '<span class="st">' + label + t + '</span>' + text;
+    box.appendChild(d);
+  }
+
+  var checked = false;
+  function checkAll() {
+    checked = true;
+    var bad = 0, near = 0;
+    CARDS.forEach(function (c) {
+      var box = byId('fb-' + c.id);
+      box.innerHTML = '';
+      var r = judgeCard(c, laneOf(c));
+      put(box, r[0], 'Placement', r[1]);
+      if (r[0] === 'near') near++; else if (r[0] !== 'correct') bad++;
+    });
+    var ob = byId('ofb');
+    ob.innerHTML = '';
+    var o = judgeOrder();
+    put(ob, o[0], 'Sequence', o[1]);
+    if (o[0] === 'near') near++; else if (o[0] !== 'correct') bad++;
+
+    var sum = byId('summary');
+    sum.innerHTML = '';
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', 'summary');
+    d.setAttribute('data-state', state);
+    d.innerHTML = state === 'correct'
+      ? '<span class="st">Assembly · Correct</span>The failure is stated in operational terms, the actions run in an order their inputs allow, and every sign of success can be checked on the finished map.'
+      : '<span class="st">Assembly · ' + (state === 'near' ? 'Close' : 'Review the flagged cards') + '</span>Cards marked amber or red need another look. Change a placement and the check runs again.';
+    sum.appendChild(d);
+  }
+
+  function onChange() {
+    syncSteps();
+    readout();
+    if (checked) checkAll();
+  }
+  CARDS.forEach(function (c) {
+    byId('lane-' + c.id).addEventListener('change', onChange);
+    byId('step-' + c.id).addEventListener('change', onChange);
+  });
+  byId('check').addEventListener('click', checkAll);
+  byId('reset').addEventListener('click', function () {
+    checked = false;
+    CARDS.forEach(function (c) {
+      byId('lane-' + c.id).value = '';
+      byId('step-' + c.id).value = '';
+      byId('fb-' + c.id).innerHTML = '';
+    });
+    byId('ofb').innerHTML = '';
+    byId('summary').innerHTML = '';
+    syncSteps();
+    readout();
+  });
+  syncSteps();
+  readout();
+})();
+</script>
+</body>
+</html>
