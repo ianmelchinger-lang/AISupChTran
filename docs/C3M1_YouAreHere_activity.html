@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two views to fund</title>
+<style>
+:root {
+  --navy: #001d6c;
+  --sky: #d0e2ff;
+  --cobalt: #0043c3;
+  --periwinkle: #78a9ff;
+  --mist: #edf5ff;
+  --white: #ffffff;
+  --ok-ink: #0e6027;
+  --ok-bg: #defbe6;
+  --warn-ink: #5f4500;
+  --warn-bg: #fcf4d6;
+  --bad-ink: #a2191f;
+  --bad-bg: #fff1f1;
+  --ink: var(--navy);
+  --page: var(--mist);
+  --paper: var(--white);
+  --accent: var(--cobalt);
+  --accent-soft: var(--sky);
+  --rule: var(--periwinkle);
+  --on-dark: var(--white);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 14px;
+}
+h1 { font-size: 30px; }
+h2 { font-size: 22px; margin-top: 8px; }
+h3 { font-size: 17px; margin-bottom: 6px; }
+
+p { margin: 0 0 14px; }
+strong, b { font-weight: 600; }
+
+.terms {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--page);
+  border-left: 4px solid var(--rule);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.terms dt { font-weight: 600; margin-top: 8px; }
+.terms dt:first-child { margin-top: 0; }
+.terms dd { margin: 0; }
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; font-weight: 600; margin-bottom: 10px; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--paper);
+  cursor: pointer;
+}
+.option:hover { background: var(--page); }
+.option.selected {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.option:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.option input[type="radio"] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+.option span { display: block; }
+fieldset:disabled .option { cursor: default; }
+fieldset:disabled .option:hover { background: var(--paper); }
+fieldset:disabled .option.selected { background: var(--accent-soft); }
+
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.btn {
+  appearance: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-dark);
+  font: inherit;
+  font-weight: 600;
+  min-height: 46px;
+  padding: 10px 22px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--navy); border-color: var(--navy); }
+.btn[disabled] { background: var(--navy); border-color: var(--navy); cursor: default; }
+
+.msg {
+  min-height: 1.55em;
+  margin: 10px 0 0;
+  color: var(--bad-ink);
+  font-weight: 600;
+}
+.hint { margin: 12px 0 0; font-size: 15px; }
+
+.dark {
+  background: var(--navy);
+  color: var(--on-dark);
+  border-radius: 10px;
+  padding: 20px 22px;
+}
+.dark h2 { color: var(--on-dark); margin-top: 0; }
+.dark p:last-child { margin-bottom: 0; }
+
+.footnote { margin: 18px 0 0; font-size: 14px; }
+
+ul.facts { margin: 0 0 18px; padding-left: 22px; }
+ul.facts li { margin-bottom: 6px; }
+.prompt { font-weight: 600; margin-top: 22px; }
+
+/* Scorecard */
+.score {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  margin: 0 0 12px;
+  font-variant-numeric: tabular-nums;
+}
+.score caption {
+  text-align: left;
+  font-weight: 600;
+  padding: 0 0 8px;
+}
+.score th, .score td {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.score th {
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.score th .w {
+  display: block;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.score .n { text-align: center; white-space: nowrap; }
+.score td.total { font-weight: 600; }
+.score .what { display: block; font-size: 14px; margin-top: 2px; }
+.scale { font-size: 15px; margin: 0 0 18px; }
+
+/* Reveal */
+#reveal {
+  margin-top: 24px;
+  border-top: 2px solid var(--rule);
+  padding-top: 22px;
+}
+#reveal:focus, #reveal h2:focus { outline: none; }
+.reveal-in { animation: rise 320ms ease-out both; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.echo {
+  background: var(--accent-soft);
+  border-left: 6px solid var(--accent);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+.echo strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.scope {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.roles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.role {
+  background: var(--page);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.role h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.3; }
+.role p { margin: 0; font-size: 15px; }
+.capability { margin-top: 22px; }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  main { padding: 16px 16px 40px; }
+  .panel { padding: 20px 16px; }
+  h1 { font-size: 26px; }
+  .btn { width: 100%; }
+  .roles { grid-template-columns: 1fr; }
+}
+
+/* The eight-column table stacks into one card per initiative before it can overflow. */
+@media (max-width: 700px) {
+  .score, .score tbody { display: block; }
+  .score caption { display: block; width: 100%; }
+  .score thead { position: absolute; left: -9999px; }
+  .score tr {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+    gap: 2px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    margin: 0 0 10px;
+    padding: 8px 10px;
+  }
+  .score td { display: block; min-width: 0; border: 0; padding: 3px 0; text-align: left; }
+  .score td.name, .score td.loss { grid-column: 1 / -1; }
+  .score td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+</style>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <p class="eyebrow">Situation</p>
+    <h1 id="title">Two views to fund</h1>
+
+    <p>You lead supply chain transformation at Sample Enterprise Goods, a manufacturer and distributor of household and personal-care consumables. The executive committee has approved <span id="env-text"></span> for AI and supply chain transformation, and the envelope is large enough to cover both proposals below.</p>
+
+    <p>Each proposal comes from a function that feels the cost of not seeing. The distribution and logistics director wants one view of inventory across the six distribution centers, the e-commerce fulfillment center, and its reserve. The procurement director wants to see inbound material before it arrives. Both argue that better visibility will improve decisions.</p>
+
+    <table class="score" id="score">
+      <caption>The two proposals on the table. The costs are the sponsors’ estimates.</caption>
+      <thead id="score-head"></thead>
+      <tbody id="score-body"></tbody>
+    </table>
+
+    <p>Here is what you have learned so far.</p>
+    <ul class="facts" id="facts"></ul>
+
+    <p class="prompt">Both sponsors say you cannot manage what you cannot see. Commit to a first move before you read on.</p>
+
+    <form id="commit" novalidate>
+      <fieldset id="choices">
+        <legend>The first move I would make</legend>
+      </fieldset>
+
+      <p class="msg" id="message" role="alert"></p>
+      <button type="submit" class="btn" id="lock">Lock in my choice</button>
+      <p class="hint" id="hint">Once you lock it in, you will see what the proposals left out.</p>
+    </form>
+
+    <section id="reveal" tabindex="-1" aria-labelledby="reveal-title" hidden>
+      <div class="echo">
+        <strong>You committed to</strong>
+        <span id="echo-text"></span>
+      </div>
+
+      <h2 id="reveal-title" tabindex="-1">What the proposals left out</h2>
+      <p>Three facts sat behind the case for visibility. Each was true before you chose.</p>
+
+      <p class="scope">Two proposals. Three facts.</p>
+      <div class="roles">
+        <div class="role">
+          <h3>One word, two meanings</h3>
+          <p>The legacy warehouse system counts stock on quality hold as available, and the newer one does not. A single view over both adds two different quantities under one word, and a faster feed delivers the disagreement sooner.</p>
+        </div>
+        <div class="role">
+          <h3>A report is not a sighting</h3>
+          <p id="role2"></p>
+        </div>
+        <div class="role">
+          <h3>Warning needs somewhere to go</h3>
+          <p id="role3"></p>
+        </div>
+      </div>
+
+      <p>Each sponsor was accurate about what they could see from their own function. Neither proposal says which action would differ if its signal changed.</p>
+
+      <h2>What your choice does</h2>
+      <p id="consequence"></p>
+
+      <div class="dark capability">
+        <h2>The capability this depends on</h2>
+        <p>Each option was a reasonable move inside one question: how much to see, and how fast. None began by asking which action would differ if the signal changed.</p>
+        <p>That question has a test. A signal changes a decision only when it arrives before the point where the decision is committed, means what the decision needs it to mean, and finds at least one alternative still open. Tracing each signal to the decision it changes comes first, before any visibility investment is scoped, costed, or sequenced.</p>
+      </div>
+
+      <p class="footnote">The company, roles, and situation in this exercise are fictional case material. The figures are illustrative.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // Case figures. They belong to this exercise alone.
+  var ENVELOPE = 9.5;      // USD millions
+  var SUPPLIERS = 36;      // strategic suppliers
+  var SENDERS = 11;        // strategic suppliers that send advance ship notices
+  var SINGLE_SOURCE = 12;  // critical items with one qualified source
+  var PREMIUM = 8.0;       // USD millions a year, premium freight from late inbound material
+  var OVERSELL = '2 or 3'; // oversell events per promotion
+  var SYNC_HOURS = 4;
+  var VENDOR_MONTHS = 14;  // vendor's own implementation estimate for the network view
+
+  var PROPOSALS = [
+    { name: 'Network inventory view',
+      who: 'Distribution and logistics director',
+      what: 'One view of stock across six distribution centers, the fulfillment center, and the e-commerce reserve.',
+      cost: 3.8 },
+    { name: 'Inbound supplier visibility',
+      who: 'Procurement director',
+      what: 'Ship-notice coverage, carrier tracking, and a predicted arrival for inbound material.',
+      cost: 1.1 }
+  ];
+
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function money(n) { return 'USD ' + n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' million'; }
+  function pct(n) { return Math.round(n / ENVELOPE * 100); }
+
+  var nonSenders = SUPPLIERS - SENDERS;
+  var both = PROPOSALS[0].cost + PROPOSALS[1].cost;
+
+  document.getElementById('env-text').textContent = money(ENVELOPE);
+
+  // Proposals table.
+  var head = document.getElementById('score-head');
+  var body = document.getElementById('score-body');
+  var hr = document.createElement('tr');
+  hr.innerHTML = '<th scope="col">Proposal</th><th scope="col">What it adds</th><th scope="col" class="n">Cost</th><th scope="col" class="n">Share of envelope</th>';
+  head.appendChild(hr);
+  PROPOSALS.forEach(function (p) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="name"><strong>' + p.name + '</strong><span class="what">Sponsor: ' + p.who + '</span></td>' +
+      '<td class="loss" data-label="What it adds">' + p.what + '</td>' +
+      '<td class="n" data-label="Cost">' + money(p.cost) + '</td>' +
+      '<td class="n" data-label="Share of envelope">' + pct(p.cost) + '%</td>';
+    body.appendChild(tr);
+  });
+
+  // Facts.
+  var FACTS = [
+    'Ocean freight becomes visible only when it reaches the port. Domestic inbound becomes visible when the carrier calls.',
+    fmt(SENDERS) + ' of the ' + fmt(SUPPLIERS) + ' strategic suppliers send advance ship notices.',
+    'The e-commerce reserve syncs with the ERP every ' + fmt(SYNC_HOURS) + ' hours, and it oversold ' + OVERSELL + ' times per promotion.',
+    'Late inbound materials add ' + money(PREMIUM) + ' a year in premium freight.',
+    'The senior vice president wants to know where the envelope goes first.'
+  ];
+  var factsEl = document.getElementById('facts');
+  FACTS.forEach(function (t) {
+    var li = document.createElement('li');
+    li.textContent = t;
+    factsEl.appendChild(li);
+  });
+
+  // Reveal cards that carry figures.
+  document.getElementById('role2').textContent =
+    'A ship notice says what a supplier reports sending. It cannot show departure, position, or arrival. ' +
+    fmt(SENDERS) + ' of ' + fmt(SUPPLIERS) + ' strategic suppliers send notices today, and ocean freight appears only at the port.';
+  document.getElementById('role3').textContent =
+    'The first two weeks of the production schedule are frozen, and ' + fmt(SINGLE_SOURCE) +
+    ' critical items have a single qualified source. A signal about one of them can arrive on time and still leave the action as it was.';
+
+  // Choices and their consequences, built from the figures above.
+  var picks = {
+    a: {
+      label: 'Fund both proposals, and ask each team for data as close to real time as the budget allows.',
+      does: 'Together the proposals cost ' + money(both) + ', ' + pct(both) + '% of the envelope. You would be buying speed for every signal. ' +
+        fmt(nonSenders) + ' of the ' + fmt(SUPPLIERS) + ' strategic suppliers would still send no notice, the two warehouse systems would still use different rules for what counts as available, and no one would have said which decision any of the new data could change.'
+    },
+    b: {
+      label: 'Fund the network inventory view first, because it touches the most decisions.',
+      does: 'The network view costs ' + money(PROPOSALS[0].cost) + ', ' + pct(PROPOSALS[0].cost) + '% of the envelope, and the vendor’s own estimate is ' + fmt(VENDOR_MONTHS) +
+        ' months to implement it. For that whole period it would draw on two warehouse systems that define “available” differently, while the inbound side, where ' +
+        fmt(nonSenders) + ' strategic suppliers send no notice and ocean freight shows only at the port, would wait.'
+    },
+    c: {
+      label: 'Fund inbound supplier visibility first, and require all ' + fmt(SUPPLIERS) + ' strategic suppliers to send ship notices.',
+      does: 'Inbound visibility costs ' + money(PROPOSALS[1].cost) + ', ' + pct(PROPOSALS[1].cost) + '% of the envelope. Bringing the other ' + fmt(nonSenders) +
+        ' suppliers into the portal would give you a notice for every strategic supplier. Each notice would still be the supplier’s own account of what it sent. It cannot show where the goods are, and for an item with one source and a schedule already frozen, an earlier report may leave the action as it was.'
+    },
+    d: {
+      label: 'Cut the e-commerce reserve’s ' + fmt(SYNC_HOURS) + '-hour sync to near real time, and fund nothing else yet.',
+      does: 'A faster sync addresses stale balances, which are one cause of the ' + OVERSELL + ' oversell events per promotion. Mismatched definitions of available stock, receipts counted before they land, two orders checking the same units, and record errors would all continue unchanged, and the other proposal and the decisions it touches would wait.'
+    },
+    e: {
+      label: 'I would want to know more before choosing.',
+      does: 'Wanting to know more is a sound instinct. The questions that matter are which decision each signal feeds, how late it can arrive, and whether an alternative remains open. Neither proposal says, and nothing on the table invited the questions.'
+    }
+  };
+
+  var order = ['a', 'b', 'c', 'd', 'e'];
+  var fieldset = document.getElementById('choices');
+  order.forEach(function (k) {
+    var label = document.createElement('label');
+    label.className = 'option';
+    label.setAttribute('for', 'pick-' + k);
+    var input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'pick';
+    input.id = 'pick-' + k;
+    input.value = k;
+    var span = document.createElement('span');
+    span.textContent = picks[k].label;
+    label.appendChild(input);
+    label.appendChild(span);
+    fieldset.appendChild(label);
+  });
+
+  var form = document.getElementById('commit');
+  var message = document.getElementById('message');
+  var lockButton = document.getElementById('lock');
+  var hint = document.getElementById('hint');
+  var reveal = document.getElementById('reveal');
+  var revealTitle = document.getElementById('reveal-title');
+  var echoText = document.getElementById('echo-text');
+  var consequence = document.getElementById('consequence');
+  var options = form.querySelectorAll('.option');
+  var inputs = form.querySelectorAll('input[name="pick"]');
+
+  var committed = null;
+
+  function markSelected() {
+    var i;
+    for (i = 0; i < options.length; i += 1) {
+      var radio = options[i].querySelector('input');
+      if (radio.checked) {
+        options[i].classList.add('selected');
+      } else {
+        options[i].classList.remove('selected');
+      }
+    }
+  }
+
+  function currentPick() {
+    var i;
+    for (i = 0; i < inputs.length; i += 1) {
+      if (inputs[i].checked) { return inputs[i].value; }
+    }
+    return null;
+  }
+
+  var j;
+  for (j = 0; j < inputs.length; j += 1) {
+    inputs[j].addEventListener('change', function () {
+      message.textContent = '';
+      markSelected();
+    });
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (committed !== null) { return; }
+
+    var value = currentPick();
+    if (value === null) {
+      message.textContent = 'Choose one answer to lock in.';
+      return;
+    }
+
+    committed = value;
+    fieldset.disabled = true;
+    lockButton.disabled = true;
+    lockButton.textContent = 'Choice locked';
+    hint.hidden = true;
+    message.textContent = '';
+
+    echoText.textContent = picks[committed].label;
+    consequence.textContent = picks[committed].does;
+
+    reveal.hidden = false;
+    reveal.classList.add('reveal-in');
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    revealTitle.focus({ preventScroll: true });
+    if (reveal.scrollIntoView) {
+      reveal.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }
+  });
+})();
+</script>
+</body>
+</html>

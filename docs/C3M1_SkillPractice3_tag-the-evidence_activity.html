@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tag the evidence</title>
+<style>
+:root {
+  --navy: #001d6c;
+  --sky: #d0e2ff;
+  --cobalt: #0043c3;
+  --periwinkle: #78a9ff;
+  --mist: #edf5ff;
+  --white: #ffffff;
+  --ok-ink: #0e6027;
+  --ok-bg: #defbe6;
+  --warn-ink: #5f4500;
+  --warn-bg: #fcf4d6;
+  --bad-ink: #a2191f;
+  --bad-bg: #fff1f1;
+  --ink: var(--navy);
+  --page: var(--mist);
+  --paper: var(--white);
+  --accent: var(--cobalt);
+  --accent-soft: var(--sky);
+  --rule: var(--periwinkle);
+  --on-dark: var(--white);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+main { max-width: 760px; margin: 0 auto; padding: 32px 24px 56px; }
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1, h2, h3 { font-weight: 600; line-height: 1.2; margin: 0 0 14px; }
+h1 { font-size: 30px; }
+h2 { font-size: 22px; margin-top: 8px; }
+h3 { font-size: 17px; margin-bottom: 8px; }
+
+p { margin: 0 0 14px; }
+strong, b { font-weight: 600; }
+.lede { font-size: 18px; }
+
+.terms {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--page);
+  border-left: 4px solid var(--rule);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.terms dt { font-weight: 600; margin-top: 8px; }
+.terms dt:first-child { margin-top: 0; }
+.terms dd { margin: 0; }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; margin: 0 0 18px; }
+.tbl caption { text-align: left; font-weight: 600; padding: 0 0 8px; }
+.tbl th, .tbl td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+.tbl th {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.tbl td.n, .tbl th.n { text-align: right; }
+
+.card {
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  background: var(--paper);
+}
+.card.is-correct { border-color: var(--ok-ink); }
+.card.is-near { border-color: var(--warn-ink); }
+.card.is-wrong { border-color: var(--bad-ink); }
+
+.facts {
+  margin: 0 0 12px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 4px 14px;
+  font-size: 15.5px;
+}
+.facts dt { font-weight: 600; }
+.facts dd { margin: 0; }
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field label, .field .label { display: block; margin-bottom: 4px; font-size: 14px; font-weight: 600; }
+
+select, input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+}
+select:focus-visible, input:focus-visible, button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; font-weight: 600; margin-bottom: 10px; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--paper);
+  cursor: pointer;
+}
+.option:hover { background: var(--page); }
+.option.selected { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.option input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+.option .body { display: block; flex: 1; min-width: 0; }
+.option .name { display: block; font-weight: 600; }
+.option .meta { display: block; font-size: 14.5px; margin-top: 2px; }
+
+.btn {
+  appearance: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-dark);
+  font: inherit;
+  font-weight: 600;
+  min-height: 46px;
+  padding: 10px 22px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--navy); border-color: var(--navy); }
+.btn.secondary { background: var(--paper); color: var(--accent); }
+.btn.secondary:hover { background: var(--accent-soft); color: var(--navy); border-color: var(--navy); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; }
+
+.msg { min-height: 1.55em; margin: 10px 0 0; color: var(--bad-ink); font-weight: 600; }
+
+.fb {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid;
+  font-size: 15px;
+}
+.fb:empty { display: none; }
+.fb .lead { font-weight: 600; }
+.fb-correct { background: var(--ok-bg); border-color: var(--ok-ink); }
+.fb-correct .lead { color: var(--ok-ink); }
+.fb-near { background: var(--warn-bg); border-color: var(--warn-ink); }
+.fb-near .lead { color: var(--warn-ink); }
+.fb-wrong { background: var(--bad-bg); border-color: var(--bad-ink); }
+.fb-wrong .lead { color: var(--bad-ink); }
+
+.summary {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  border-left: 6px solid var(--accent);
+}
+.summary p:last-child { margin-bottom: 0; }
+
+.section { margin-top: 28px; padding-top: 22px; border-top: 2px solid var(--rule); }
+.second { margin-top: 28px; padding-top: 22px; border-top: 2px dashed var(--rule); }
+
+.readout-note {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  background: var(--page);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.share-field { max-width: 260px; margin: 14px 0; }
+.footnote { margin: 22px 0 0; font-size: 14px; }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  main { padding: 16px 16px 40px; }
+  .panel { padding: 20px 16px; }
+  h1 { font-size: 26px; }
+  .fields { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: 1fr; gap: 0; }
+  .facts dd { margin-bottom: 6px; }
+  .btn { width: 100%; }
+  .share-field { max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.pairhead { margin: 0 0 8px; font-size: 15.5px; }
+.dim { border-top: 1px solid var(--rule); padding: 12px 0 4px; }
+.dim .dimname { font-weight: 600; margin: 0 0 2px; }
+.dim .evid { margin: 0 0 8px; font-size: 15.5px; }
+.verdict { margin-top: 8px; padding-top: 12px; border-top: 2px solid var(--rule); }
+
+</style>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <p class="eyebrow">Skill practice</p>
+    <h1>Tag the evidence</h1>
+    <p class="lede">An inbound record is worth what its evidence is worth. A supplier’s notice, a carrier’s pickup, a dock receipt, and a model’s estimate each support a different commitment, and an estimate means little without the time it was generated.</p>
+
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods, reading the inbound status extract that buyers and planners use each week. For each of the six lines below, tag the evidence the line actually holds, then choose the strongest action that evidence supports.</p>
+
+    <dl class="terms">
+      <dt>Ordered</dt>
+      <dd>A purchase commitment exists. Nothing else about the shipment has been shown.</dd>
+      <dt>Reported shipped</dt>
+      <dd>The supplier’s own account of what it sent, such as a ship notice with item, quantity, and carrier.</dd>
+      <dt>Observed</dt>
+      <dd>An independent event shows the goods moving or arriving, such as a carrier pickup or a port arrival.</dd>
+      <dt>Received</dt>
+      <dd>The goods were counted at the receiving dock.</dd>
+      <dt>Predicted arrival</dt>
+      <dd>An estimate of when the shipment will land, recalculated as movement events arrive. It is usable only with the time it was generated.</dd>
+      <dt>The four actions</dt>
+      <dd>Commit fixes the schedule or the purchase timing to this shipment. Plan provisionally uses it in the plan and confirms at the next milestone. Treat as unconfirmed means asking the supplier or carrier first. Use the received quantity means planning on what arrived and returning the discrepancy to the buyer.</dd>
+    </dl>
+
+    <div id="lines"></div>
+
+    <p class="msg" id="msg" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="btn" id="check">Check my tags</button>
+    </div>
+    <section id="sum" class="summary" aria-live="polite" hidden>
+      <p id="sum-text"></p>
+    </section>
+
+    <section id="second" class="second" aria-labelledby="second-title" hidden>
+      <h2 id="second-title">Move one assumption</h2>
+      <p id="second-intro"></p>
+      <div class="card" id="card2">
+        <h3 id="card2-title"></h3>
+        <dl class="facts" id="facts2"></dl>
+        <div class="fields">
+          <div class="field">
+            <label for="s-state">Evidence state, line now</label>
+            <select id="s-state"></select>
+          </div>
+          <div class="field">
+            <label for="s-age">Estimate age, line now</label>
+            <select id="s-age"></select>
+          </div>
+          <div class="field">
+            <label for="s-action">Strongest action, line now</label>
+            <select id="s-action"></select>
+          </div>
+        </div>
+        <div class="fb" id="fb-s" aria-live="polite"></div>
+      </div>
+      <p class="msg" id="msg2" role="alert"></p>
+      <div class="actions">
+        <button type="button" class="btn secondary" id="check2">Check this line</button>
+      </div>
+    </section>
+
+    <p class="footnote">The company, roles, and figures in this exercise are fictional case material.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (text !== undefined) { n.textContent = text; }
+    return n;
+  }
+  function byId(id) { return document.getElementById(id); }
+  function opt(value, text) {
+    var o = document.createElement('option');
+    o.value = value;
+    o.textContent = text;
+    return o;
+  }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function result(state, text) { return { state: state, text: text }; }
+  function show(box, r) {
+    box.className = 'fb fb-' + r.state;
+    box.textContent = '';
+    var lead = r.state === 'correct' ? 'Correct.' : (r.state === 'near' ? 'Close.' : 'Not yet.');
+    box.appendChild(el('span', 'lead', lead));
+    box.appendChild(document.createTextNode(' ' + r.text));
+  }
+  function clear(box) { box.className = 'fb'; box.textContent = ''; }
+  function fill(select, options) {
+    options.forEach(function (o) { select.appendChild(opt(o[0], o[1])); });
+  }
+
+  var STATES = [
+    ['', 'Choose'],
+    ['ordered', 'Ordered'],
+    ['reported', 'Reported shipped'],
+    ['observed', 'Observed'],
+    ['received', 'Received'],
+    ['predicted', 'Predicted arrival']
+  ];
+  var AGES = [
+    ['', 'Choose'],
+    ['current', 'Current'],
+    ['stale', 'Stale']
+  ];
+  var ACTIONS = [
+    ['', 'Choose'],
+    ['A', 'Commit'],
+    ['B', 'Plan provisionally'],
+    ['C', 'Treat as unconfirmed; ask first'],
+    ['D', 'Use the received quantity']
+  ];
+  // Strength of the three actions that rest on forward evidence. D is a separate branch.
+  var RANK = { C: 0, B: 1, A: 2 };
+
+  var NOTICED_KG = 2000, RECEIVED_KG = 1600;
+  var SHORT_KG = NOTICED_KG - RECEIVED_KG;
+  var SHORT_PCT = Math.round(SHORT_KG / NOTICED_KG * 100);
+
+  var DEFAULT_STATE = 'Read the fields on this line one at a time. First move: for each field that is filled, ask who produced it: the supplier, an independent event, the receiving dock, or a model.';
+  var NEAR_PRED = 'The prediction is current, but it is an estimate built from events, and the strongest evidence on this line is the event itself. First move: ask which field a prediction depends on, and which of the two is stronger.';
+  var UNDER = 'The state is right. The action asks for more confirmation than this evidence needs. First move: ask what is the strongest action this state licenses within the commitment window.';
+  var NO_RECEIPT = 'Nothing on this line has been received, so there is no received quantity to use. First move: look at the receipt field.';
+
+  var LINES = [
+    { id: 'I1', title: 'Trigger sprayers and pumps, ocean from East Asia',
+      facts: [['Order', 'Purchase-order line due in four weeks'], ['Notice', 'None'], ['Movement event', 'None'], ['Receipt', 'None'], ['Predicted arrival', 'None']],
+      state: 'ordered', okA: ['C'], maxRank: 0,
+      critState: {},
+      critOver: 'With nothing past the order, no one has shown that the goods are on their way. First move: ask what the buyer knows about this shipment beyond the purchase order.',
+      ok: 'Ordered. The purchase order exists and nothing else has been shown, so the strongest action is to treat the shipment as unconfirmed and ask the supplier or carrier first.' },
+    { id: 'I2', title: 'Primary surfactants',
+      facts: [['Order', 'Open purchase-order line'], ['Notice', 'Notice for 40 tonnes'], ['Movement event', 'None'], ['Receipt', 'None'], ['Predicted arrival', 'None']],
+      state: 'reported', okA: ['B', 'C'], maxRank: 1,
+      critState: { observed: 'A ship notice is the supplier’s own account of what it sent, and it cannot show departure, position, or arrival. First move: ask what independent event on this line shows the goods moving.' },
+      critOver: 'A commitment on a notice rests on the supplier’s word alone. First move: ask what the schedule loses if the notice proves wrong, and which later event would confirm it.',
+      ok: 'Reported shipped. The notice is the supplier’s own account, and nothing independent shows movement, so planning provisionally and confirming at the next milestone fits. Asking first is also defensible.' },
+    { id: 'I3', title: 'Secondary surfactants',
+      facts: [['Order', 'Open purchase-order line'], ['Notice', 'Notice on file'], ['Movement event', 'Carrier pickup observed'], ['Receipt', 'None'], ['Predicted arrival', 'Estimate generated today']],
+      state: 'observed', age: 'current', nearState: 'predicted', nearText: NEAR_PRED, okA: ['A', 'B'], maxRank: 2,
+      critState: { reported: 'The notice is on this line, and so is something stronger. First move: look for a field the supplier did not produce.' },
+      critAge: 'The estimate was generated today, after the pickup it rests on. First move: compare the time it was generated with the latest movement event.',
+      critOver: '',
+      ok: 'Observed, with a current estimate. A carrier pickup is an independent event, and the estimate was generated today with it in hand. The evidence supports committing, and planning provisionally is also defensible.' },
+    { id: 'I4', title: 'Aerosol cans',
+      facts: [['Order', 'Open purchase-order line'], ['Notice', 'None'], ['Movement event', 'None since the estimate was generated'], ['Receipt', 'None'], ['Predicted arrival', 'Estimate generated nine days ago']],
+      state: 'predicted', age: 'stale', okA: ['C'], maxRank: 0,
+      critState: { observed: 'No movement event is recorded on this line since the estimate was generated. First move: look at the movement field.' },
+      critAge: 'A prediction is only as current as the last event it saw. First move: compare the time it was generated with the events recorded since.',
+      critOver: 'An estimate with no event behind it for nine days is nine days old. First move: ask what has been learned about this shipment since the estimate was generated.',
+      ok: 'Predicted arrival, and stale. The estimate was generated nine days ago and no movement has arrived since, so it still reflects old evidence. Ask the supplier or carrier before committing anything to it.' },
+    { id: 'I5', title: 'Botanical oils and extracts',
+      facts: [['Order', 'Open purchase-order line'], ['Notice', 'Notice for ' + fmt(NOTICED_KG) + ' kg'], ['Movement event', 'None shown'], ['Receipt', fmt(RECEIVED_KG) + ' kg received'], ['Predicted arrival', 'None']],
+      state: 'received', okA: ['D'], maxRank: null,
+      critState: { reported: 'The notice is on this line, and so is a count from the dock. First move: ask which field shows what actually arrived.' },
+      critOver: 'The notice and the receipt disagree. First move: ask which of the two shows what arrived, and who needs to hear about the difference.',
+      ok: 'Received. The receipt, not the notice, shows what arrived: ' + fmt(NOTICED_KG) + ' kg noticed, ' + fmt(RECEIVED_KG) + ' kg received, ' + fmt(SHORT_KG) + ' kg or ' + fmt(SHORT_PCT) + ' percent short. Plan on the received quantity and return the discrepancy to the buyer.' },
+    { id: 'I6', title: 'UV-filter active ingredients, from Europe',
+      facts: [['Order', 'Open purchase-order line'], ['Notice', 'None'], ['Movement event', 'Port arrival yesterday'], ['Receipt', 'None'], ['Predicted arrival', 'None']],
+      state: 'observed', okA: ['A', 'B'], maxRank: 2,
+      critState: { received: 'A port arrival is a sighting of the goods, and a receipt is a count at the receiving dock. First move: ask who saw what, and where.', reported: 'No notice is on this line. First move: ask what the line does hold, and who produced it.' },
+      critOver: '',
+      ok: 'Observed. A port arrival is an independent sighting of the goods, and it is the first one on this line. It supports committing, and planning provisionally is also defensible.' }
+  ];
+
+  // The second pass reuses the primary surfactants line with one assumption moved.
+  var SECOND = {
+    id: 'I2', title: 'Primary surfactants',
+    facts: [['Order', 'Open purchase-order line'], ['Notice', 'Notice for 40 tonnes'], ['Movement event', 'Carrier pickup observed'], ['Receipt', 'None'], ['Predicted arrival', 'Estimate generated today']],
+    state: 'observed', age: 'current', nearState: 'predicted', nearText: NEAR_PRED, okA: ['A', 'B'], maxRank: 2,
+    critState: { reported: 'Something on this line has changed since your first tag. First move: find the field the supplier did not produce.' },
+    critAge: 'The estimate was generated today, after the pickup it rests on. First move: compare the time it was generated with the latest movement event.',
+    critOver: '',
+    ok: 'Observed, with a current estimate. A pickup is an independent event, and the estimate was generated today, so this line now reads like the secondary surfactants line: it supports committing, and planning provisionally is also defensible.'
+  };
+
+  function judgeState(L, s) {
+    if (s === L.state) { return { k: 'ok' }; }
+    if (L.nearState && s === L.nearState) { return { k: 'near', text: L.nearText }; }
+    return { k: 'wrong', text: (L.critState && L.critState[s]) || DEFAULT_STATE };
+  }
+  function judgeAction(L, a, stateOK) {
+    if (L.okA.indexOf(a) > -1) { return { k: 'ok' }; }
+    var lead = stateOK ? 'The state is right. ' : '';
+    if (a === 'D') { return { k: 'wrong', text: lead + NO_RECEIPT }; }
+    if (L.maxRank === null || RANK[a] > L.maxRank) { return { k: 'wrong', text: lead + L.critOver }; }
+    return { k: 'near', text: UNDER };
+  }
+  function judgeAge(L, g) {
+    if (!L.age || g === L.age) { return { k: 'ok' }; }
+    return { k: 'wrong', text: L.critAge };
+  }
+  function judgeLine(L, s, a, g) {
+    var sj = judgeState(L, s);
+    var gj = judgeAge(L, g);
+    var aj = judgeAction(L, a, sj.k === 'ok');
+    if (sj.k === 'wrong') { return result('wrong', sj.text); }
+    if (gj.k === 'wrong') { return result('wrong', gj.text); }
+    if (aj.k === 'wrong') { return result('wrong', aj.text); }
+    if (sj.k === 'near') { return result('near', sj.text); }
+    if (aj.k === 'near') { return result('near', aj.text); }
+    return result('correct', L.ok);
+  }
+
+  var msg = byId('msg');
+  var sum = byId('sum');
+  var second = byId('second');
+  var secondBuilt = false;
+
+  function resetAll() {
+    msg.textContent = '';
+    sum.hidden = true;
+    second.hidden = true;
+  }
+
+  function addFacts(dl, facts) {
+    facts.forEach(function (f) {
+      dl.appendChild(el('dt', '', f[0]));
+      dl.appendChild(el('dd', '', f[1]));
+    });
+  }
+
+  var rows = [];
+  LINES.forEach(function (L) {
+    var card = el('article', 'card');
+    card.appendChild(el('h3', '', L.id + ' · ' + L.title));
+    var dl = el('dl', 'facts');
+    addFacts(dl, L.facts);
+    card.appendChild(dl);
+    var fields = el('div', 'fields');
+    var f1 = el('div', 'field'), f2 = el('div', 'field');
+    var l1 = el('label', '', 'Evidence state, line ' + L.id); l1.setAttribute('for', 's-' + L.id);
+    var l2 = el('label', '', 'Strongest action, line ' + L.id); l2.setAttribute('for', 'a-' + L.id);
+    var s1 = document.createElement('select'); s1.id = 's-' + L.id; fill(s1, STATES);
+    var s2 = document.createElement('select'); s2.id = 'a-' + L.id; fill(s2, ACTIONS);
+    var s3 = null;
+    f1.appendChild(l1); f1.appendChild(s1);
+    fields.appendChild(f1);
+    if (L.age) {
+      var f3 = el('div', 'field');
+      var l3 = el('label', '', 'Estimate age, line ' + L.id); l3.setAttribute('for', 'g-' + L.id);
+      s3 = document.createElement('select'); s3.id = 'g-' + L.id; fill(s3, AGES);
+      f3.appendChild(l3); f3.appendChild(s3);
+      fields.appendChild(f3);
+    }
+    f2.appendChild(l2); f2.appendChild(s2);
+    fields.appendChild(f2);
+    card.appendChild(fields);
+    var fb = el('div', 'fb'); fb.setAttribute('aria-live', 'polite');
+    card.appendChild(fb);
+    byId('lines').appendChild(card);
+    function ch() { clear(fb); card.className = 'card'; resetAll(); }
+    s1.addEventListener('change', ch);
+    s2.addEventListener('change', ch);
+    if (s3) { s3.addEventListener('change', ch); }
+    rows.push({ L: L, card: card, state: s1, action: s2, age: s3, fb: fb });
+  });
+
+  function joinIds(a) {
+    if (a.length < 2) { return a.join(''); }
+    return a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  }
+
+  byId('check').addEventListener('click', function () {
+    msg.textContent = '';
+    var open = [];
+    rows.forEach(function (r) { if (!r.state.value || !r.action.value || (r.age && !r.age.value)) { open.push(r.L.id); } });
+    if (open.length) {
+      msg.textContent = 'Finish each line first. Still open: ' + joinIds(open) + '.';
+      return;
+    }
+    var allOK = true;
+    rows.forEach(function (r) {
+      var res = judgeLine(r.L, r.state.value, r.action.value, r.age ? r.age.value : '');
+      show(r.fb, res);
+      r.card.className = 'card is-' + res.state;
+      if (res.state !== 'correct') { allOK = false; }
+    });
+    sum.hidden = false;
+    if (allOK) {
+      var committing = LINES.filter(function (L) { return L.okA.indexOf('A') > -1; }).length;
+      byId('sum-text').textContent = 'Only ' + fmt(committing) + ' of the ' + fmt(LINES.length) + ' lines hold evidence that can carry a commitment, and both rest on an independent event. A notice supports provisional planning, an old estimate supports a question, and a receipt replaces the quantity on the notice.';
+      second.hidden = false;
+      if (!secondBuilt) { buildSecond(); }
+    } else {
+      byId('sum-text').textContent = 'Lines to revisit are marked. The note under each names the part to change. Change a choice and check again.';
+    }
+  });
+
+  function buildSecond() {
+    secondBuilt = true;
+    byId('second-intro').textContent = 'Suppose a carrier pickup is now recorded for the primary surfactants line, and a new estimate was generated today. Tag the line again.';
+    byId('card2-title').textContent = SECOND.id + ' · ' + SECOND.title;
+    addFacts(byId('facts2'), SECOND.facts);
+    fill(byId('s-state'), STATES);
+    fill(byId('s-age'), AGES);
+    fill(byId('s-action'), ACTIONS);
+    ['s-state', 's-age', 's-action'].forEach(function (id) {
+      byId(id).addEventListener('change', function () { clear(byId('fb-s')); byId('card2').className = 'card'; byId('msg2').textContent = ''; });
+    });
+  }
+
+  byId('check2').addEventListener('click', function () {
+    var m2 = byId('msg2');
+    m2.textContent = '';
+    var s = byId('s-state').value, a = byId('s-action').value, g = byId('s-age').value;
+    if (!s || !a || !g) { m2.textContent = 'Choose a state, an estimate age, and an action first.'; return; }
+    var r = judgeLine(SECOND, s, a, g);
+    show(byId('fb-s'), r);
+    byId('card2').className = 'card is-' + r.state;
+  });
+})();
+</script>
+</body>
+</html>

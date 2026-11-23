@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test each signal</title>
+<style>
+:root {
+  --navy: #001d6c;
+  --sky: #d0e2ff;
+  --cobalt: #0043c3;
+  --periwinkle: #78a9ff;
+  --mist: #edf5ff;
+  --white: #ffffff;
+  --ok-ink: #0e6027;
+  --ok-bg: #defbe6;
+  --warn-ink: #5f4500;
+  --warn-bg: #fcf4d6;
+  --bad-ink: #a2191f;
+  --bad-bg: #fff1f1;
+  --ink: var(--navy);
+  --page: var(--mist);
+  --paper: var(--white);
+  --accent: var(--cobalt);
+  --accent-soft: var(--sky);
+  --rule: var(--periwinkle);
+  --on-dark: var(--white);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+main { max-width: 760px; margin: 0 auto; padding: 32px 24px 56px; }
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1, h2, h3 { font-weight: 600; line-height: 1.2; margin: 0 0 14px; }
+h1 { font-size: 30px; }
+h2 { font-size: 22px; margin-top: 8px; }
+h3 { font-size: 17px; margin-bottom: 8px; }
+
+p { margin: 0 0 14px; }
+strong, b { font-weight: 600; }
+.lede { font-size: 18px; }
+
+.terms {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--page);
+  border-left: 4px solid var(--rule);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.terms dt { font-weight: 600; margin-top: 8px; }
+.terms dt:first-child { margin-top: 0; }
+.terms dd { margin: 0; }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; margin: 0 0 18px; }
+.tbl caption { text-align: left; font-weight: 600; padding: 0 0 8px; }
+.tbl th, .tbl td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+.tbl th {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.tbl td.n, .tbl th.n { text-align: right; }
+
+.card {
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  background: var(--paper);
+}
+.card.is-correct { border-color: var(--ok-ink); }
+.card.is-near { border-color: var(--warn-ink); }
+.card.is-wrong { border-color: var(--bad-ink); }
+
+.facts {
+  margin: 0 0 12px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 4px 14px;
+  font-size: 15.5px;
+}
+.facts dt { font-weight: 600; }
+.facts dd { margin: 0; }
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field label, .field .label { display: block; margin-bottom: 4px; font-size: 14px; font-weight: 600; }
+
+select, input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+}
+select:focus-visible, input:focus-visible, button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; font-weight: 600; margin-bottom: 10px; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--paper);
+  cursor: pointer;
+}
+.option:hover { background: var(--page); }
+.option.selected { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.option input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+.option .body { display: block; flex: 1; min-width: 0; }
+.option .name { display: block; font-weight: 600; }
+.option .meta { display: block; font-size: 14.5px; margin-top: 2px; }
+
+.btn {
+  appearance: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-dark);
+  font: inherit;
+  font-weight: 600;
+  min-height: 46px;
+  padding: 10px 22px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--navy); border-color: var(--navy); }
+.btn.secondary { background: var(--paper); color: var(--accent); }
+.btn.secondary:hover { background: var(--accent-soft); color: var(--navy); border-color: var(--navy); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; }
+
+.msg { min-height: 1.55em; margin: 10px 0 0; color: var(--bad-ink); font-weight: 600; }
+
+.fb {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid;
+  font-size: 15px;
+}
+.fb:empty { display: none; }
+.fb .lead { font-weight: 600; }
+.fb-correct { background: var(--ok-bg); border-color: var(--ok-ink); }
+.fb-correct .lead { color: var(--ok-ink); }
+.fb-near { background: var(--warn-bg); border-color: var(--warn-ink); }
+.fb-near .lead { color: var(--warn-ink); }
+.fb-wrong { background: var(--bad-bg); border-color: var(--bad-ink); }
+.fb-wrong .lead { color: var(--bad-ink); }
+
+.summary {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  border-left: 6px solid var(--accent);
+}
+.summary p:last-child { margin-bottom: 0; }
+
+.section { margin-top: 28px; padding-top: 22px; border-top: 2px solid var(--rule); }
+.second { margin-top: 28px; padding-top: 22px; border-top: 2px dashed var(--rule); }
+
+.readout-note {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  background: var(--page);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.share-field { max-width: 260px; margin: 14px 0; }
+.footnote { margin: 22px 0 0; font-size: 14px; }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  main { padding: 16px 16px 40px; }
+  .panel { padding: 20px 16px; }
+  h1 { font-size: 26px; }
+  .fields { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: 1fr; gap: 0; }
+  .facts dd { margin-bottom: 6px; }
+  .btn { width: 100%; }
+  .share-field { max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.pairhead { margin: 0 0 8px; font-size: 15.5px; }
+.dim { border-top: 1px solid var(--rule); padding: 12px 0 4px; }
+.dim .dimname { font-weight: 600; margin: 0 0 2px; }
+.dim .evid { margin: 0 0 8px; font-size: 15.5px; }
+.verdict { margin-top: 8px; padding-top: 12px; border-top: 2px solid var(--rule); }
+
+</style>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <p class="eyebrow">Skill practice</p>
+    <h1>Test each signal</h1>
+    <p class="lede">A faster or wider signal helps only when it can change what someone does. For each signal, ask whether it reaches the decision before the decision is committed, whether it means what the decision needs, and whether any alternative is still open.</p>
+
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. Six signals are either proposed or already on a screen, and each one is aimed at a decision. For every pair, rate timing, meaning, and the open alternative, and then give a verdict.</p>
+
+    <dl class="terms">
+      <dt>Commitment point</dt>
+      <dd>The moment after which the decision is fixed. Latency is counted from the underlying event, not from the screen refresh.</dd>
+      <dt>Timing</dt>
+      <dd>Met when the signal reaches the decision before its commitment point. Fails when it arrives after. Met only with the proposed signal when it would be early enough but does not exist today.</dd>
+      <dt>Meaning</dt>
+      <dd>Met when the signal names the item, node, status, and quantity the decision needs, under a definition the decision can use. Fails when it does not.</dd>
+      <dt>Open alternative</dt>
+      <dd>Open when at least one feasible action could still differ if the signal took another value. None open when a policy, a passed window, a missing substitute, or a contract term fixes the action.</dd>
+      <dt>Verdict</dt>
+      <dd>Changes the decision when all three conditions hold. Only if a named gap closes when a condition fails and could be repaired. Changes no decision when no alternative is open.</dd>
+    </dl>
+
+    <div id="pairs"></div>
+
+    <p class="msg" id="msg" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="btn" id="check">Check my readings</button>
+    </div>
+    <section id="sum" class="summary" aria-live="polite" hidden>
+      <p id="sum-text"></p>
+    </section>
+
+    <section id="second" class="second" aria-labelledby="second-title" hidden>
+      <h2 id="second-title">Move one assumption</h2>
+      <p id="second-intro"></p>
+      <div id="pair-b"></div>
+      <p class="msg" id="msg2" role="alert"></p>
+      <div class="actions">
+        <button type="button" class="btn secondary" id="check2">Check these verdicts</button>
+      </div>
+      <section id="sum2" class="summary" aria-live="polite" hidden>
+        <p id="sum2-text"></p>
+      </section>
+    </section>
+
+    <p class="footnote">The company, roles, and figures in this exercise are fictional case material.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (text !== undefined) { n.textContent = text; }
+    return n;
+  }
+  function byId(id) { return document.getElementById(id); }
+  function opt(value, text) {
+    var o = document.createElement('option');
+    o.value = value;
+    o.textContent = text;
+    return o;
+  }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function result(state, text) { return { state: state, text: text }; }
+  function show(box, r) {
+    box.className = 'fb fb-' + r.state;
+    box.textContent = '';
+    var lead = r.state === 'correct' ? 'Correct.' : (r.state === 'near' ? 'Close.' : 'Not yet.');
+    box.appendChild(el('span', 'lead', lead));
+    box.appendChild(document.createTextNode(' ' + r.text));
+  }
+  function clear(box) { box.className = 'fb'; box.textContent = ''; }
+
+  var TIMING = [['', 'Choose'], ['met', 'Met'], ['fails', 'Fails'], ['proposed', 'Met only with the proposed signal']];
+  var MEANING = [['', 'Choose'], ['met', 'Met'], ['fails', 'Fails']];
+  var ALT = [['', 'Choose'], ['open', 'Open'], ['none', 'None open']];
+  var CONS = [['', 'Choose what fixes the action'], ['policy', 'A policy'], ['window', 'A window that has passed'], ['nosub', 'No substitute exists'], ['contract', 'A contract term']];
+  var VERD = [['', 'Choose a verdict'], ['changes', 'Changes the decision'], ['only', 'Only if a named gap closes'], ['none', 'Changes no decision']];
+
+  var NOTE = {
+    timing: 'Timing is judged by when the signal reaches the decision, counted from the underlying event, against the point where the decision commits. First move: write the commitment point, then the moment the signal could reach it.',
+    meaning: 'Meaning is judged by whether the signal names the item, node, status, and quantity the decision needs, under a definition the decision can use. First move: ask whether every source behind the figure applies the same rule.',
+    alt: 'An open alternative means at least one feasible action could differ if the signal took another value, whether it changes the source, the timing, the quantity, or the mode. First move: list what the decision owner could do differently.',
+    cons: 'Name what fixes the action: a policy, a passed window, a missing substitute, or a contract term. First move: ask what would stop the owner from acting on the signal today.'
+  };
+  var DIMNAME = { timing: 'the timing rating', meaning: 'the meaning rating', alt: 'the open-alternative rating', cons: 'what fixes the action' };
+  var GENERIC_VERDICT = 'The verdict follows from the ratings: no open alternative means the signal changes no decision, all three conditions holding means it changes the decision, and a repairable failure means it changes the decision only if a named gap closes. First move: reread your three ratings against those rules.';
+  var NULL_VERDICT = 'A signal changes a decision only if an alternative is open, however accurate and timely it is. First move: name the action that would differ if this signal took another value, and what fixes it.';
+
+  // Each pair: the evidence, then the key. The key is used only after the learner checks.
+  var PAIRS = [
+    { n: 1, tag: 'Promotion reservation',
+      signal: 'The e-commerce fulfillment center’s stock balance, as the e-commerce platform shows it.',
+      decision: 'Whether a promotion order can reserve a unit at the fulfillment center.',
+      commit: 'Before another channel’s order takes the unit.',
+      ev: 'The platform syncs with the ERP every four hours. The fulfillment center runs on the newer warehouse system, which leaves held stock out of “available,” and its cycle-count match is 97.9%. Until a unit is reserved, an order can be accepted, held, or declined.',
+      key: { timing: 'fails', meaning: 'met', alt: 'open', cons: null, verdict: 'only' },
+      ok: 'Timing fails: a four-hour sync cannot show what another channel took since the last update, and the decision commits order by order. Meaning holds and an alternative is open, so the signal changes the decision only if event sequencing closes.' },
+    { n: 2, tag: 'Deployment run',
+      signal: 'A daily network snapshot of inventory by distribution center.',
+      decision: 'Deployment of stock across the six distribution centers and the fulfillment center.',
+      commit: 'The daily and weekly deployment runs.',
+      ev: 'The snapshot posts once a day and adds the figures from both warehouse systems. The legacy system counts stock on quality hold as available, and the newer one does not. Transfers and expedites stay open until a run commits.',
+      key: { timing: 'met', meaning: 'fails', alt: 'open', cons: null, verdict: 'only' },
+      over: { timing: { fails: 'A daily snapshot reaches a daily or weekly run before it commits, so speed is not the gap here. First move: look at what the snapshot adds together.' } },
+      ok: 'Timing holds, because a daily snapshot reaches a daily or weekly run in time. Meaning fails: the two warehouse systems count held stock differently, so the total mixes two quantities, and a faster feed would carry the same mixture sooner. The signal changes the decision only if the definitions reconcile.' },
+    { n: 3, tag: 'Purchase timing',
+      signal: 'Departure and in-transit milestone events for the single-source sprayer supplier’s ocean shipments, matched to the purchase-order line.',
+      decision: 'Material purchase quantity and timing.',
+      commit: 'The cutoff for pulling a purchase order forward or air-freighting part of an order.',
+      ev: 'Today ocean freight becomes visible only when it reaches the port, and the cutoff falls well before that. The inbound supplier visibility proposal would add the milestone events. A buyer can still move a purchase order earlier or split an order across modes.',
+      key: { timing: 'proposed', meaning: 'met', alt: 'open', cons: null, verdict: 'only' },
+      over: { timing: { met: 'Check what exists today. Ocean freight becomes visible only at the port, and the milestones are what the proposal would add. First move: ask whether this signal reaches the buyer today.' } },
+      ok: 'Today the milestones do not exist, so the signal reaches the buyer too late. Once the proposed milestones exist, timing, meaning, and an open alternative all hold. The verdict rests on a gap the proposal would close.' },
+    { n: 4, tag: 'Frozen schedule',
+      signal: 'A port-delay report for the single-source UV-filter ingredient.',
+      decision: 'The master production schedule.',
+      commit: 'The first two weeks of the schedule are frozen.',
+      ev: 'The delay is reported when the shipment reaches the port, and the week the shipment was due is already inside the frozen two weeks. The report names the shipment and the delay. The ingredient has one qualified source, and changing the source takes about six months of requalification.',
+      key: { timing: 'fails', meaning: 'met', alt: 'none', cons: ['window', 'nosub'], verdict: 'none' },
+      over: { verdict: { changes: NULL_VERDICT, only: NULL_VERDICT } },
+      ok: 'The delay reaches the schedule after the freeze, and the ingredient has one source that takes about six months to requalify. No feasible action can differ, so the signal changes no decision, however accurate it is.' },
+    { n: 5, tag: 'Surfactant schedule',
+      signal: 'A ship notice and a carrier pickup for a surfactant order from the primary supplier.',
+      decision: 'The master production schedule.',
+      commit: 'The schedule freezes its first two weeks. The order feeds production in week 3, which is still open when the notice and pickup arrive.',
+      ev: 'The notice and the pickup arrive in week 1 and name the purchase-order line and the quantity. If the notice shows a short quantity or the pickup does not happen, the planner can move volume to the second surfactant supplier, which is qualified up to 40% of volume, or resequence the line.',
+      key: { timing: 'met', meaning: 'met', alt: 'open', cons: null, verdict: 'changes' },
+      ok: 'The notice and pickup arrive before the schedule commits week 3, they name the order line and the quantity, and a second supplier and a resequence are both available. All three conditions hold, so the signal changes the decision.' },
+    { n: 6, tag: 'Reserve in a promotion',
+      signal: 'The e-commerce reserve balance at the fulfillment center, visible to the planners who deploy stock to retail accounts.',
+      decision: 'Deployment of stock to retail accounts during an e-commerce promotion.',
+      commit: 'The daily deployment run.',
+      ev: 'The balance is current and names the item and the quantity. By policy the reserve is protected during an e-commerce promotion, and the e-commerce operations lead releases it at the close of the promotion.',
+      key: { timing: 'met', meaning: 'met', alt: 'none', cons: ['policy'], verdict: 'none' },
+      over: { verdict: { changes: NULL_VERDICT, only: NULL_VERDICT } },
+      ok: 'A policy protects the reserve during a promotion, so no deployment decision can draw on it. The signal is timely and accurate, and the action is fixed. It changes no decision.' }
+  ];
+
+  // The moved assumption: a gap closes, or a signal is made perfect. Verdicts only.
+  var SECOND = [
+    { n: 1, tag: 'Promotion reservation', line: 'The fulfillment center’s balance now reaches the platform as events, in order, as each order and receipt occurs.', key: 'changes',
+      ok: 'The named gap is closed, so timing, meaning, and an open alternative all hold, and the signal changes the decision.' },
+    { n: 2, tag: 'Deployment run', line: 'Both warehouse systems now apply one definition of “available” that leaves held stock out.', key: 'changes',
+      ok: 'The named gap is closed, so the snapshot means one thing across all the centers, and the signal changes the decision.' },
+    { n: 3, tag: 'Purchase timing', line: 'The milestone events now exist and reach the buyer before the cutoff.', key: 'changes',
+      ok: 'The named gap is closed, so the milestones arrive in time, mean what the buyer needs, and meet an open alternative.' },
+    { n: 4, tag: 'Frozen schedule', line: 'The port delay is now reported the instant it happens. The delay itself still happens in a frozen week, and the ingredient still has one source.', key: 'none',
+      ok: 'Latency counts from the underlying event, and the event falls inside the freeze. A faster report changes what the planner knows and leaves the action as it was.' },
+    { n: 6, tag: 'Reserve in a promotion', line: 'The reserve balance is now exact to the unit.', key: 'none',
+      ok: 'A perfect signal does not lift the policy. The reserve stays protected until the promotion closes, so the action is still fixed.' }
+  ];
+
+  function field(labelText, id, options, hidden) {
+    var f = el('div', 'field');
+    if (hidden) { f.hidden = true; }
+    var l = el('label', '', labelText);
+    l.setAttribute('for', id);
+    var s = document.createElement('select');
+    s.id = id;
+    options.forEach(function (o) { s.appendChild(opt(o[0], o[1])); });
+    f.appendChild(l);
+    f.appendChild(s);
+    return { wrap: f, sel: s };
+  }
+
+  var cards = [];
+  var sum = byId('sum');
+  var sumText = byId('sum-text');
+  var msg = byId('msg');
+  var second = byId('second');
+  var secondBuilt = false;
+  var cards2 = [];
+
+  function resetFeedback() {
+    msg.textContent = '';
+    sum.hidden = true;
+    second.hidden = true;
+  }
+
+  function buildPair(P) {
+    var card = el('article', 'card');
+    card.appendChild(el('h3', '', 'Pair ' + P.n + ' · ' + P.tag));
+    var dl = el('dl', 'facts');
+    [['Signal', P.signal], ['Decision', P.decision], ['Commitment point', P.commit]].forEach(function (r) {
+      dl.appendChild(el('dt', '', r[0]));
+      dl.appendChild(el('dd', '', r[1]));
+    });
+    card.appendChild(dl);
+    card.appendChild(el('p', 'evid', P.ev));
+
+    var pre = 'p' + P.n + '-';
+    var fields = el('div', 'fields');
+    var t = field('Timing', pre + 'timing', TIMING);
+    var m = field('Meaning', pre + 'meaning', MEANING);
+    var a = field('Open alternative', pre + 'alt', ALT);
+    var c = field('What fixes the action', pre + 'cons', CONS, true);
+    [t, m, a, c].forEach(function (x) { fields.appendChild(x.wrap); });
+    card.appendChild(fields);
+
+    var vrow = el('div', 'verdict');
+    var v = field('Your verdict for pair ' + P.n, pre + 'verdict', VERD);
+    vrow.appendChild(v.wrap);
+    card.appendChild(vrow);
+
+    var fb = el('div', 'fb');
+    fb.setAttribute('aria-live', 'polite');
+    card.appendChild(fb);
+    byId('pairs').appendChild(card);
+
+    var o = { P: P, card: card, t: t.sel, m: m.sel, a: a.sel, c: c.sel, cwrap: c.wrap, v: v.sel, fb: fb };
+    function onChange() {
+      o.cwrap.hidden = o.a.value !== 'none';
+      if (o.a.value !== 'none') { o.c.value = ''; }
+      clear(o.fb);
+      o.card.className = 'card';
+      resetFeedback();
+    }
+    [o.t, o.m, o.a, o.c, o.v].forEach(function (s) { s.addEventListener('change', onChange); });
+    return o;
+  }
+
+  function readPair(o) {
+    return { timing: o.t.value, meaning: o.m.value, alt: o.a.value, cons: o.c.value, verdict: o.v.value };
+  }
+
+  function pairGaps(o) {
+    var r = readPair(o), gaps = [];
+    if (!r.timing) { gaps.push('timing'); }
+    if (!r.meaning) { gaps.push('meaning'); }
+    if (!r.alt) { gaps.push('the open alternative'); }
+    if (r.alt === 'none' && !r.cons) { gaps.push('what fixes the action'); }
+    if (!r.verdict) { gaps.push('a verdict'); }
+    return gaps;
+  }
+
+  function judgePair(o) {
+    var P = o.P, K = P.key, r = readPair(o), over = P.over || {};
+    var wrong = [];
+    if (r.timing !== K.timing) { wrong.push('timing'); }
+    if (r.meaning !== K.meaning) { wrong.push('meaning'); }
+    if (r.alt !== K.alt) { wrong.push('alt'); }
+    else if (K.alt === 'none' && K.cons.indexOf(r.cons) === -1) { wrong.push('cons'); }
+    var verdictOK = r.verdict === K.verdict;
+
+    function dimNote(d) {
+      var key = d === 'alt' ? 'alt' : d;
+      if (over[d] && over[d][r[key]]) { return over[d][r[key]]; }
+      return NOTE[d];
+    }
+    function verdictNote() {
+      if (over.verdict && over.verdict[r.verdict]) { return over.verdict[r.verdict]; }
+      return GENERIC_VERDICT;
+    }
+
+    if (!wrong.length && verdictOK) { return result('correct', P.ok); }
+    if (!wrong.length) {
+      return result('near', 'The structure is right: your ratings match the evidence. One element is out of place: the verdict. ' + verdictNote());
+    }
+    if (wrong.length === 1 && verdictOK) {
+      return result('near', 'The verdict is right. One rating is out of place: ' + DIMNAME[wrong[0]] + '. ' + dimNote(wrong[0]));
+    }
+    if (wrong.length === 1) {
+      return result('wrong', 'A rating and the verdict are both out of place. ' + dimNote(wrong[0]) + (over.verdict && over.verdict[r.verdict] ? ' ' + over.verdict[r.verdict] : ''));
+    }
+    return result('wrong', 'More than one rating is out of place, so take the three tests one at a time. ' + dimNote(wrong[0]));
+  }
+
+  PAIRS.forEach(function (P) { cards.push(buildPair(P)); });
+
+  byId('check').addEventListener('click', function () {
+    msg.textContent = '';
+    var open = [];
+    cards.forEach(function (o) {
+      var g = pairGaps(o);
+      if (g.length) { open.push('pair ' + o.P.n + ' (' + g.join(', ') + ')'); }
+    });
+    if (open.length) {
+      msg.textContent = 'Finish each pair first. Still open: ' + open.join('; ') + '.';
+      return;
+    }
+    var revisit = [];
+    cards.forEach(function (o) {
+      var r = judgePair(o);
+      show(o.fb, r);
+      o.card.className = 'card is-' + r.state;
+      if (r.state !== 'correct') { revisit.push(o.P.n); }
+    });
+    sum.hidden = false;
+    if (!revisit.length) {
+      var count = { changes: 0, only: 0, none: 0 };
+      PAIRS.forEach(function (P) { count[P.key.verdict] += 1; });
+      sumText.textContent = 'Every reading holds. ' + fmt(count.none) + ' signals change no decision, ' + fmt(count.changes) +
+        ' changes the decision outright, and ' + fmt(count.only) + ' change it only if a named gap closes. A plan that funded all ' + fmt(PAIRS.length) + ' alike would have missed that difference.';
+      second.hidden = false;
+      if (!secondBuilt) { buildSecond(); }
+    } else {
+      sumText.textContent = 'Pairs to revisit: ' + revisit.join(', ') + '. The note under each one names the part to change. Change a rating and check again.';
+      second.hidden = true;
+    }
+  });
+
+  function buildSecond() {
+    secondBuilt = true;
+    byId('second-intro').textContent = 'Suppose each named gap closes, the port delay is reported the instant it happens, and the reserve balance becomes exact. The ratings stay as they were, and only the signals move. Give each pair’s verdict again.';
+    var box = byId('pair-b');
+    SECOND.forEach(function (S) {
+      var card = el('article', 'card');
+      card.appendChild(el('h3', '', 'Pair ' + S.n + ' · ' + S.tag));
+      card.appendChild(el('p', 'evid', S.line));
+      var f = field('Your verdict for pair ' + S.n + ' now', 'q' + S.n + '-verdict', VERD);
+      card.appendChild(f.wrap);
+      var fb = el('div', 'fb');
+      fb.setAttribute('aria-live', 'polite');
+      card.appendChild(fb);
+      box.appendChild(card);
+      var o = { S: S, card: card, v: f.sel, fb: fb };
+      f.sel.addEventListener('change', function () {
+        clear(fb);
+        card.className = 'card';
+        byId('msg2').textContent = '';
+        byId('sum2').hidden = true;
+      });
+      cards2.push(o);
+    });
+  }
+
+  byId('check2').addEventListener('click', function () {
+    var msg2 = byId('msg2');
+    msg2.textContent = '';
+    var open = cards2.filter(function (o) { return !o.v.value; }).map(function (o) { return o.S.n; });
+    if (open.length) { msg2.textContent = 'Give a verdict for each pair first. Still open: ' + open.join(', ') + '.'; return; }
+    var bad = 0;
+    cards2.forEach(function (o) {
+      var S = o.S, v = o.v.value, r;
+      if (v === S.key) { r = result('correct', S.ok); }
+      else if (S.key === 'none') { r = result('wrong', NULL_VERDICT); }
+      else { r = result('wrong', 'The named gap is closed by assumption, and the ratings were otherwise sound. First move: with the gap closed, test timing, meaning, and the open alternative again.'); }
+      show(o.fb, r);
+      o.card.className = 'card is-' + r.state;
+      if (r.state !== 'correct') { bad += 1; }
+    });
+    var s2 = byId('sum2');
+    s2.hidden = false;
+    byId('sum2-text').textContent = bad
+      ? 'Pairs to revisit are marked. Change a verdict and check again.'
+      : 'Closing a gap turns a conditional signal into a deciding one. A faster or more exact signal does nothing for a pair where policy, a passed window, or a missing substitute fixes the action.';
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Judge each source</title>
+<style>
+:root {
+  --navy: #001d6c;
+  --sky: #d0e2ff;
+  --cobalt: #0043c3;
+  --periwinkle: #78a9ff;
+  --mist: #edf5ff;
+  --white: #ffffff;
+  --ok-ink: #0e6027;
+  --ok-bg: #defbe6;
+  --warn-ink: #5f4500;
+  --warn-bg: #fcf4d6;
+  --bad-ink: #a2191f;
+  --bad-bg: #fff1f1;
+  --ink: var(--navy);
+  --page: var(--mist);
+  --paper: var(--white);
+  --accent: var(--cobalt);
+  --accent-soft: var(--sky);
+  --rule: var(--periwinkle);
+  --on-dark: var(--white);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+main { max-width: 760px; margin: 0 auto; padding: 32px 24px 56px; }
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1, h2, h3 { font-weight: 600; line-height: 1.2; margin: 0 0 14px; }
+h1 { font-size: 30px; }
+h2 { font-size: 22px; margin-top: 8px; }
+h3 { font-size: 17px; margin-bottom: 8px; }
+
+p { margin: 0 0 14px; }
+strong, b { font-weight: 600; }
+.lede { font-size: 18px; }
+
+.terms {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--page);
+  border-left: 4px solid var(--rule);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.terms dt { font-weight: 600; margin-top: 8px; }
+.terms dt:first-child { margin-top: 0; }
+.terms dd { margin: 0; }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; margin: 0 0 18px; }
+.tbl caption { text-align: left; font-weight: 600; padding: 0 0 8px; }
+.tbl th, .tbl td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+.tbl th {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.tbl td.n, .tbl th.n { text-align: right; }
+
+.card {
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  background: var(--paper);
+}
+.card.is-correct { border-color: var(--ok-ink); }
+.card.is-near { border-color: var(--warn-ink); }
+.card.is-wrong { border-color: var(--bad-ink); }
+
+.facts {
+  margin: 0 0 12px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 4px 14px;
+  font-size: 15.5px;
+}
+.facts dt { font-weight: 600; }
+.facts dd { margin: 0; }
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field label, .field .label { display: block; margin-bottom: 4px; font-size: 14px; font-weight: 600; }
+
+select, input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+}
+select:focus-visible, input:focus-visible, button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; font-weight: 600; margin-bottom: 10px; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--paper);
+  cursor: pointer;
+}
+.option:hover { background: var(--page); }
+.option.selected { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.option input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+.option .body { display: block; flex: 1; min-width: 0; }
+.option .name { display: block; font-weight: 600; }
+.option .meta { display: block; font-size: 14.5px; margin-top: 2px; }
+
+.btn {
+  appearance: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-dark);
+  font: inherit;
+  font-weight: 600;
+  min-height: 46px;
+  padding: 10px 22px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--navy); border-color: var(--navy); }
+.btn.secondary { background: var(--paper); color: var(--accent); }
+.btn.secondary:hover { background: var(--accent-soft); color: var(--navy); border-color: var(--navy); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; }
+
+.msg { min-height: 1.55em; margin: 10px 0 0; color: var(--bad-ink); font-weight: 600; }
+
+.fb {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid;
+  font-size: 15px;
+}
+.fb:empty { display: none; }
+.fb .lead { font-weight: 600; }
+.fb-correct { background: var(--ok-bg); border-color: var(--ok-ink); }
+.fb-correct .lead { color: var(--ok-ink); }
+.fb-near { background: var(--warn-bg); border-color: var(--warn-ink); }
+.fb-near .lead { color: var(--warn-ink); }
+.fb-wrong { background: var(--bad-bg); border-color: var(--bad-ink); }
+.fb-wrong .lead { color: var(--bad-ink); }
+
+.summary {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  border-left: 6px solid var(--accent);
+}
+.summary p:last-child { margin-bottom: 0; }
+
+.section { margin-top: 28px; padding-top: 22px; border-top: 2px solid var(--rule); }
+.second { margin-top: 28px; padding-top: 22px; border-top: 2px dashed var(--rule); }
+
+.readout-note {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  background: var(--page);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.share-field { max-width: 260px; margin: 14px 0; }
+.footnote { margin: 22px 0 0; font-size: 14px; }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  main { padding: 16px 16px 40px; }
+  .panel { padding: 20px 16px; }
+  h1 { font-size: 26px; }
+  .fields { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: 1fr; gap: 0; }
+  .facts dd { margin-bottom: 6px; }
+  .btn { width: 100%; }
+  .share-field { max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.pairhead { margin: 0 0 8px; font-size: 15.5px; }
+.dim { border-top: 1px solid var(--rule); padding: 12px 0 4px; }
+.dim .dimname { font-weight: 600; margin: 0 0 2px; }
+.dim .evid { margin: 0 0 8px; font-size: 15.5px; }
+.verdict { margin-top: 8px; padding-top: 12px; border-top: 2px solid var(--rule); }
+
+.fb p { margin: 0 0 10px; }
+.fb p:last-child { margin-bottom: 0; }
+.fb p.pf-correct .lead { color: var(--ok-ink); }
+.fb p.pf-near .lead { color: var(--warn-ink); }
+.fb p.pf-wrong .lead { color: var(--bad-ink); }
+</style>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <p class="eyebrow">Skill practice</p>
+    <h1>Judge each source</h1>
+    <p class="lede">A shared view inherits what its sources have: their definitions, their delays, their errors. It can carry a decision only where the sources that decision draws on meet the conditions, and a source you cannot judge from the evidence is marked unknown, not met.</p>
+
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. The distribution and logistics director wants one inventory view across the distribution centers, the e-commerce fulfillment center, and its reserve. Before you sign, mark each source against four conditions, then rule on what the shared view can carry.</p>
+
+    <dl class="terms">
+      <dt>Common definitions</dt>
+      <dd>Each status means the same thing across sources, measured against the rule the decision uses.</dd>
+      <dt>Freshness and event sequencing</dt>
+      <dd>Events post soon enough, and in the right order, for the decision the view serves.</dd>
+      <dt>Named reconciliation owner</dt>
+      <dd>Someone is named to resolve differences between sources and correct them.</dd>
+      <dt>Records checked against counts</dt>
+      <dd>Physical counts confirm the records. The case sets the minimum cycle-count match for promising from a node without verification at <span id="min-text"></span>.</dd>
+      <dt>Met, fails, unknown</dt>
+      <dd>Mark unknown when the case gives no evidence either way. An unknown is a question for someone to answer, and it is not the same as met.</dd>
+      <dt>The three rulings</dt>
+      <dd>Authoritative now means the view can decide this use as it stands. Usable for a named scope only means it can decide this use among the sources that meet the conditions. Not yet means a condition must close first, and you name which one.</dd>
+    </dl>
+
+    <div class="card">
+      <h3>Across all three sources</h3>
+      <dl class="facts" id="facts-all"></dl>
+    </div>
+
+    <h2>Mark each source</h2>
+    <div id="sources"></div>
+
+    <h2>Rule on each use</h2>
+    <div id="uses"></div>
+
+    <p class="msg" id="msg" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="btn" id="check">Check my marks and rulings</button>
+    </div>
+    <section id="sum" class="summary" aria-live="polite" hidden>
+      <p id="sum-text"></p>
+    </section>
+
+    <section id="second" class="second" aria-labelledby="second-title" hidden>
+      <h2 id="second-title">Move one assumption</h2>
+      <p id="second-intro"></p>
+      <div class="card" id="card2">
+        <h3>Legacy warehouse system</h3>
+        <dl class="facts" id="facts2"></dl>
+        <div class="fields">
+          <div class="field">
+            <label for="s2-counts">Records checked against counts, legacy system, now</label>
+            <select id="s2-counts"></select>
+          </div>
+          <div class="field">
+            <label for="s2-ruling">Ruling on promising across all US nodes, now</label>
+            <select id="s2-ruling"></select>
+          </div>
+          <div class="field">
+            <label for="s2-second">Scope, or the first thing to close, now</label>
+            <select id="s2-second"></select>
+          </div>
+        </div>
+        <div class="fb" id="fb-s2" aria-live="polite"></div>
+      </div>
+      <p class="msg" id="msg2" role="alert"></p>
+      <div class="actions">
+        <button type="button" class="btn secondary" id="check2">Check this reading</button>
+      </div>
+    </section>
+
+    <p class="footnote">The company, roles, and figures in this exercise are fictional case material.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (text !== undefined) { n.textContent = text; }
+    return n;
+  }
+  function byId(id) { return document.getElementById(id); }
+  function opt(value, text) {
+    var o = document.createElement('option');
+    o.value = value;
+    o.textContent = text;
+    return o;
+  }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function pct(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; }
+  function fill(select, options) { options.forEach(function (o) { select.appendChild(opt(o[0], o[1])); }); }
+  function result(state, text) { return { state: state, text: text }; }
+  function leadOf(state) { return state === 'correct' ? 'Correct.' : (state === 'near' ? 'Close.' : 'Not yet.'); }
+  function show(box, r) {
+    box.className = 'fb fb-' + r.state;
+    box.textContent = '';
+    box.appendChild(el('span', 'lead', leadOf(r.state)));
+    box.appendChild(document.createTextNode(' ' + r.text));
+  }
+  function showMany(box, items) {
+    var worst = 'correct';
+    box.textContent = '';
+    items.forEach(function (it) {
+      if (it.r.state === 'wrong') { worst = 'wrong'; }
+      else if (it.r.state === 'near' && worst !== 'wrong') { worst = 'near'; }
+      var p = el('p', 'pf-' + it.r.state);
+      p.appendChild(el('span', 'lead', it.label + ': ' + leadOf(it.r.state)));
+      p.appendChild(document.createTextNode(' ' + it.r.text));
+      box.appendChild(p);
+    });
+    box.className = 'fb fb-' + worst;
+    return worst;
+  }
+  function clear(box) { box.className = 'fb'; box.textContent = ''; }
+  function joinList(a) {
+    if (a.length < 2) { return a.join(''); }
+    return a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  }
+
+  // Case figures. They belong to this exercise alone.
+  var MIN_MATCH = 97.5;   // minimum cycle-count match for promising from a node without verification
+  var MATCH = { legacy: 93.1, newer: 98.6, reserve: 97.9 };
+  var SYNC_HOURS = 4;
+  var OVERSELL = '2 or 3';
+  var DATA_DONE = 40;     // percent of the data foundation landed
+
+  byId('min-text').textContent = pct(MIN_MATCH);
+
+  var MARKS = [['', 'Choose'], ['met', 'Met'], ['fails', 'Fails'], ['unknown', 'Unknown']];
+  var RULINGS = [['', 'Choose'], ['auth', 'Authoritative now'], ['scope', 'Usable for a named scope only'], ['not', 'Not yet']];
+  var SECONDS = [
+    ['', 'Choose'],
+    ['newer', 'Newer-system DCs only'],
+    ['defs', 'Reconcile status definitions'],
+    ['seq', 'Fix event sequencing'],
+    ['owner', 'Name a reconciliation owner'],
+    ['counts', 'Verify records against counts'],
+    ['speed', 'Speed up the feed']
+  ];
+  var WHATS = [['', 'Choose'], ['omits', 'Records a status the system omits'], ['resist', 'Resistance to the new view'], ['dup', 'A duplicate of the system']];
+  var DOS = [['', 'Choose'], ['fold', 'Fold it in, then retire it'], ['ban', 'Ban it now'], ['del', 'Delete it as a duplicate']];
+
+  var UNK_FRESH = 'A mark needs evidence from the case. First move: look for a stated posting cadence for this system. If there is none, name who could supply it: the IT and data lead.';
+  var HAS_EVIDENCE = 'The case gives the evidence for this cell. First move: find the statement or figure that decides it.';
+  var COUNT_CRIT = 'Compare the system’s cycle-count match with the minimum. First move: read the two figures side by side.';
+
+  function countsCell(figure, where) {
+    var meets = figure >= MIN_MATCH;
+    return {
+      key: meets ? 'met' : 'fails',
+      ok: pct(figure) + ' ' + where + (meets ? ' meets the ' : ' is below the ') + pct(MIN_MATCH) + ' minimum for promising without verification.',
+      crit: COUNT_CRIT
+    };
+  }
+
+  var SOURCES = [
+    { id: 'legacy', name: 'Legacy warehouse system', short: 'legacy system',
+      facts: [['Serves', 'Four of the six distribution centers, one of them in Canada'], ['“Available” includes', 'Stock on quality hold'], ['Posting cadence', 'Not stated'], ['Cycle-count match', pct(MATCH.legacy)]],
+      cells: {
+        defs: { key: 'fails', ok: 'This system counts stock on quality hold inside “available,” and the promising rule does not, so its definition fails against the rule.', crit: 'A definition is judged against the decision’s rule. First move: ask what this system counts inside “available,” and whether the rule counts it.' },
+        fresh: { key: 'unknown', ok: 'The case states no posting cadence for this system, so the mark is unknown. The question goes to the IT and data lead.', crit: UNK_FRESH },
+        owner: { key: 'fails', ok: 'No one is named to reconcile status codes across the two warehouse systems, and the data foundation that would land them is ' + DATA_DONE + '% done.', crit: 'A reconciliation owner is a named person or role. First move: look for who is named to reconcile status codes across the two warehouse systems.' },
+        counts: countsCell(MATCH.legacy, 'at the legacy sites')
+      } },
+    { id: 'newer', name: 'Newer warehouse system', short: 'newer system',
+      facts: [['Serves', 'Two distribution centers and the e-commerce fulfillment center'], ['“Available” excludes', 'Stock on quality hold'], ['Posting cadence', 'Not stated'], ['Cycle-count match', pct(MATCH.newer) + ' at the distribution centers']],
+      cells: {
+        defs: { key: 'met', ok: 'This system leaves stock on quality hold out of “available,” which is what the promising rule does, so its definition meets the rule.', crit: 'A definition is judged against the decision’s rule. First move: ask what this system leaves out of “available,” and whether the rule leaves it out too.' },
+        fresh: { key: 'unknown', ok: 'The case states no posting cadence for this system, so the mark is unknown. The question goes to the IT and data lead.', crit: UNK_FRESH },
+        owner: { key: 'fails', ok: 'This system is one side of the reconciliation no one owns. Status codes across the two warehouse systems have no named owner.', crit: 'A reconciliation owner is a named person or role. First move: look for who is named to reconcile status codes across the two warehouse systems.' },
+        counts: countsCell(MATCH.newer, 'at the distribution centers')
+      } },
+    { id: 'reserve', name: 'E-commerce order platform and its reserve', short: 'e-commerce platform',
+      facts: [['Reserve', 'Held by the platform at the fulfillment center'], ['Sync with the ERP', 'Every ' + fmt(SYNC_HOURS) + ' hours'], ['Oversell events', OVERSELL + ' per promotion'], ['Definition of “available”', 'Not stated'], ['Cycle-count match', pct(MATCH.reserve) + ' at the fulfillment center']],
+      cells: {
+        defs: { key: 'unknown', ok: 'The case does not say how this platform defines what is available against its reserve, so the mark is unknown. The question goes to the IT and data lead.', crit: 'A mark needs evidence from the case. First move: look for how this platform defines what is available against its reserve. If the case does not say, name who could supply it: the IT and data lead.' },
+        fresh: { key: 'fails', ok: 'Sequencing is judged for the decision the view serves, and here that is reserving stock during a promotion. The platform syncs every ' + fmt(SYNC_HOURS) + ' hours and has oversold ' + OVERSELL + ' times per promotion, so another order can take a unit between syncs.', crit: 'Sequencing is judged for the decision the view serves, and here that is reserving stock during a promotion. First move: compare the ' + fmt(SYNC_HOURS) + '-hour sync with how quickly another order can take a unit.' },
+        owner: { key: 'unknown', ok: 'The case says nothing about who reconciles this platform’s figures with the ERP, so the mark is unknown. The question goes to the IT and data lead.', crit: 'A mark needs evidence from the case. First move: ask what the case actually states about who reconciles this platform’s figures with the ERP, and whether saying nothing is a finding.' },
+        counts: countsCell(MATCH.reserve, 'at the fulfillment center')
+      } }
+  ];
+  var CONDS = [['defs', 'Common definitions'], ['fresh', 'Freshness and event sequencing'], ['owner', 'Named reconciliation owner'], ['counts', 'Records checked against counts']];
+
+  function judgeCell(cell, v) {
+    if (v === cell.key) { return result('correct', cell.ok); }
+    if (v === 'unknown') { return result('wrong', HAS_EVIDENCE); }
+    return result('wrong', cell.crit);
+  }
+
+  var ALL_FACTS = [
+    ['Data foundation', 'The cloud data platform has landed ' + DATA_DONE + '% of priority sources, and warehouse status codes are not reconciled'],
+    ['Reconciliation owner', 'None is named for status codes across the two warehouse systems']
+  ];
+  ALL_FACTS.forEach(function (f) {
+    byId('facts-all').appendChild(el('dt', '', f[0]));
+    byId('facts-all').appendChild(el('dd', '', f[1]));
+  });
+
+  // Uses of the shared view.
+  var USES = [
+    { id: 'U1', title: 'Promise orders across all US nodes',
+      text: 'The network view would supply per-order promising, drawing on every node in the US.',
+      kind: 'use', ruling: 'not', second: 'defs',
+      critAuth: 'A view is authoritative for a use only when the sources it draws on meet the conditions for that decision, and this use draws on every US node. First move: ask which of those sources do not meet them.',
+      critScope: 'Narrowing helps only where the sources in scope meet the conditions, and this use is promising across every US node. First move: ask what this use needs that the legacy nodes do not yet supply.',
+      critSecond: 'The ruling is right. One element is out of place: the first thing to close. That condition matters, and another comes before it. First move: ask which failing condition changes what a figure means.',
+      speed: 'Speed is not the gap. Two systems can post at the same moment and still disagree about what a figure means. First move: ask whether the quantities being added mean the same thing.',
+      ok: 'Not yet, and the first thing to close is the meaning of “available.” One system counts held stock and the other does not, so the network total mixes two quantities. Records at the legacy sites also fall below the count minimum, and no one is named to reconcile either system.' },
+    { id: 'U2', title: 'Deploy stock among the newer-system distribution centers',
+      text: 'The view would supply the daily and weekly deployment run, drawing only on the two distribution centers that run on the newer warehouse system.',
+      kind: 'use', ruling: 'scope', second: 'newer',
+      critAuth: 'The view as a whole is not authoritative, because the sources outside this scope still fail. First move: ask which of the view’s sources fail a condition, and what an unqualified ruling would carry them into.',
+      critNot: 'Conditions differ by decision. First move: ask which sources this use draws on, and which conditions apply to those sources alone.',
+      critSecond: 'The ruling is right. One element is out of place: the scope. First move: ask which sources meet the conditions for this use.',
+      ok: 'Usable for the newer-system distribution centers only. They share one definition of “available” that leaves out held stock, and their records meet the count minimum. With one system there are no cross-system differences to reconcile. The posting cadence remains a question for the IT and data lead, so the scope is the sources that meet the conditions, not the whole view.' },
+    { id: 'U3', title: 'Use a shared balance for e-commerce reservation during promotions',
+      text: 'The shared balance would tell the e-commerce platform whether a unit is still free before another channel takes it.',
+      kind: 'use', ruling: 'not', second: 'seq',
+      critAuth: 'A view is authoritative for a use only when the sources it draws on meet the conditions for that decision. First move: ask what this decision needs from a balance at the moment another order reaches for the same unit, and whether the source can supply it.',
+      critScope: 'Narrowing helps only where the sources in scope meet the conditions, and the one source this use depends on fails one. First move: ask which condition the reserve fails for this decision.',
+      critSecond: 'The ruling is right. One element is out of place: the first thing to close. First move: ask which condition the reserve fails for this decision, on the evidence in the case.',
+      speed: 'Speed is one part of sequencing. The condition is wider: events must post in an order that stops two orders from taking the same unit. First move: ask what else, beside a faster feed, would keep two orders from taking the same unit.',
+      ok: 'Not yet, and the first thing to close is event sequencing. The reserve syncs every ' + fmt(SYNC_HOURS) + ' hours, and the platform has oversold ' + OVERSELL + ' times per promotion. A shared balance cannot be authoritative for reservation until events post in an order that stops two orders from taking the same unit.' },
+    { id: 'U4', title: 'The legacy-DC quality-hold spreadsheet',
+      text: 'Legacy-DC managers keep a spreadsheet of stock on quality hold, because the legacy system’s “available” includes it. As the shared view arrives, someone will ask what to do with it.',
+      kind: 'sheet', what: 'omits', doit: 'fold',
+      critWhat: 'Read what the spreadsheet contributes before deciding what it is. First move: ask why the managers keep it, and what the system shows without it.',
+      critDo: 'Removing it unread would remove what it records. First move: ask where the held stock would be recorded once the sheet is gone.',
+      critNear: 'The action is right. One element is out of place: what the sheet is. First move: ask what the sheet records that the system does not.',
+      ok: 'The spreadsheet records stock on quality hold, a status the legacy system will not show. Retiring it unread would lose that knowledge, so its status folds into the shared view first.' }
+  ];
+
+  function judgeUse(U, ru, se) {
+    if (U.kind === 'sheet') {
+      if (ru === U.what && se === U.doit) { return result('correct', U.ok); }
+      if (se === U.doit) { return result('near', U.critNear); }
+      if (ru === U.what) { return result('wrong', U.critDo); }
+      return result('wrong', U.critWhat);
+    }
+    if (ru !== U.ruling) {
+      if (ru === 'auth') { return result('wrong', U.critAuth); }
+      if (ru === 'scope') { return result('wrong', U.critScope); }
+      return result('wrong', U.critNot);
+    }
+    if (se === U.second) { return result('correct', U.ok); }
+    if (se === 'speed' && U.speed) { return result(U.id === 'U1' ? 'wrong' : 'near', U.speed); }
+    return result('near', U.critSecond);
+  }
+
+  var msg = byId('msg'), sum = byId('sum'), second = byId('second');
+  var secondBuilt = false;
+  function resetAll() { msg.textContent = ''; sum.hidden = true; second.hidden = true; }
+
+  var srcRows = [];
+  SOURCES.forEach(function (S) {
+    var card = el('article', 'card');
+    card.appendChild(el('h3', '', S.name));
+    var dl = el('dl', 'facts');
+    S.facts.forEach(function (f) { dl.appendChild(el('dt', '', f[0])); dl.appendChild(el('dd', '', f[1])); });
+    card.appendChild(dl);
+    var fields = el('div', 'fields');
+    var selects = {};
+    CONDS.forEach(function (c) {
+      var f = el('div', 'field');
+      var l = el('label', '', c[1] + ', ' + S.short); l.setAttribute('for', 'm-' + S.id + '-' + c[0]);
+      var s = document.createElement('select'); s.id = 'm-' + S.id + '-' + c[0]; fill(s, MARKS);
+      f.appendChild(l); f.appendChild(s); fields.appendChild(f);
+      selects[c[0]] = s;
+      s.addEventListener('change', function () { clear(fb); card.className = 'card'; resetAll(); });
+    });
+    card.appendChild(fields);
+    var fb = el('div', 'fb'); fb.setAttribute('aria-live', 'polite');
+    card.appendChild(fb);
+    byId('sources').appendChild(card);
+    srcRows.push({ S: S, card: card, selects: selects, fb: fb });
+  });
+
+  var useRows = [];
+  USES.forEach(function (U) {
+    var card = el('article', 'card');
+    card.appendChild(el('h3', '', U.id + ' · ' + U.title));
+    card.appendChild(el('p', '', U.text));
+    var fields = el('div', 'fields');
+    var f1 = el('div', 'field'), f2 = el('div', 'field');
+    var sheet = U.kind === 'sheet';
+    var l1 = el('label', '', (sheet ? 'What the spreadsheet is, ' : 'Ruling, ') + U.id); l1.setAttribute('for', 'u-' + U.id + '-r');
+    var l2 = el('label', '', (sheet ? 'What to do with it, ' : 'Scope, or the first thing to close, ') + U.id); l2.setAttribute('for', 'u-' + U.id + '-w');
+    var s1 = document.createElement('select'); s1.id = 'u-' + U.id + '-r'; fill(s1, sheet ? WHATS : RULINGS);
+    var s2 = document.createElement('select'); s2.id = 'u-' + U.id + '-w'; fill(s2, sheet ? DOS : SECONDS);
+    f1.appendChild(l1); f1.appendChild(s1); f2.appendChild(l2); f2.appendChild(s2);
+    fields.appendChild(f1); fields.appendChild(f2);
+    card.appendChild(fields);
+    var fb = el('div', 'fb'); fb.setAttribute('aria-live', 'polite');
+    card.appendChild(fb);
+    byId('uses').appendChild(card);
+    function ch() { clear(fb); card.className = 'card'; resetAll(); }
+    s1.addEventListener('change', ch);
+    s2.addEventListener('change', ch);
+    useRows.push({ U: U, card: card, a: s1, b: s2, fb: fb });
+  });
+
+  byId('check').addEventListener('click', function () {
+    msg.textContent = '';
+    var open = [];
+    srcRows.forEach(function (r) {
+      var gaps = CONDS.some(function (c) { return !r.selects[c[0]].value; });
+      if (gaps) { open.push('the marks for the ' + r.S.short); }
+    });
+    useRows.forEach(function (r) { if (!r.a.value || !r.b.value) { open.push(r.U.id); } });
+    if (open.length) { msg.textContent = 'Finish first. Still open: ' + joinList(open) + '.'; return; }
+
+    var allOK = true;
+    srcRows.forEach(function (r) {
+      var items = CONDS.map(function (c) {
+        return { label: c[1], r: judgeCell(r.S.cells[c[0]], r.selects[c[0]].value) };
+      });
+      var worst = showMany(r.fb, items);
+      r.card.className = 'card is-' + worst;
+      if (worst !== 'correct') { allOK = false; }
+    });
+    useRows.forEach(function (r) {
+      var res = judgeUse(r.U, r.a.value, r.b.value);
+      show(r.fb, res);
+      r.card.className = 'card is-' + res.state;
+      if (res.state !== 'correct') { allOK = false; }
+    });
+
+    sum.hidden = false;
+    if (allOK) {
+      var unknowns = 0, total = 0;
+      SOURCES.forEach(function (S) { CONDS.forEach(function (c) { total += 1; if (S.cells[c[0]].key === 'unknown') { unknowns += 1; } }); });
+      byId('sum-text').textContent = 'The shared view can carry deployment among the newer-system distribution centers now. It cannot yet carry promising across every node, because “available” still differs between the two warehouse systems, and it cannot carry e-commerce reservation, because events do not post in an order that protects a unit. ' + fmt(unknowns) + ' of the ' + fmt(total) + ' marks stayed unknown, and each is a question for someone to answer. The spreadsheet holds a status the system will not show, so it folds in before it retires.';
+      second.hidden = false;
+      if (!secondBuilt) { buildSecond(); }
+    } else {
+      byId('sum-text').textContent = 'Marks and rulings to revisit are shown. The note under each names the part to change. Change a choice and check again.';
+    }
+  });
+
+  // Second pass: the legacy sites now meet the count minimum. No new figure is given.
+  function buildSecond() {
+    secondBuilt = true;
+    byId('second-intro').textContent = 'Suppose a counting program brings the legacy sites up to the minimum. The case gives no new figure. Mark that cell again, then rule again on promising across all US nodes.';
+    var dl = byId('facts2');
+    [['Cycle-count match', 'Now at or above the ' + pct(MIN_MATCH) + ' minimum'], ['“Available” includes', 'Stock on quality hold, as before'], ['Reconciliation owner', 'None named, as before']].forEach(function (f) {
+      dl.appendChild(el('dt', '', f[0])); dl.appendChild(el('dd', '', f[1]));
+    });
+    fill(byId('s2-counts'), MARKS); fill(byId('s2-ruling'), RULINGS); fill(byId('s2-second'), SECONDS);
+    ['s2-counts', 's2-ruling', 's2-second'].forEach(function (id) {
+      byId(id).addEventListener('change', function () { clear(byId('fb-s2')); byId('card2').className = 'card'; byId('msg2').textContent = ''; });
+    });
+  }
+
+  byId('check2').addEventListener('click', function () {
+    var m2 = byId('msg2');
+    m2.textContent = '';
+    var c = byId('s2-counts').value, ru = byId('s2-ruling').value, se = byId('s2-second').value;
+    if (!c || !ru || !se) { m2.textContent = 'Finish first. Mark the cell, then give a ruling and its scope or first thing to close.'; return; }
+    var U1 = USES[0];
+    var r;
+    if (c !== 'met') {
+      r = result('wrong', 'The case says the match now meets the minimum. First move: compare the new reading with the minimum, and mark the cell that way.');
+    } else if (ru === 'auth') {
+      r = result('wrong', 'Closing one condition does not close the others. First move: list each condition still failing for the sources this use draws on.');
+    } else if (ru === 'scope') {
+      r = result('wrong', U1.critScope);
+    } else if (se === 'counts') {
+      r = result('wrong', 'That condition is now met. First move: ask which condition still fails, and how it differs from the one you just closed.');
+    } else if (se === 'speed') {
+      r = result('wrong', U1.speed);
+    } else if (se === U1.second) {
+      r = result('correct', 'The count condition now holds, and the ruling does not move. “Available” still includes held stock in one system and not in the other, so the network total still mixes two quantities. The first thing to close is the same as before.');
+    } else {
+      r = result('near', U1.critSecond);
+    }
+    show(byId('fb-s2'), r);
+    byId('card2').className = 'card is-' + r.state;
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Count what the rule allows</title>
+<style>
+:root {
+  --navy: #001d6c;
+  --sky: #d0e2ff;
+  --cobalt: #0043c3;
+  --periwinkle: #78a9ff;
+  --mist: #edf5ff;
+  --white: #ffffff;
+  --ok-ink: #0e6027;
+  --ok-bg: #defbe6;
+  --warn-ink: #5f4500;
+  --warn-bg: #fcf4d6;
+  --bad-ink: #a2191f;
+  --bad-bg: #fff1f1;
+  --ink: var(--navy);
+  --page: var(--mist);
+  --paper: var(--white);
+  --accent: var(--cobalt);
+  --accent-soft: var(--sky);
+  --rule: var(--periwinkle);
+  --on-dark: var(--white);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+main { max-width: 760px; margin: 0 auto; padding: 32px 24px 56px; }
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1, h2, h3 { font-weight: 600; line-height: 1.2; margin: 0 0 14px; }
+h1 { font-size: 30px; }
+h2 { font-size: 22px; margin-top: 8px; }
+h3 { font-size: 17px; margin-bottom: 8px; }
+
+p { margin: 0 0 14px; }
+strong, b { font-weight: 600; }
+.lede { font-size: 18px; }
+
+.terms {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--page);
+  border-left: 4px solid var(--rule);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.terms dt { font-weight: 600; margin-top: 8px; }
+.terms dt:first-child { margin-top: 0; }
+.terms dd { margin: 0; }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; margin: 0 0 18px; }
+.tbl caption { text-align: left; font-weight: 600; padding: 0 0 8px; }
+.tbl th, .tbl td { text-align: left; vertical-align: top; padding: 7px 10px; border-bottom: 1px solid var(--rule); }
+.tbl th {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.tbl td.n, .tbl th.n { text-align: right; }
+
+.card {
+  border: 1.5px solid var(--rule);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  background: var(--paper);
+}
+.card.is-correct { border-color: var(--ok-ink); }
+.card.is-near { border-color: var(--warn-ink); }
+.card.is-wrong { border-color: var(--bad-ink); }
+
+.facts {
+  margin: 0 0 12px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 4px 14px;
+  font-size: 15.5px;
+}
+.facts dt { font-weight: 600; }
+.facts dd { margin: 0; }
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field label, .field .label { display: block; margin-bottom: 4px; font-size: 14px; font-weight: 600; }
+
+select, input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+}
+select:focus-visible, input:focus-visible, button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; font-weight: 600; margin-bottom: 10px; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--paper);
+  cursor: pointer;
+}
+.option:hover { background: var(--page); }
+.option.selected { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.option:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.option input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+.option .body { display: block; flex: 1; min-width: 0; }
+.option .name { display: block; font-weight: 600; }
+.option .meta { display: block; font-size: 14.5px; margin-top: 2px; }
+
+.btn {
+  appearance: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-dark);
+  font: inherit;
+  font-weight: 600;
+  min-height: 46px;
+  padding: 10px 22px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--navy); border-color: var(--navy); }
+.btn.secondary { background: var(--paper); color: var(--accent); }
+.btn.secondary:hover { background: var(--accent-soft); color: var(--navy); border-color: var(--navy); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; }
+
+.msg { min-height: 1.55em; margin: 10px 0 0; color: var(--bad-ink); font-weight: 600; }
+
+.fb {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid;
+  font-size: 15px;
+}
+.fb:empty { display: none; }
+.fb .lead { font-weight: 600; }
+.fb-correct { background: var(--ok-bg); border-color: var(--ok-ink); }
+.fb-correct .lead { color: var(--ok-ink); }
+.fb-near { background: var(--warn-bg); border-color: var(--warn-ink); }
+.fb-near .lead { color: var(--warn-ink); }
+.fb-wrong { background: var(--bad-bg); border-color: var(--bad-ink); }
+.fb-wrong .lead { color: var(--bad-ink); }
+
+.summary {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  border-left: 6px solid var(--accent);
+}
+.summary p:last-child { margin-bottom: 0; }
+
+.section { margin-top: 28px; padding-top: 22px; border-top: 2px solid var(--rule); }
+.second { margin-top: 28px; padding-top: 22px; border-top: 2px dashed var(--rule); }
+
+.readout-note {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  background: var(--page);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.share-field { max-width: 260px; margin: 14px 0; }
+.footnote { margin: 22px 0 0; font-size: 14px; }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  main { padding: 16px 16px 40px; }
+  .panel { padding: 20px 16px; }
+  h1 { font-size: 26px; }
+  .fields { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: 1fr; gap: 0; }
+  .facts dd { margin-bottom: 6px; }
+  .btn { width: 100%; }
+  .share-field { max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.pairhead { margin: 0 0 8px; font-size: 15.5px; }
+.dim { border-top: 1px solid var(--rule); padding: 12px 0 4px; }
+.dim .dimname { font-weight: 600; margin: 0 0 2px; }
+.dim .evid { margin: 0 0 8px; font-size: 15.5px; }
+.verdict { margin-top: 8px; padding-top: 12px; border-top: 2px solid var(--rule); }
+
+</style>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <p class="eyebrow">Skill practice</p>
+    <h1>Count what the rule allows</h1>
+    <p class="lede">“Available” is the result of rules applied to a physical count, and two systems can apply different rules to the same stock without either making an arithmetic error. A promise is sound only when it draws on the stock the promising rule names.</p>
+
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. Customer service is about to promise the largest account’s order for its US stores: <strong id="order-qty"></strong> cases, due in five days, shipping on day 4. Eight status lines follow. Rule on each one against the promising rule, work out the promisable quantity, and say whether the promise holds the stock.</p>
+
+    <dl class="terms">
+      <dt>The promising rule</dt>
+      <dd>Count usable, sellable, uncommitted stock at US nodes, plus transfers with an observed pickup that are due before the ship date. Exclude the e-commerce reserve at the fulfillment center, Canadian nodes, held stock, and dispatches that are reported but not observed.</dd>
+      <dt>Usable, sellable, uncommitted</dt>
+      <dd>Usable removes held, damaged, or expired stock. Sellable applies product, location, ownership, and channel eligibility. Uncommitted removes stock assigned to other demand.</dd>
+      <dt>Observed</dt>
+      <dd>Shown by an independent event, such as a carrier pickup. The sending node’s own report of a dispatch is a report.</dd>
+      <dt>Reservation</dt>
+      <dd>An act that assigns specific units to an order. It succeeds only if the units are still free when it runs. Checking a figure, or calculating a promise from it, assigns nothing.</dd>
+      <dt>Promisable quantity</dt>
+      <dd>The cases the rule lets you count for this order.</dd>
+    </dl>
+
+    <div id="lines"></div>
+
+    <div class="card">
+      <h3>The promise</h3>
+      <div class="fields">
+        <div class="field">
+          <label for="qty">Promisable quantity, in cases</label>
+          <input type="number" id="qty" min="0" step="1" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="hold">Does promising this quantity hold the stock for the order?</label>
+          <select id="hold"></select>
+        </div>
+      </div>
+      <div class="fb" id="fb-qty" aria-live="polite"></div>
+      <div class="fb" id="fb-hold" aria-live="polite"></div>
+    </div>
+
+    <p class="msg" id="msg" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="btn" id="check">Check my count</button>
+    </div>
+    <section id="sum" class="summary" aria-live="polite" hidden>
+      <p id="sum-text"></p>
+    </section>
+
+    <section id="second" class="second" aria-labelledby="second-title" hidden>
+      <h2 id="second-title">Move one assumption</h2>
+      <p id="second-intro"></p>
+      <div class="card" id="card2">
+        <h3 id="card2-title"></h3>
+        <dl class="facts" id="facts2"></dl>
+        <div class="fields">
+          <div class="field">
+            <label for="s-ruling">Your ruling on this line</label>
+            <select id="s-ruling"></select>
+          </div>
+          <div class="field">
+            <label for="s-reason">What decides it</label>
+            <select id="s-reason"></select>
+          </div>
+          <div class="field">
+            <label for="s-qty">Promisable quantity now, in cases</label>
+            <input type="number" id="s-qty" min="0" step="1" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label for="s-meaning">What that quantity means for the order</label>
+            <select id="s-meaning"></select>
+          </div>
+        </div>
+        <div class="fb" id="fb-s" aria-live="polite"></div>
+      </div>
+      <p class="msg" id="msg2" role="alert"></p>
+      <div class="actions">
+        <button type="button" class="btn secondary" id="check2">Check this count</button>
+      </div>
+    </section>
+
+    <p class="footnote">The company, roles, and figures in this exercise are fictional case material.</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (text !== undefined) { n.textContent = text; }
+    return n;
+  }
+  function byId(id) { return document.getElementById(id); }
+  function opt(value, text) {
+    var o = document.createElement('option');
+    o.value = value;
+    o.textContent = text;
+    return o;
+  }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function result(state, text) { return { state: state, text: text }; }
+  function show(box, r) {
+    box.className = 'fb fb-' + r.state;
+    box.textContent = '';
+    var lead = r.state === 'correct' ? 'Correct.' : (r.state === 'near' ? 'Close.' : 'Not yet.');
+    box.appendChild(el('span', 'lead', lead));
+    box.appendChild(document.createTextNode(' ' + r.text));
+  }
+  function clear(box) { box.className = 'fb'; box.textContent = ''; }
+
+  var ORDER = 2400;
+
+  var RULINGS = [['', 'Choose'], ['all', 'Count all of it'], ['part', 'Count only the usable part'], ['out', 'Exclude it']];
+  var REASONS = [
+    ['', 'Choose'],
+    ['usable', 'Fails the usable test'],
+    ['uncommitted', 'Fails the uncommitted test'],
+    ['sellable', 'Fails the sellable test'],
+    ['allocatable', 'Allocation priority'],
+    ['policy', 'Protected by channel policy'],
+    ['passes', 'Passes every test the rule names'],
+    ['receipt', 'Observed pickup, lands in time'],
+    ['reported', 'Reported, not observed']
+  ];
+  var HOLDS = [
+    ['', 'Choose'],
+    ['yes', 'Yes: the promise holds it'],
+    ['no', 'No: only a reservation holds it'],
+    ['accept', 'Yes, once the customer accepts']
+  ];
+
+  // The eight status lines. qty is the figure shown. part is the usable portion of that figure.
+  // key: the ruling, the deciding reason, and what each wrong choice should say.
+  var LINES = [
+    { id: 'L1', where: 'Distribution center, Columbus (legacy warehouse system)', qty: 1400, part: 1400 - 300,
+      status: 'Reported “available.” The figure includes 300 cases on quality hold.',
+      key: { ruling: 'part', reason: 'usable' },
+      crit: 'A system’s “available” is the result of its own rules, so rule on what the figure contains, not on its label. First move: ask which part of the figure fails a test and which part passes.',
+      ok: 'Count the usable part, 1,100 cases. This system’s “available” includes stock on hold, so the hold comes out before the rest counts.' },
+    { id: 'L2', where: 'Distribution center, Columbus', qty: 250, part: 250,
+      status: 'Reserved for another order. Listed apart from the 1,400 above.',
+      key: { ruling: 'out', reason: 'uncommitted' },
+      crit: 'Stock assigned to another order is already spoken for, and the rule counts only stock no demand has claimed. First move: ask whether these units are still uncommitted.',
+      ok: 'Exclude. The units are reserved against another order, so they fail the uncommitted test.' },
+    { id: 'L3', where: 'Distribution center, Dallas (newer warehouse system)', qty: 600, part: 600,
+      status: 'Reported “available.”',
+      key: { ruling: 'all', reason: 'passes', nearRu: { value: 'part', text: 'The structure is right: this line counts. One element is out of place: the ruling. Nothing on the line fails a test, so the usable part is the whole of it.' } },
+      crit: 'Check the figure against each test the rule names: usable, sellable, uncommitted. First move: ask whether anything on this line fails a test.',
+      ok: 'Count all 600. This system leaves held stock out of “available,” the node is in the US, and nothing on the line is committed elsewhere.' },
+    { id: 'L4', where: 'Distribution center, Dallas', qty: 150, part: 0,
+      status: 'On quality hold. Listed apart from the 600 above.',
+      key: { ruling: 'out', reason: 'usable', nearRu: { value: 'part', text: 'The structure is right. One element is out of place: the ruling. None of this line is usable, so the usable part is nothing. Say so directly and exclude it.' } },
+      crit: 'The rule counts only stock that can be used at all. First move: ask whether these units could ship today.',
+      ok: 'Exclude. Stock on quality hold fails the usable test, whichever system lists it.' },
+    { id: 'L5', where: 'E-commerce fulfillment center, Indianapolis', qty: 500, part: 500,
+      status: 'Reported “available.” These cases are the e-commerce reserve.',
+      key: { ruling: 'out', reason: 'policy' },
+      crit: 'The rule protects some stock for another channel. First move: ask whose stock this is, and under what policy it is held.',
+      ok: 'Exclude. The reserve is protected for the e-commerce channel by policy, so it never counts toward another order, however its system labels it.' },
+    { id: 'L6', where: 'Distribution center, Mississauga, Canada (legacy system; run by a third-party logistics provider)', qty: 800, part: 800,
+      status: 'Reported “available.”',
+      key: { ruling: 'out', reason: 'sellable' },
+      crit: 'The rule limits the count to nodes that can serve this order’s destination. First move: ask where the node is and where the order ships.',
+      ok: 'Exclude. This is a Canadian node, and the order ships to US stores, so the stock is not eligible for it.' },
+    { id: 'L7', where: 'Transfer to the Columbus distribution center', qty: 400, part: 400,
+      status: 'A carrier pickup has been observed. Due on day 2.',
+      key: { ruling: 'all', reason: 'receipt', nearRu: { value: 'part', text: 'The structure is right: this line counts. One element is out of place: the ruling. Nothing on the line fails a test, so the whole transfer counts.' } },
+      crit: 'A transfer counts when something independent shows it is moving and it lands in time. First move: ask what observation backs the transfer, and when it is due against the ship date.',
+      ok: 'Count all 400. The pickup is observed, and the transfer is due on day 2, before the ship date on day 4.' },
+    { id: 'L8', where: 'Transfer to the Dallas distribution center', qty: 300, part: 300,
+      status: 'The sending node reports it dispatched. No pickup has been observed. Due on day 3.',
+      key: { ruling: 'out', reason: 'reported' },
+      crit: 'A transfer counts when something independent shows it is moving and it lands in time. First move: ask who reports the dispatch, and whether anything independent shows it moving.',
+      ok: 'Exclude. A report from the sending node is not an observation, so the transfer is not yet a qualifying receipt.' }
+  ];
+
+  function counted(line, ruling) {
+    if (ruling === 'all') { return line.qty; }
+    if (ruling === 'part') { return line.part; }
+    return 0;
+  }
+  function keyCounted(line) { return counted(line, line.key.ruling); }
+  var PROMISABLE = LINES.reduce(function (a, l) { return a + keyCounted(l); }, 0);
+  var SHORT = ORDER - PROMISABLE;
+  var NAIVE = LINES.filter(function (l) { return /available/.test(l.status) && l.id !== 'L8'; }).reduce(function (a, l) { return a + l.qty; }, 0);
+
+  function sel(id, options) {
+    var s = byId(id);
+    options.forEach(function (o) { s.appendChild(opt(o[0], o[1])); });
+    return s;
+  }
+
+  byId('order-qty').textContent = fmt(ORDER);
+  var holdSel = sel('hold', HOLDS);
+  var qtyIn = byId('qty');
+  var msg = byId('msg');
+  var sum = byId('sum');
+  var second = byId('second');
+  var secondBuilt = false;
+
+  function resetAll() {
+    msg.textContent = '';
+    sum.hidden = true;
+    second.hidden = true;
+  }
+
+  var rows = [];
+  LINES.forEach(function (L) {
+    var card = el('article', 'card');
+    card.appendChild(el('h3', '', L.id + ' · ' + L.where));
+    var dl = el('dl', 'facts');
+    dl.appendChild(el('dt', '', 'Cases'));
+    dl.appendChild(el('dd', '', fmt(L.qty)));
+    dl.appendChild(el('dt', '', 'Status'));
+    dl.appendChild(el('dd', '', L.status));
+    card.appendChild(dl);
+    var fields = el('div', 'fields');
+    var f1 = el('div', 'field'), f2 = el('div', 'field');
+    var l1 = el('label', '', 'Your ruling on ' + L.id); l1.setAttribute('for', 'r-' + L.id);
+    var l2 = el('label', '', 'What decides ' + L.id); l2.setAttribute('for', 'w-' + L.id);
+    var s1 = document.createElement('select'); s1.id = 'r-' + L.id;
+    RULINGS.forEach(function (o) { s1.appendChild(opt(o[0], o[1])); });
+    var s2 = document.createElement('select'); s2.id = 'w-' + L.id;
+    REASONS.forEach(function (o) { s2.appendChild(opt(o[0], o[1])); });
+    f1.appendChild(l1); f1.appendChild(s1); f2.appendChild(l2); f2.appendChild(s2);
+    fields.appendChild(f1); fields.appendChild(f2);
+    card.appendChild(fields);
+    var fb = el('div', 'fb'); fb.setAttribute('aria-live', 'polite');
+    card.appendChild(fb);
+    byId('lines').appendChild(card);
+    var row = { L: L, card: card, ruling: s1, reason: s2, fb: fb };
+    function ch() { clear(fb); card.className = 'card'; resetAll(); clear(byId('fb-qty')); clear(byId('fb-hold')); }
+    s1.addEventListener('change', ch);
+    s2.addEventListener('change', ch);
+    rows.push(row);
+  });
+  qtyIn.addEventListener('input', function () { clear(byId('fb-qty')); resetAll(); });
+  holdSel.addEventListener('change', function () { clear(byId('fb-hold')); resetAll(); });
+
+  function judgeLine(row) {
+    var L = row.L, K = L.key, ru = row.ruling.value, re = row.reason.value;
+    var ruOK = ru === K.ruling;
+    var ruNear = !!K.nearRu && ru === K.nearRu.value;
+    var reOK = re === K.reason;
+    if (ruOK && reOK) { return result('correct', L.ok); }
+    if (ruNear && reOK) { return result('near', K.nearRu.text); }
+    if (ruOK) { return result('near', 'The ruling is right. One element is out of place: what decides it. ' + L.crit); }
+    return result('wrong', L.crit);
+  }
+
+  function ownTotal() {
+    return rows.reduce(function (a, r) { return a + counted(r.L, r.ruling.value); }, 0);
+  }
+  function miscounted() {
+    return rows.filter(function (r) { return counted(r.L, r.ruling.value) !== keyCounted(r.L); }).map(function (r) { return r.L.id; });
+  }
+  function joinIds(a) {
+    if (a.length < 2) { return a.join(''); }
+    return a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  }
+
+  function judgeQty(entered, own, bad) {
+    var note = '';
+    if (entered === NAIVE) { note = ' ' + fmt(NAIVE) + ' is what you get by adding the four figures labelled “available” at face value.'; }
+    else if (entered === ORDER) {
+      var l8 = rows[7];
+      if (counted(l8.L, l8.ruling.value) > 0) { note = ' ' + fmt(ORDER) + ' is what you get by counting the transfer that no one has observed moving. A report from the sending node is not an observation.'; }
+      else { note = ' ' + fmt(ORDER) + ' is the size of the order, which is the target to measure against and not the quantity the rule yields.'; }
+    }
+    if (entered !== own) {
+      return result('wrong', 'Your rulings add to ' + fmt(own) + ' cases, and you entered ' + fmt(entered) + '.' + note + ' First move: add only the lines you ruled to count, at the quantity each ruling allows.');
+    }
+    if (!bad.length) { return result('correct', 'Your rulings add to ' + fmt(entered) + ' cases, and the entry matches.'); }
+    return result('near', 'The arithmetic ties to your rulings. One element is out of place: the rulings behind it. Lines to recheck: ' + joinIds(bad) + '.' + note + ' First move: apply the rule to one line at a time before adding.');
+  }
+
+  function judgeHold(v) {
+    if (v === 'no') { return result('correct', 'Seeing stock, calculating a promise, and reserving stock are separate acts. Between the check and the reservation another order can take the units, so the stock is held only when a reservation succeeds.'); }
+    return result('wrong', 'A promise is a calculation from a figure, and a hold is a separate act. First move: ask what stops another transaction from taking the units between the check and the hold.');
+  }
+
+  byId('check').addEventListener('click', function () {
+    msg.textContent = '';
+    var missing = [];
+    rows.forEach(function (r) { if (!r.ruling.value || !r.reason.value) { missing.push(r.L.id); } });
+    var entered = qtyIn.value === '' ? null : Number(qtyIn.value);
+    var parts = [];
+    if (missing.length) { parts.push('a ruling and a reason for ' + joinIds(missing)); }
+    if (entered === null || isNaN(entered)) { parts.push('the promisable quantity'); }
+    if (!holdSel.value) { parts.push('your answer on the hold'); }
+    if (parts.length) { msg.textContent = 'Finish first. Still open: ' + parts.join('; ') + '.'; return; }
+
+    var allOK = true;
+    rows.forEach(function (r) {
+      var res = judgeLine(r);
+      show(r.fb, res);
+      r.card.className = 'card is-' + res.state;
+      if (res.state !== 'correct') { allOK = false; }
+    });
+    var own = ownTotal();
+    var bad = miscounted();
+    var rq = judgeQty(entered, own, bad);
+    show(byId('fb-qty'), rq);
+    var rh = judgeHold(holdSel.value);
+    show(byId('fb-hold'), rh);
+    if (rq.state !== 'correct' || rh.state !== 'correct') { allOK = false; }
+
+    sum.hidden = false;
+    if (allOK) {
+      byId('sum-text').textContent = 'The rule yields ' + fmt(PROMISABLE) + ' cases against an order of ' + fmt(ORDER) + ', which is ' + fmt(SHORT) + ' short. That quantity is a calculation, and the stock is held only once a reservation succeeds.';
+      second.hidden = false;
+      if (!secondBuilt) { buildSecond(); }
+    } else {
+      byId('sum-text').textContent = 'Lines and answers to revisit are marked. The note under each names the part to change. Change a choice and check again.';
+      second.hidden = true;
+    }
+  });
+
+  // Second pass: the pickup for the L8 transfer is now observed.
+  var MEANINGS = [
+    ['', 'Choose'],
+    ['covers-held', 'Covers the order and holds it'],
+    ['covers-promise', 'Covers the order; holds nothing'],
+    ['short', 'Still short of the order']
+  ];
+  function buildSecond() {
+    secondBuilt = true;
+    var L8 = LINES[7];
+    byId('second-intro').textContent = 'Suppose the carrier now records a pickup for the transfer to the Dallas distribution center. It is due on day 3, before the ship date. Rule on that line again and re-enter the promisable quantity.';
+    byId('card2-title').textContent = L8.id + ' · ' + L8.where;
+    var dl = byId('facts2');
+    [['Cases', fmt(L8.qty)], ['Status now', 'A carrier pickup has been observed. Due on day 3.']].forEach(function (r) {
+      dl.appendChild(el('dt', '', r[0]));
+      dl.appendChild(el('dd', '', r[1]));
+    });
+    sel('s-ruling', RULINGS); sel('s-reason', REASONS); sel('s-meaning', MEANINGS);
+    ['s-ruling', 's-reason', 's-meaning'].forEach(function (id) {
+      byId(id).addEventListener('change', function () { clear(byId('fb-s')); byId('card2').className = 'card'; byId('msg2').textContent = ''; });
+    });
+    byId('s-qty').addEventListener('input', function () { clear(byId('fb-s')); byId('card2').className = 'card'; byId('msg2').textContent = ''; });
+  }
+
+  byId('check2').addEventListener('click', function () {
+    var msg2 = byId('msg2');
+    msg2.textContent = '';
+    var ru = byId('s-ruling').value, re = byId('s-reason').value, me = byId('s-meaning').value;
+    var q = byId('s-qty').value === '' ? null : Number(byId('s-qty').value);
+    var missing = [];
+    if (!ru) { missing.push('the ruling'); }
+    if (!re) { missing.push('what decides it'); }
+    if (q === null || isNaN(q)) { missing.push('the quantity'); }
+    if (!me) { missing.push('what it means for the order'); }
+    if (missing.length) { msg2.textContent = 'Finish first. Still open: ' + missing.join(', ') + '.'; return; }
+
+    var L8 = LINES[7];
+    var base = PROMISABLE - keyCounted(L8);          // every other line, unchanged
+    var newKey = base + L8.qty;                      // the pickup is observed, so the line counts in full
+    var own2 = base + counted(L8, ru);
+    var r;
+    if (ru === 'part' && re === 'receipt') {
+      r = result('near', 'The structure is right: this line counts now. One element is out of place: the ruling. Nothing on the transfer fails a test, so the whole of it counts.');
+    } else if (ru !== 'all') {
+      r = result('wrong', 'A transfer counts when something independent shows it is moving and it lands in time. First move: ask what has changed on this line since the first count, and whether the rule now admits it.');
+    } else if (re !== 'receipt') {
+      r = result('near', 'The ruling is right. One element is out of place: what decides it. A transfer counts through the receipt route: an observed pickup, due before the ship date.');
+    } else if (q !== own2) {
+      r = result('wrong', 'Your ruling adds ' + fmt(counted(L8, ru)) + ' cases to the other lines’ ' + fmt(base) + ', which is ' + fmt(own2) + ', and you entered ' + fmt(q) + '. First move: add the line you changed to the total you already had.');
+    } else if (me === 'covers-promise') {
+      r = result('correct', 'The rule now yields ' + fmt(newKey) + ' cases, which covers the order of ' + fmt(ORDER) + '. Covered is not held: the units are held only when a reservation succeeds, and another order can still take them first.');
+    } else if (me === 'covers-held') {
+      r = result('near', 'The quantity is right, and it covers the order. One element is out of place: what it means. A promise is a calculation, and a hold is a separate act. First move: ask what stops another order from taking the units before the reservation.');
+    } else {
+      r = result('wrong', 'The quantity is right, and the reading of it is not. First move: compare the quantity with the order of ' + fmt(ORDER) + '.');
+    }
+    show(byId('fb-s'), r);
+    byId('card2').className = 'card is-' + r.state;
+  });
+})();
+</script>
+</body>
+</html>
