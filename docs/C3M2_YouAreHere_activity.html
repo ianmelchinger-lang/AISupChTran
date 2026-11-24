@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reviewed, so let it act?</title>
+<style>
+:root {
+  --navy: #001d6c;
+  --sky: #d0e2ff;
+  --cobalt: #0043c3;
+  --periwinkle: #78a9ff;
+  --mist: #edf5ff;
+  --white: #ffffff;
+  --ok-ink: #0e6027;
+  --ok-bg: #defbe6;
+  --warn-ink: #5f4500;
+  --warn-bg: #fcf4d6;
+  --bad-ink: #a2191f;
+  --bad-bg: #fff1f1;
+  --ink: var(--navy);
+  --page: var(--mist);
+  --paper: var(--white);
+  --accent: var(--cobalt);
+  --accent-soft: var(--sky);
+  --rule: var(--periwinkle);
+  --on-dark: var(--white);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 24px 56px;
+}
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 14px;
+}
+h1 { font-size: 30px; }
+h2 { font-size: 22px; margin-top: 8px; }
+h3 { font-size: 17px; margin-bottom: 6px; }
+
+p { margin: 0 0 14px; }
+strong, b { font-weight: 600; }
+
+.terms {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--page);
+  border-left: 4px solid var(--rule);
+  border-radius: 6px;
+  font-size: 15.5px;
+}
+.terms dt { font-weight: 600; margin-top: 8px; }
+.terms dt:first-child { margin-top: 0; }
+.terms dd { margin: 0; }
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; font-weight: 600; margin-bottom: 10px; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--paper);
+  cursor: pointer;
+}
+.option:hover { background: var(--page); }
+.option.selected {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.option:focus-within {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.option input[type="radio"] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 3px 0 0;
+  accent-color: var(--accent);
+}
+.option span { display: block; }
+fieldset:disabled .option { cursor: default; }
+fieldset:disabled .option:hover { background: var(--paper); }
+fieldset:disabled .option.selected { background: var(--accent-soft); }
+
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.btn {
+  appearance: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-dark);
+  font: inherit;
+  font-weight: 600;
+  min-height: 46px;
+  padding: 10px 22px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--navy); border-color: var(--navy); }
+.btn[disabled] { background: var(--navy); border-color: var(--navy); cursor: default; }
+
+.msg {
+  min-height: 1.55em;
+  margin: 10px 0 0;
+  color: var(--bad-ink);
+  font-weight: 600;
+}
+.hint { margin: 12px 0 0; font-size: 15px; }
+
+.dark {
+  background: var(--navy);
+  color: var(--on-dark);
+  border-radius: 10px;
+  padding: 20px 22px;
+}
+.dark h2 { color: var(--on-dark); margin-top: 0; }
+.dark p:last-child { margin-bottom: 0; }
+
+.footnote { margin: 18px 0 0; font-size: 14px; }
+
+ul.facts { margin: 0 0 18px; padding-left: 22px; }
+ul.facts li { margin-bottom: 6px; }
+.prompt { font-weight: 600; margin-top: 22px; }
+
+/* Pilot summary */
+.summary {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15.5px;
+  margin: 0 0 18px;
+  font-variant-numeric: tabular-nums;
+}
+.summary caption {
+  text-align: left;
+  font-weight: 600;
+  padding: 0 0 8px;
+}
+.summary th, .summary td {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--rule);
+}
+.summary th { font-weight: 400; width: 46%; }
+.summary td { font-weight: 600; }
+.summary tr:first-child th, .summary tr:first-child td { border-top: 2px solid var(--accent); }
+
+/* Reveal */
+#reveal {
+  margin-top: 24px;
+  border-top: 2px solid var(--rule);
+  padding-top: 22px;
+}
+#reveal:focus, #reveal h2:focus { outline: none; }
+.reveal-in { animation: rise 320ms ease-out both; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.echo {
+  background: var(--accent-soft);
+  border-left: 6px solid var(--accent);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+.echo strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.scope {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.roles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.role {
+  background: var(--page);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.role h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.3; }
+.role p { margin: 0; font-size: 15px; }
+.capability { margin-top: 22px; }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  main { padding: 16px 16px 40px; }
+  .panel { padding: 20px 16px; }
+  h1 { font-size: 26px; }
+  .btn { width: 100%; }
+  .roles { grid-template-columns: 1fr; }
+  .summary th { width: 50%; }
+}
+
+@media (max-width: 700px) {
+  .roles { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="panel">
+    <p class="eyebrow">Situation</p>
+    <h1 id="title">Reviewed, so let it act?</h1>
+
+    <p>You have been asked to lead supply chain transformation at Sample Enterprise Goods, a manufacturer and distributor of household and personal-care consumables. Ten weeks ago the supply planning team began a pilot of exception alerts. The supply planners read the alerts and decide what to do: move stock between distribution centers, expedite a truck, or leave the plan alone.</p>
+
+    <p>The pilot team has circulated its summary. The supply planning manager now wants to go one step further. For each alert that calls for an expedite, the system would queue the expedite, so that planners can act faster.</p>
+
+    <dl class="terms">
+      <dt>Exception alert</dt><dd>A warning that an order, shipment, or stock position is off plan and may need a decision.</dd>
+      <dt>Alert type</dt><dd>One rule that raises one kind of alert, such as a purchase order line that is past due.</dd>
+      <dt>Expedite</dt><dd>Pay for faster freight so that a shipment lands sooner.</dd>
+      <dt>Queue an expedite</dt><dd>The system prepares the faster-freight request and holds it ready, so a planner does not build it by hand.</dd>
+    </dl>
+
+    <table class="summary" id="summary">
+      <caption>Pilot summary, as circulated</caption>
+      <tbody id="summary-body"></tbody>
+    </table>
+
+    <p>Here is what you have learned so far.</p>
+    <ul class="facts" id="facts"></ul>
+
+    <p class="prompt">The supply planning manager asks you to approve the next step. Commit to a first move before you read on.</p>
+
+    <form id="commit" novalidate>
+      <fieldset id="choices">
+        <legend>The first move I would make</legend>
+
+        <label class="option" for="pick-a">
+          <input type="radio" name="pick" id="pick-a" value="a">
+          <span>Approve queuing the expedites. Every alert is already reviewed, so the planners’ review carries over.</span>
+        </label>
+
+        <label class="option" for="pick-b">
+          <input type="radio" name="pick" id="pick-b" value="b">
+          <span>Approve queuing, with a planner approving each expedite before it releases.</span>
+        </label>
+
+        <label class="option" for="pick-c">
+          <input type="radio" name="pick" id="pick-c" value="c">
+          <span>Approve queuing on the highest-cost lanes only, and track how often planners override the system.</span>
+        </label>
+
+        <label class="option" for="pick-d">
+          <input type="radio" name="pick" id="pick-d" value="d">
+          <span>Retune first. Mute the noisiest alert types, then decide on queuing.</span>
+        </label>
+
+        <label class="option" for="pick-e">
+          <input type="radio" name="pick" id="pick-e" value="e">
+          <span>I would want to know more before choosing.</span>
+        </label>
+      </fieldset>
+
+      <p class="msg" id="message" role="alert"></p>
+      <button type="submit" class="btn" id="lock">Lock in my choice</button>
+      <p class="hint" id="hint">Once you lock it in, you will see what the summary left out.</p>
+    </form>
+
+    <section id="reveal" tabindex="-1" aria-labelledby="reveal-title" hidden>
+      <div class="echo">
+        <strong>You committed to</strong>
+        <span id="echo-text"></span>
+      </div>
+
+      <h2 id="reveal-title" tabindex="-1">What the summary left out</h2>
+      <p>Three facts sat behind the summary. Each was true before you chose.</p>
+
+      <p class="scope" id="scope"></p>
+      <div class="roles" id="cards"></div>
+
+      <p id="closing"></p>
+
+      <h2>What your choice does</h2>
+      <p id="consequence"></p>
+
+      <div class="dark capability">
+        <h2>The capability this depends on</h2>
+        <p>Each option was a sound move for a manager who reads “reviewed” as “checked”. None began by asking how far software should go on each response, given the review that people can actually perform at this volume.</p>
+        <p>That read has two parts. The first sizes the alert stream against the minutes people have, so that the alerts that reach a person are ones the person can investigate and act on. The second sets, response by response, how much the software does and how much a person decides, and tests whether the review attached to each is real. It has to be in place before any response can be automated, funded, or scoped.</p>
+      </div>
+
+      <p class="footnote">The company, roles, and figures in this exercise are fictional case material.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // Case figures used in this exercise. Every number the page shows is built from these.
+  var CASE = {
+    weeks: 10,
+    types: 11,
+    mutedTypes: 4,
+    alertsPerDay: 640,
+    actionablePerDay: 71,
+    planners: 7,
+    minutesEach: 90,
+    minutesPerAlert: 5,
+    premiumFreightM: 21.0,
+    imbalanceFreightM: 9.2,
+    airFreightEventM: 6.2
+  };
+
+  function n(v) { return v.toLocaleString('en-US'); }
+  function m1(v) { return v.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+
+  var minutesTotal = CASE.planners * CASE.minutesEach;                         // 630
+  var investigationsPerDay = Math.floor(minutesTotal / CASE.minutesPerAlert);  // 126
+  var oneInAlerts = Math.round(CASE.alertsPerDay / investigationsPerDay);      // 5
+  var oneInActionable = Math.round(CASE.alertsPerDay / CASE.actionablePerDay); // 9
+
+  var NUMWORD = { 4: 'four', 5: 'five', 7: 'seven', 9: 'nine', 11: 'eleven' };
+  function word(v) { return NUMWORD[v] || n(v); }
+
+  // Pilot summary table.
+  var rows = [
+    ['Pilot length', n(CASE.weeks) + ' weeks'],
+    ['Alert types', n(CASE.types)],
+    ['Alerts a day', n(CASE.alertsPerDay)],
+    ['Alerts reviewed', '100%'],
+    ['Decisions the alerts support', 'Deployment across distribution centers; transport mode and expedite']
+  ];
+  var sb = document.getElementById('summary-body');
+  rows.forEach(function (r) {
+    var tr = document.createElement('tr');
+    var th = document.createElement('th');
+    th.scope = 'row';
+    th.textContent = r[0];
+    var td = document.createElement('td');
+    td.textContent = r[1];
+    tr.appendChild(th);
+    tr.appendChild(td);
+    sb.appendChild(tr);
+  });
+
+  // Facts so far.
+  var facts = [
+    'The supply planning manager owns the pilot and wants the system to queue each expedite.',
+    'Premium freight costs USD ' + m1(CASE.premiumFreightM) + 'M a year, and deployment imbalance drives USD ' + m1(CASE.imbalanceFreightM) + 'M of it.',
+    'The alerts go to the supply planners, who decide what to do about each one.'
+  ];
+  var fl = document.getElementById('facts');
+  facts.forEach(function (t) {
+    var li = document.createElement('li');
+    li.textContent = t;
+    fl.appendChild(li);
+  });
+
+  // Reveal content, built from the case figures above.
+  document.getElementById('scope').textContent = n(CASE.alertsPerDay) + ' alerts a day. Three facts.';
+
+  var cards = [
+    {
+      h: 'A click, counted as a review',
+      p: 'The pilot counts an alert as reviewed once a planner acknowledges it. ' + word(CASE.planners).replace(/^./, function (c) { return c.toUpperCase(); }) + ' supply planners give exceptions ' + n(CASE.minutesEach) + ' minutes a day each, and one investigation takes about ' + word(CASE.minutesPerAlert) + ' minutes. That is time to investigate about one alert in ' + word(oneInAlerts) + '.'
+    },
+    {
+      h: 'Four types nobody opens',
+      p: 'About one alert in ' + word(oneInActionable) + ' warrants action. By week four, planners were clearing ' + word(CASE.mutedTypes) + ' of the ' + word(CASE.types) + ' types without opening them, because those types were so often wrong. Clearing a type also clears the real exceptions inside it.'
+    },
+    {
+      h: 'No one has set what software may do',
+      p: 'The company has no approval route for an automated decision and no defined levels of autonomy. Its only authority matrix sets spend thresholds. Expedites are not small: air freight during one port-congestion summer, two years ago, cost USD ' + m1(CASE.airFreightEventM) + 'M.'
+    }
+  ];
+  var cl = document.getElementById('cards');
+  cards.forEach(function (c) {
+    var d = document.createElement('div');
+    d.className = 'role';
+    var h = document.createElement('h3');
+    h.textContent = c.h;
+    var p = document.createElement('p');
+    p.textContent = c.p;
+    d.appendChild(h);
+    d.appendChild(p);
+    cl.appendChild(d);
+  });
+
+  document.getElementById('closing').textContent =
+    'The summary shows how many alerts were acknowledged. It cannot show how many anyone investigated, what clearing a type removed, or who may let software act. Your reading looked reasonable because the figures that would have changed it were not on the page.';
+
+  var picks = {
+    a: {
+      label: 'Approve queuing the expedites. Every alert is already reviewed, so the planners’ review carries over.',
+      does: 'The review you would rely on is a click on ' + n(CASE.alertsPerDay) + ' alerts a day, and planners have time to investigate about one in ' + word(oneInAlerts) + '. The system would queue expedites from a stream that is mostly noise, and part of the real signal sits in types that nobody opens.'
+    },
+    b: {
+      label: 'Approve queuing, with a planner approving each expedite before it releases.',
+      does: 'An approval is only as real as the time to perform it. The same planners who can investigate about one alert in ' + word(oneInAlerts) + ' would approve each queued expedite, so the approval would risk becoming one more click. Its record would look like a control and show nothing about whether anyone checked.'
+    },
+    c: {
+      label: 'Approve queuing on the highest-cost lanes only, and track how often planners override the system.',
+      does: 'Narrowing the scope limits how much money moves, but the stream underneath is the same. Tracking overrides is a sound instinct, yet a low override count cannot tell a planner who agrees from a planner with no time to check. Both look the same on the page.'
+    },
+    d: {
+      label: 'Retune first. Mute the noisiest alert types, then decide on queuing.',
+      does: 'Cutting noise is the right kind of work, but muting is what the planners already did. ' + word(CASE.mutedTypes).replace(/^./, function (c) { return c.toUpperCase(); }) + ' of ' + word(CASE.types) + ' types were cleared unopened, and clearing a type clears the real exceptions inside it. Retuning needs a check on what each type would lose and on who can act on what remains.'
+    },
+    e: {
+      label: 'I would want to know more before choosing.',
+      does: 'Wanting to know more is a sound instinct. The questions that matter are how many alerts anyone investigates, what the cleared types held, and what authority the system would act under. The summary never says, and nothing in it invites the questions.'
+    }
+  };
+
+  var form = document.getElementById('commit');
+  var fieldset = document.getElementById('choices');
+  var message = document.getElementById('message');
+  var lockButton = document.getElementById('lock');
+  var hint = document.getElementById('hint');
+  var reveal = document.getElementById('reveal');
+  var revealTitle = document.getElementById('reveal-title');
+  var echoText = document.getElementById('echo-text');
+  var consequence = document.getElementById('consequence');
+  var options = form.querySelectorAll('.option');
+  var inputs = form.querySelectorAll('input[name="pick"]');
+
+  var committed = null;
+
+  function markSelected() {
+    var i;
+    for (i = 0; i < options.length; i += 1) {
+      var radio = options[i].querySelector('input');
+      if (radio.checked) {
+        options[i].classList.add('selected');
+      } else {
+        options[i].classList.remove('selected');
+      }
+    }
+  }
+
+  function currentPick() {
+    var i;
+    for (i = 0; i < inputs.length; i += 1) {
+      if (inputs[i].checked) { return inputs[i].value; }
+    }
+    return null;
+  }
+
+  var j;
+  for (j = 0; j < inputs.length; j += 1) {
+    inputs[j].addEventListener('change', function () {
+      message.textContent = '';
+      markSelected();
+    });
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (committed !== null) { return; }
+
+    var value = currentPick();
+    if (value === null) {
+      message.textContent = 'Choose one answer to lock in.';
+      return;
+    }
+
+    committed = value;
+    fieldset.disabled = true;
+    lockButton.disabled = true;
+    lockButton.textContent = 'Choice locked';
+    hint.hidden = true;
+    message.textContent = '';
+
+    echoText.textContent = picks[committed].label;
+    consequence.textContent = picks[committed].does;
+
+    reveal.hidden = false;
+    reveal.classList.add('reveal-in');
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    revealTitle.focus({ preventScroll: true });
+    if (reveal.scrollIntoView) {
+      reveal.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }
+  });
+})();
+</script>
+</body>
+</html>

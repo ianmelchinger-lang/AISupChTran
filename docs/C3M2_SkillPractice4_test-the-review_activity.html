@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test the review</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+p{margin:0 0 10px}
+.lede{font-size:17px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.claim{border:2px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0;background:var(--panel)}
+.claim b{display:block;font-size:30px;line-height:1.1}
+.claim span{font-size:14px;color:var(--muted)}
+.record{margin:0 0 6px;padding-left:20px}
+.record li{margin:0 0 4px}
+table{width:100%;border-collapse:collapse}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+select,input[type=text]{font:inherit;color:var(--ink);background:var(--bg);min-height:44px;padding:8px 10px;border:2px solid var(--line);border-radius:8px;width:100%}
+.fld{margin:0 0 14px}
+.fld label.lab{display:block;font-weight:700;margin:0 0 4px}
+.fld input[type=text]{width:9em}
+.inrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+input[type=checkbox]{width:22px;height:22px;margin:0;flex:none;accent-color:var(--accent)}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;min-height:44px;cursor:pointer}
+.opt span{flex:1}
+.opt.sel{background:var(--accent-soft);border-radius:6px}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:10px 14px}
+legend{font-weight:700;padding:0 6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{min-height:1.5em;margin:8px 0 0;color:var(--bad);font-weight:700}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:10px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:10px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--near-bg);color:var(--near);border:1px solid var(--near)}
+.hidden{display:none !important}
+.tname{font-weight:700}
+.task{display:block;font-size:14px;color:var(--muted)}
+.readout{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.readout div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.readout b{display:block;font-size:19px}
+.readout span{font-size:14px;color:var(--muted)}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .stack thead{position:absolute;left:-9999px}
+  .stack caption{display:block}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label);display:block;font-size:13px;font-weight:700;color:var(--muted)}
+  .readout{grid-template-columns:1fr}
+  .fld input[type=text]{width:100%}
+  button{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Skill practice</p>
+  <h1>Test the review</h1>
+  <p class="lede">A review is oversight only when the record shows that the reviewer could inspect the evidence, could change the outcome, had time to check, and caught errors. The move that comes first is to read a claim of review against the record, test by test, before anyone builds on it.</p>
+
+  <section class="card" aria-labelledby="terms-h">
+    <h2 id="terms-h">Terms used here</h2>
+    <dl class="terms">
+      <dt>Acknowledgement</dt><dd>A click that marks an alert as seen.</dd>
+      <dt>Seeded error</dt><dd>A wrong alert planted on purpose, so that someone can check whether reviewers catch it.</dd>
+      <dt>Action divergence</dt><dd>How often the action taken differs from what the system proposed.</dd>
+      <dt>Trace</dt><dd>The record of what a reviewer checked and what followed from it.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="sit-h">
+    <h2 id="sit-h">You are the supply chain transformation lead at Sample Enterprise Goods</h2>
+    <p>The supply planning manager wants the exception-alert pilot to queue and carry out expedites on its own. The case rests on one line from the pilot dashboard.</p>
+    <div class="claim" role="group" aria-label="Claim from the pilot dashboard">
+      <b>100% of alerts reviewed</b>
+      <span>Exception-alert pilot dashboard</span>
+    </div>
+    <p>Before you rule on that claim, here is what the record shows.</p>
+    <ul class="record" id="record"></ul>
+  </section>
+
+  <section class="card" aria-labelledby="work-h">
+    <h2 id="work-h">Test the claim</h2>
+    <p class="small muted">For each test, mark what the record shows. <strong>Holds</strong> means the record shows it. <strong>Fails</strong> means the record shows that it does not. <strong>No evidence</strong> means the record shows neither.</p>
+    <table class="stack">
+      <caption>Five tests of a review</caption>
+      <thead><tr><th scope="col">Test</th><th scope="col">What the record shows</th></tr></thead>
+      <tbody id="tests"></tbody>
+    </table>
+
+    <div class="fld" style="margin-top:14px">
+      <label class="lab" for="ruling">Your ruling on the claim</label>
+      <select id="ruling" aria-label="Ruling on the claim of review"></select>
+    </div>
+    <div class="fld">
+      <label class="lab" for="reviewer">Who would have to do the reviewing for the decisions this pilot supports?</label>
+      <select id="reviewer" aria-label="Who reviews"></select>
+    </div>
+    <fieldset>
+      <legend>Which measures would prove a review is real? Choose every one you would use.</legend>
+      <div id="measures"></div>
+    </fieldset>
+    <p class="msg" id="msg" role="alert"></p>
+    <div class="row"><button type="button" id="check">Check my ruling</button></div>
+    <div id="fb" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="sec-h">
+    <h2 id="sec-h">Move one assumption</h2>
+    <p>The capacity test rests on the volume that reaches a reviewer. Change it and see what moves, and what does not.</p>
+    <p><span class="tag">Illustrative</span> The button sets a made-up volume to show the effect. It is not part of any answer above.</p>
+    <div class="fld">
+      <label class="lab" for="f-vol">Alerts a day that reach a reviewer</label>
+      <div class="inrow">
+        <input id="f-vol" type="text" inputmode="numeric" autocomplete="off" value="640">
+        <button type="button" class="secondary" id="try100">Try 100 a day</button>
+        <button type="button" class="secondary" id="backAll">Back to the full stream</button>
+      </div>
+    </div>
+    <p class="msg" id="sec-msg" role="alert"></p>
+    <div class="readout" id="readout" aria-live="polite"></div>
+    <div class="note" id="sec-moved" aria-live="polite"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function n(x) { return Number(x).toLocaleString('en-US'); }
+  function n1(x) { return Number(x).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+  function clear(node) { while (node.firstChild) { node.removeChild(node.firstChild); } }
+  function parseNum(s) {
+    if (s === null || s === undefined) { return null; }
+    var t = String(s).replace(/[,\s]/g, '');
+    if (t === '' || !/^\d+$/.test(t)) { return null; }
+    return Number(t);
+  }
+
+  var CASE = { alerts: 640, types: 11, mutedTypes: 4, planners: 7, minutesEach: 90, minutesPerAlert: 5 };
+  var MINUTES = CASE.planners * CASE.minutesEach;
+  var NEEDED = CASE.alerts * CASE.minutesPerAlert;
+  var COVER = MINUTES / NEEDED * 100;
+
+  var RECORD = [
+    'The dashboard counts an acknowledgement, which is a click, as a review.',
+    'The pilot raises ' + n(CASE.alerts) + ' alerts a day across ' + CASE.types + ' types.',
+    n(CASE.planners) + ' supply planners give exceptions ' + n(CASE.minutesEach) + ' minutes each a day. One investigation takes ' + n(CASE.minutesPerAlert) + ' minutes.',
+    'By week four, planners had cleared ' + CASE.mutedTypes + ' of the ' + CASE.types + ' types in bulk, unopened.',
+    'Supply planners own the decisions the alerts support, and the pilot carries out nothing.',
+    'The dashboard reports acknowledgements. It carries no audit of reviewed alerts, no planted wrong alerts, and no link from an alert to a later action.'
+  ];
+
+  var TESTS = [
+    { key: 'access', name: 'Information access', asks: 'Could the reviewer inspect the evidence behind the alert?' },
+    { key: 'authority', name: 'Authority to change', asks: 'Could the reviewer change the outcome?' },
+    { key: 'capacity', name: 'Time and capacity', asks: 'Did the reviewer have time to check at this volume?' },
+    { key: 'error', name: 'Error detection', asks: 'Did reviewers catch errors?' },
+    { key: 'linkage', name: 'Outcome linkage', asks: 'Does the record link a review to a changed or confirmed action?' }
+  ];
+  var READ = [['', 'Choose a reading'], ['holds', 'Holds'], ['fails', 'Fails'], ['none', 'No evidence']];
+
+  var TEST_KEY = {
+    access: { ok: ['none'], off: ['fails'], bad: ['holds'] },
+    authority: { ok: ['holds', 'none'], off: ['fails'], bad: [] },
+    capacity: { ok: ['fails'], off: ['none'], bad: ['holds'] },
+    error: { ok: ['fails', 'none'], off: [], bad: ['holds'] },
+    linkage: { ok: ['none', 'fails'], off: [], bad: ['holds'] }
+  };
+  var TEST_TEXT = {
+    access: {
+      off: 'The record is silent on what the reviewer could see, which is different from showing that the evidence was withheld. Ask whether any line shows either.',
+      bad: 'The record shows what was clicked, not what the reviewer could see when clicking. First move: ask which line says what evidence was in front of the reviewer.'
+    },
+    authority: {
+      off: 'Look at who owns the decision and what the pilot does with it. Ask whether anything stops the owner from changing the outcome.'
+    },
+    capacity: {
+      off: 'The record does carry the numbers to test this: the alerts, the minutes each investigation takes, and the minutes the planners have.',
+      bad: 'The record has the numbers to test time and capacity. First move: multiply the alerts by the minutes one investigation takes, then set that against the minutes the planners have.'
+    },
+    error: {
+      bad: 'Nothing in the record shows reviewers catching errors. First move: ask which line would have to exist for this test to hold, and whether it is there.'
+    },
+    linkage: {
+      bad: 'Nothing in the record connects a review to an action. First move: ask which line would show an alert leading to a different or confirmed action, and whether it is there.'
+    }
+  };
+
+  var RULINGS = [['', 'Choose a ruling'], ['demo', 'The review is demonstrated'], ['partly', 'The review is partly demonstrated'], ['not', 'The review is not demonstrated']];
+  var REVIEWERS = [['', 'Choose a role'], ['manager', 'The supply planning manager who sponsors the pilot'], ['planners', 'Supply planners'], ['it', 'The team that runs the dashboard'], ['buyers', 'Buyers']];
+
+  var MEASURES = [
+    ['ack', 'Acknowledgement rate: the share of alerts acknowledged', 'decoy'],
+    ['E', 'Error detection on seeded audit alerts: the share of planted wrong alerts that reviewers catch', 'core'],
+    ['app', 'Approval rate: the share of proposals that reviewers approved', 'decoy'],
+    ['T', 'Trace completeness: the share of reviewed alerts with a record of the evidence the reviewer checked', 'core'],
+    ['val', 'Premium freight saved since the pilot launched', 'decoy'],
+    ['A', 'Action divergence: how often the action taken differs from what the alert proposed, and why', 'core'],
+    ['shr', 'Share of alerts reviewed, as the dashboard counts them', 'decoy'],
+    ['R', 'Review time against the deadline: whether the minutes spent fit before the decision must be made', 'valid']
+  ];
+
+  function renderStatic() {
+    var ul = byId('record');
+    clear(ul);
+    RECORD.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    var body = byId('tests');
+    clear(body);
+    TESTS.forEach(function (t) {
+      var tr = document.createElement('tr');
+      var opts = READ.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+      tr.innerHTML =
+        '<td data-label="Test"><span class="tname">' + t.name + '</span><span class="task">' + t.asks + '</span></td>' +
+        '<td data-label="What the record shows"><select id="t-' + t.key + '" aria-label="' + t.name + ': what the record shows">' + opts + '</select></td>';
+      body.appendChild(tr);
+    });
+    byId('ruling').innerHTML = RULINGS.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+    byId('reviewer').innerHTML = REVIEWERS.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+    var box = byId('measures');
+    clear(box);
+    MEASURES.forEach(function (m) {
+      var lab = document.createElement('label');
+      lab.className = 'opt';
+      lab.setAttribute('for', 'm-' + m[0]);
+      var inp = document.createElement('input');
+      inp.type = 'checkbox';
+      inp.id = 'm-' + m[0];
+      inp.value = m[0];
+      inp.addEventListener('change', function () { lab.classList.toggle('sel', inp.checked); byId('fb').innerHTML = ''; byId('msg').textContent = ''; });
+      var sp = document.createElement('span');
+      sp.textContent = m[1];
+      lab.appendChild(inp);
+      lab.appendChild(sp);
+      box.appendChild(lab);
+    });
+  }
+
+  function judgeTest(key, v) {
+    var k = TEST_KEY[key];
+    if (k.ok.indexOf(v) !== -1) { return { st: 'ok' }; }
+    if (k.off.indexOf(v) !== -1) { return { st: 'off', text: 'One element is out of place: ' + nameOf(key).toLowerCase() + '. ' + TEST_TEXT[key].off }; }
+    return { st: 'bad', text: TEST_TEXT[key].bad };
+  }
+  function nameOf(key) { var i; for (i = 0; i < TESTS.length; i += 1) { if (TESTS[i].key === key) { return TESTS[i].name; } } return key; }
+
+  function judgeRuling(v) {
+    if (v === 'not') { return { st: 'ok' }; }
+    if (v === 'partly') {
+      return { st: 'off', text: 'One element is out of place: the ruling. A review counts as oversight only when the record shows all four of these: inspection, authority to change, time to check, and errors caught. Count how many the record shows.' };
+    }
+    return { st: 'bad', text: 'The ruling does not hold. First move: list what the record shows for each test, then ask whether it shows that reviewers inspected, could change the outcome, had time, and caught errors.' };
+  }
+  function judgeReviewer(v) {
+    if (v === 'planners') { return { st: 'ok' }; }
+    return { st: 'off', text: 'One element is out of place: who reviews. The reviewer has to be the role that makes the decision the alerts support, not the owner of the pilot or of its dashboard. Ask who makes these decisions.' };
+  }
+  function judgeMeasures(chosen) {
+    var has = function (k) { return chosen.indexOf(k) !== -1; };
+    var core = has('E') && (has('A') || has('T'));
+    var decoy = has('ack') || has('app') || has('val') || has('shr');
+    if (core && !decoy) { return { st: 'ok' }; }
+    if (core && decoy) {
+      return { st: 'off', text: 'One element is out of place: the measure set. A rate that counts clicks, approvals, or value cannot show that review is real. Take out each measure that an agreeing reviewer, or a good quarter, would satisfy.' };
+    }
+    if (!core && !decoy) {
+      return { st: 'off', text: 'One element is out of place: the measure set. It is sound as far as it goes, but it does not yet show that reviewers catch errors and that their review leaves a trace. Ask what would prove each.' };
+    }
+    return { st: 'bad', text: 'The measure set leans on a rate that cannot tell a good recommender from a reviewer who agrees with everything. First move: for each measure, ask whether an agreeing reviewer could produce the same number.' };
+  }
+
+  function fbBox(state, lead, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-state', state);
+    var st = document.createElement('span');
+    st.className = 'st';
+    st.textContent = state === 'correct' ? 'Correct' : state === 'near' ? 'Near' : 'Not yet';
+    d.appendChild(st);
+    if (lead) {
+      var b = document.createElement('strong');
+      b.textContent = lead + '. ';
+      d.appendChild(b);
+    }
+    d.appendChild(document.createTextNode(text));
+    return d;
+  }
+
+  function chosenMeasures() {
+    var out = [];
+    MEASURES.forEach(function (m) { if (byId('m-' + m[0]).checked) { out.push(m[0]); } });
+    return out;
+  }
+
+  function check() {
+    var vals = {};
+    var i;
+    for (i = 0; i < TESTS.length; i += 1) {
+      vals[TESTS[i].key] = byId('t-' + TESTS[i].key).value;
+      if (!vals[TESTS[i].key]) { byId('msg').textContent = 'Mark all five tests, choose a ruling and a reviewer, and choose at least one measure, then check.'; return; }
+    }
+    var ruling = byId('ruling').value;
+    var reviewer = byId('reviewer').value;
+    var ms = chosenMeasures();
+    if (!ruling || !reviewer || ms.length === 0) { byId('msg').textContent = 'Mark all five tests, choose a ruling and a reviewer, and choose at least one measure, then check.'; return; }
+    byId('msg').textContent = '';
+    var items = [];
+    TESTS.forEach(function (t) { var j = judgeTest(t.key, vals[t.key]); j.name = t.name; items.push(j); });
+    var jr = judgeRuling(ruling); jr.name = 'Ruling'; items.push(jr);
+    var jv = judgeReviewer(reviewer); jv.name = 'Reviewer'; items.push(jv);
+    var jm = judgeMeasures(ms); jm.name = 'Measure set'; items.push(jm);
+    var bad = items.filter(function (x) { return x.st !== 'ok'; });
+    var box = byId('fb');
+    clear(box);
+    if (bad.length === 0) {
+      box.appendChild(fbBox('correct', 'The ruling holds',
+        'The review is not demonstrated. The dashboard’s 100% counts acknowledgements. Against it, ' + n(CASE.alerts) + ' alerts at ' + n(CASE.minutesPerAlert) + ' minutes each need ' + n(NEEDED) + ' minutes, and the planners have ' + n(MINUTES) + ', which reaches about ' + n1(COVER) + ' percent of the stream. Planners cleared ' + (CASE.mutedTypes === 4 ? 'four' : n(CASE.mutedTypes)) + ' types unopened. The record shows nothing on whether reviewers could see the evidence, caught errors, or changed an action. ' +
+        'Supply planners are the reviewers because they own the decisions. Your measures test whether reviewers catch planted errors and whether their review leaves a trace, which a reviewer who agrees with everything cannot fake.'));
+      byId('second').classList.remove('hidden');
+      renderSecond();
+      return;
+    }
+    if (bad.length === 1) {
+      box.appendChild(fbBox('near', '', 'One element does not hold: ' + bad[0].name.toLowerCase() + '.'));
+    } else {
+      box.appendChild(fbBox('wrong', '', bad.length + ' of the ' + items.length + ' elements do not hold. Each box below gives the element or the criterion and a first move.'));
+    }
+    bad.forEach(function (x) { box.appendChild(fbBox(x.st === 'off' ? 'near' : 'wrong', x.name, x.text)); });
+  }
+
+  /* ---------- second pass ---------- */
+  function renderSecond() {
+    var v = parseNum(byId('f-vol').value);
+    if (v === null || v < 1 || v > CASE.alerts) {
+      byId('sec-msg').textContent = 'Enter a whole number of alerts from 1 to ' + n(CASE.alerts) + '.';
+      return;
+    }
+    byId('sec-msg').textContent = '';
+    var need = v * CASE.minutesPerAlert;
+    var capHolds = need <= MINUTES;
+    var cover = Math.min(100, MINUTES / need * 100);
+    var tests = { access: 'none', authority: 'holds', capacity: capHolds ? 'holds' : 'fails', error: 'none', linkage: 'none' };
+    var lacking = TESTS.filter(function (t) { return tests[t.key] !== 'holds'; }).map(function (t) { return t.name.toLowerCase(); });
+    var allHold = lacking.length === 0;
+    byId('readout').innerHTML =
+      '<div><b>' + n(need) + ' minutes</b><span>needed to investigate ' + n(v) + ' alerts at ' + n(CASE.minutesPerAlert) + ' minutes each</span></div>' +
+      '<div><b>' + n(MINUTES) + ' minutes</b><span>available to the planners</span></div>' +
+      '<div><b>' + (capHolds ? 'Holds' : 'Fails') + '</b><span>time and capacity, reaching ' + n1(cover) + ' percent of these alerts</span></div>' +
+      '<div><b>' + (allHold ? 'Demonstrated' : 'Not demonstrated') + '</b><span>ruling on the review</span></div>';
+    var txt;
+    if (capHolds) {
+      txt = 'Time and capacity now holds at this volume, and the ruling does not move. The record still shows nothing on ' + lacking.join(', ').replace(/, ([^,]*)$/, ', and $1') + '. Fitting the stream to the minutes is necessary for a review to be real. It is not enough to show that one is.';
+    } else {
+      txt = 'At this volume the minutes do not reach every alert, so time and capacity fails and the ruling stands. Try a smaller volume to see whether the ruling can move on capacity alone.';
+    }
+    byId('sec-moved').textContent = txt;
+  }
+
+  /* ---------- wiring ---------- */
+  renderStatic();
+  byId('check').addEventListener('click', check);
+  var clearFb = function () { byId('fb').innerHTML = ''; byId('msg').textContent = ''; };
+  byId('tests').addEventListener('change', clearFb);
+  byId('ruling').addEventListener('change', clearFb);
+  byId('reviewer').addEventListener('change', clearFb);
+  byId('f-vol').addEventListener('input', renderSecond);
+  byId('try100').addEventListener('click', function () { byId('f-vol').value = '100'; renderSecond(); });
+  byId('backAll').addEventListener('click', function () { byId('f-vol').value = String(CASE.alerts); renderSecond(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set the automation level</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:12px 0 4px;font-size:16px}
+p{margin:0 0 10px}
+.lede{font-size:17px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.terms{margin:0 0 6px;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+table{width:100%;border-collapse:collapse}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+select{font:inherit;color:var(--ink);background:var(--bg);min-height:44px;padding:8px 10px;border:2px solid var(--line);border-radius:8px;width:100%}
+input[type=checkbox]{width:22px;height:22px;margin:0;flex:none;accent-color:var(--accent)}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;min-height:44px;cursor:pointer}
+.opt span{flex:1}
+.opt.sel{background:var(--accent-soft);border-radius:6px}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 6px;padding:10px 14px}
+legend{font-weight:700;padding:0 6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{min-height:1.5em;margin:8px 0 0;color:var(--bad);font-weight:700}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:10px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:10px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.hidden{display:none !important}
+.rname{font-weight:700}
+.rwho{display:block;font-size:14px;color:var(--muted)}
+.pre td{background:var(--panel)}
+.readout{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.readout div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.readout b{display:block;font-size:17px}
+.readout span{display:block;font-size:14px;color:var(--muted)}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .stack thead{position:absolute;left:-9999px}
+  .stack caption{display:block}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack tr.pre{margin-top:-10px;border-top:0;border-radius:0 0 8px 8px}
+  .stack td{border:0;padding:4px 0}
+  .stack td[data-label]::before{content:attr(data-label);display:block;font-size:13px;font-weight:700;color:var(--muted)}
+  .readout{grid-template-columns:1fr}
+  button{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Skill practice</p>
+  <h1>Set the automation level</h1>
+  <p class="lede">Every exception response can sit at a defensible level of automation, and keeping the decision human while automating only the alert is one of those levels. The move that comes first is to say, response by response, what holds today, what could hold once named preconditions are met, and which condition stops it going higher.</p>
+
+  <section class="card" aria-labelledby="terms-h">
+    <h2 id="terms-h">Levels and the conditions that cap them</h2>
+    <dl class="terms">
+      <dt>Sense</dt><dd>The system raises an alert that something changed. People do everything else.</dd>
+      <dt>Interpret</dt><dd>The system also says what the change means for a specific order or component, and prepares the case. A person chooses and acts.</dd>
+      <dt>Recommend</dt><dd>The system also proposes a response and estimates its cost. A person decides and carries it out.</dd>
+      <dt>Bounded action</dt><dd>The system carries out a response that is reversible, preauthorized, and limited. Someone set the limits in advance.</dd>
+      <dt>Broad autonomous action</dt><dd>The system chooses and carries out responses without those limits.</dd>
+    </dl>
+    <h3>Four conditions cap the level</h3>
+    <dl class="terms">
+      <dt>Stable, testable rules</dt><dd>The decision reduces to rules that can be written down and tested.</dd>
+      <dt>Reversible consequences</dt><dd>A wrong action can be undone.</dd>
+      <dt>Delegated authority</dt><dd>Someone with the authority has delegated the action in fact. A credential that permits an action is not a delegation.</dd>
+      <dt>Verifiable outcomes</dt><dd>Someone can check the results at the volume involved.</dd>
+    </dl>
+    <p class="small muted">An agent is software that selects and carries out workflow steps without a person choosing each. The levels apply to an agent as much as to any other software.</p>
+  </section>
+
+  <section class="card" aria-labelledby="sit-h">
+    <h2 id="sit-h">You are the supply chain transformation lead at Sample Enterprise Goods</h2>
+    <p>Sponsors ask whether software could choose and execute the response when a late-shipment signal arrives. One late shipment will set your answer.</p>
+    <div id="facts"></div>
+    <table class="stack">
+      <caption>The three responses</caption>
+      <thead><tr><th scope="col">Response</th><th scope="col">What it means here</th><th scope="col">Who acts today</th></tr></thead>
+      <tbody id="resp-facts"></tbody>
+    </table>
+  </section>
+
+  <section class="card" aria-labelledby="work-h">
+    <h2 id="work-h">Set the level for each response</h2>
+    <p class="small muted"><strong>Level now</strong> is the highest level the record supports today. The <strong>target</strong> is the highest level that would hold once the preconditions you name are met. The <strong>cap</strong> is the one condition that stops the target going a level higher.</p>
+    <table class="stack" id="work">
+      <caption>Level and cap for each response</caption>
+      <thead><tr><th scope="col">Response</th><th scope="col">Level now</th><th scope="col">Target once preconditions are met</th><th scope="col">Condition that caps the target</th></tr></thead>
+      <tbody id="work-body"></tbody>
+    </table>
+    <p class="msg" id="msg" role="alert"></p>
+    <div class="row"><button type="button" id="check">Check my levels</button></div>
+    <div id="fb" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="sec-h">
+    <h2 id="sec-h">Move one assumption</h2>
+    <p>The targets above depend on preconditions. Suppose some of them are delivered. Tick what exists, and the highest level each response can defend moves with it. Today’s level does not move, because preconditions only change the target.</p>
+    <fieldset>
+      <legend>What exists</legend>
+      <div id="toggles"></div>
+    </fieldset>
+    <div class="readout" id="readout" aria-live="polite"></div>
+    <div class="note" id="sec-moved" aria-live="polite"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function n(x) { return Number(x).toLocaleString('en-US'); }
+  function clear(node) { while (node.firstChild) { node.removeChild(node.firstChild); } }
+
+  var CASE = { airFreightEventM: 6.2, frozenWeeks: 2, stockWeeks: 2, delayWeeks: 3, muted: 4, types: 11, oneIn: 9 };
+  function m1(x) { return Number(x).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+
+  var LEVELS = [
+    ['sense', 'Sense'],
+    ['interpret', 'Interpret'],
+    ['recommend', 'Recommend'],
+    ['bounded', 'Bounded action'],
+    ['broad', 'Broad autonomous action']
+  ];
+  var LEVEL_NAME = {};
+  LEVELS.forEach(function (l) { LEVEL_NAME[l[0]] = l[1]; });
+
+  var CAPS = [
+    ['rules', 'Stable, testable rules'],
+    ['reversible', 'Reversible consequences'],
+    ['tool', 'What the tool can do'],
+    ['authority', 'Delegated authority'],
+    ['verify', 'Verifiable outcomes']
+  ];
+  var CAP_NAME = {};
+  CAPS.forEach(function (c) { CAP_NAME[c[0]] = c[1]; });
+
+  var PRE = [
+    ['cap', 'A spend cap, delegated by someone with the authority to set it'],
+    ['cred', 'The agent’s credentials already allow the action'],
+    ['carrier', 'An approved carrier list'],
+    ['supplier', 'A second supplier qualified for the part'],
+    ['rule', 'A stated rule that keeps the change outside the frozen weeks']
+  ];
+  var PRE_NAME = {
+    cap: 'a delegated spend cap',
+    carrier: 'an approved carrier list',
+    rule: 'a stated rule that keeps the change outside the frozen weeks'
+  };
+
+  var RESP = [
+    {
+      id: 'rs', name: 'Re-source', does: 'Buy the part from another supplier.', who: 'Buyer',
+      okTarget: 'interpret', required: [], caps: ['rules']
+    },
+    {
+      id: 'ex', name: 'Expedite', does: 'Air-freight a partial order from the supplier.', who: 'Transportation planner',
+      okTarget: 'recommend', required: ['cap', 'carrier'], caps: ['authority']
+    },
+    {
+      id: 'rq', name: 'Re-sequence', does: 'Change the schedule so other work runs first.', who: 'Supply planner',
+      okTarget: 'recommend', required: ['rule'], caps: ['reversible', 'rules']
+    }
+  ];
+
+  function renderFacts() {
+    byId('facts').innerHTML =
+      '<p>The only supplier of trigger sprayers and pumps for the Columbus plant ships by ocean from East Asia through a US West Coast port. It is a single source, and no other supplier is qualified for the part. It sends no ship notices and records no events before a shipment reaches the port.</p>' +
+      '<p>One shipment has missed its expected port date. The first sign of the delay is an absence at the port. The forwarder estimates a delay of ' + CASE.delayWeeks + ' weeks. Sprayer stock covers the plant’s spray lines through schedule week ' + CASE.stockWeeks + ', and week ' + (CASE.stockWeeks + 1) + ' runs short if nothing changes. The first ' + CASE.frozenWeeks + ' schedule weeks are frozen.</p>' +
+      '<p>Today the alert pilot raises alerts and nothing more. About one alert in ' + CASE.oneIn + ' is actionable, planners muted ' + CASE.muted + ' of the ' + CASE.types + ' alert types, and the dashboard counts every alert as reviewed. No one has set autonomy levels or an approval route for an automated decision. The only authority rule is a financial matrix of spend thresholds, and no spend limit has been delegated to software. Two summers ago, air freight during one port-congestion event cost USD ' + m1(CASE.airFreightEventM) + 'M.</p>';
+    var body = byId('resp-facts');
+    clear(body);
+    RESP.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td data-label="Response"><span class="rname">' + r.name + '</span></td><td data-label="What it means here">' + r.does + '</td><td data-label="Who acts today">' + r.who + '</td>';
+      body.appendChild(tr);
+    });
+  }
+
+  function opts(list, placeholder) {
+    return '<option value="">' + placeholder + '</option>' + list.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+  }
+
+  function buildWork() {
+    var body = byId('work-body');
+    clear(body);
+    RESP.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td data-label="Response"><span class="rname">' + r.name + '</span><span class="rwho">' + r.does + '</span></td>' +
+        '<td data-label="Level now"><select id="now-' + r.id + '" aria-label="Level now for ' + r.name + '">' + opts(LEVELS, 'Choose a level') + '</select></td>' +
+        '<td data-label="Target once preconditions are met"><select id="tg-' + r.id + '" aria-label="Target level for ' + r.name + '">' + opts(LEVELS, 'Choose a level') + '</select></td>' +
+        '<td data-label="Condition that caps the target"><select id="cap-' + r.id + '" aria-label="Capping condition for ' + r.name + '">' + opts(CAPS, 'Choose a condition') + '</select></td>';
+      body.appendChild(tr);
+      var pr = document.createElement('tr');
+      pr.className = 'pre hidden';
+      pr.id = 'prerow-' + r.id;
+      var html = '<td colspan="4"><fieldset><legend>Preconditions for ' + r.name + ' at this target</legend><p class="small muted">Choose every precondition that would have to be true first.</p>';
+      PRE.forEach(function (p) {
+        html += '<label class="opt"><input type="checkbox" id="pc-' + r.id + '-' + p[0] + '" value="' + p[0] + '"><span>' + p[1] + '</span></label>';
+      });
+      html += '</fieldset></td>';
+      pr.innerHTML = html;
+      body.appendChild(pr);
+    });
+  }
+
+  function readRow(r) {
+    var pre = {};
+    PRE.forEach(function (p) { pre[p[0]] = byId('pc-' + r.id + '-' + p[0]).checked; });
+    return { now: byId('now-' + r.id).value, tg: byId('tg-' + r.id).value, cap: byId('cap-' + r.id).value, pre: pre };
+  }
+
+  /* status of the target: ok, under, incomplete, over */
+  function targetStatus(r, v) {
+    if (v.tg === 'broad') { return 'over'; }
+    if (r.id === 'rs') {
+      if (v.tg === r.okTarget) { return 'ok'; }
+      if (v.tg === 'sense') { return 'under'; }
+      return 'over';
+    }
+    if (v.tg === r.okTarget) { return 'ok'; }
+    if (v.tg === 'bounded') {
+      var i;
+      for (i = 0; i < r.required.length; i += 1) { if (!v.pre[r.required[i]]) { return 'incomplete'; } }
+      if (v.pre.cred) { return 'incomplete'; }
+      return 'ok';
+    }
+    return 'under';
+  }
+
+  function judgeRow(r, v) {
+    var nowOk = v.now === 'sense';
+    var ts = targetStatus(r, v);
+    var capOk = r.caps.indexOf(v.cap) !== -1;
+    var capDecoy = v.cap === 'tool';
+    var off = (nowOk ? 0 : 1) + (ts === 'ok' ? 0 : 1) + (capOk ? 0 : 1);
+    if (off === 0) { return { state: 'correct' }; }
+    if (ts === 'over') {
+      return { state: 'wrong', text: 'The target is above what the conditions support for this response. First move: name which of the four conditions this response fails first, then set the target at the highest level that condition allows.' };
+    }
+    if (capDecoy) {
+      return { state: 'wrong', text: 'A level cannot be justified by what the tool can do. First move: name the condition about the decision, its consequences, its authority, or its verification that limits this response.' };
+    }
+    if (off >= 2) {
+      return { state: 'wrong', text: 'More than one element of this row does not hold. First move: set the level now from what is true today, then ask what the next level up would need.' };
+    }
+    if (!nowOk) {
+      return { state: 'near', text: 'One element is out of place: the level now. Today’s level is set by what is true now, not by what could be built. Check the signal, the alert record, and who has delegated what.' };
+    }
+    if (ts === 'under') {
+      return { state: 'near', text: 'One element is out of place: the target. It is defensible, but lower than the conditions support once the named preconditions are met. Ask what the next level up would need, and whether that can be named.' };
+    }
+    if (ts === 'incomplete') {
+      var extra = v.pre.cred ? ' A credential that allows an action records what the software can do, not what anyone delegated.' : '';
+      return { state: 'near', text: 'One element is out of place: the preconditions for bounded action. Bounded action is reversible, preauthorized, and limited. Check that each of those three words is backed by something on your list.' + extra };
+    }
+    return { state: 'near', text: 'One element is out of place: the condition that caps this row. Ask which of the four conditions would fail first if you tried to go one level higher for this response.' };
+  }
+
+  function whyText(r, v) {
+    var lv = LEVEL_NAME[v.tg];
+    if (r.id === 'rs') {
+      return lv + ', capped by stable, testable rules. Choosing a supplier rests on qualification, relationship, and contract terms that no feed carries, and the part has one source. The system can prepare the case, and a buyer decides.';
+    }
+    if (r.id === 'ex') {
+      if (v.tg === 'bounded') {
+        return 'Bounded action, with a delegated spend cap and an approved carrier list named as the preconditions. It is capped by delegated authority until both exist. Air freight cost USD ' + m1(CASE.airFreightEventM) + 'M two summers ago, and no spend limit has been delegated to software.';
+      }
+      return lv + ', capped by delegated authority. Air freight cost USD ' + m1(CASE.airFreightEventM) + 'M two summers ago, and no spend limit has been delegated to software. Bounded action would need both an approved carrier list and a delegated spend cap.';
+    }
+    var capNote = v.cap === 'rules' ? ' You named stable, testable rules, which also holds, since bounded action here depends on a stated rule. The condition that bites first is reversibility.' : '';
+    if (v.tg === 'bounded') {
+      return 'Bounded action, only outside the first ' + CASE.frozenWeeks + ' frozen weeks and under a stated rule. It is capped by reversibility: a change inside the frozen weeks cannot be undone.' + capNote;
+    }
+    return lv + ', capped by reversibility. A change inside the first ' + CASE.frozenWeeks + ' frozen weeks cannot be undone, so bounded action is possible only outside that window under a stated rule.' + capNote;
+  }
+
+  function fbBox(state, lead, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-state', state);
+    var st = document.createElement('span');
+    st.className = 'st';
+    st.textContent = state === 'correct' ? 'Correct' : state === 'near' ? 'Near' : 'Not yet';
+    d.appendChild(st);
+    if (lead) {
+      var b = document.createElement('strong');
+      b.textContent = lead + '. ';
+      d.appendChild(b);
+    }
+    d.appendChild(document.createTextNode(text));
+    return d;
+  }
+
+  function check() {
+    var rows = RESP.map(function (r) { return { r: r, v: readRow(r) }; });
+    var i;
+    for (i = 0; i < rows.length; i += 1) {
+      if (!rows[i].v.now || !rows[i].v.tg || !rows[i].v.cap) { byId('msg').textContent = 'Choose a level now, a target, and a capping condition for every response, then check.'; return; }
+    }
+    byId('msg').textContent = '';
+    var box = byId('fb');
+    clear(box);
+    var results = rows.map(function (x) { var j = judgeRow(x.r, x.v); j.row = x; return j; });
+    var bad = results.filter(function (j) { return j.state !== 'correct'; });
+    if (bad.length === 0) {
+      var intro = 'Each response has a level for now, a target, and a cap. Alert only is the defensible level today for all three: the signal is an absence at the port, the alert stream cannot yet separate real exceptions from noise within the minutes people have, and no one has set an autonomy level or an approval route.';
+      box.appendChild(fbBox('correct', 'All three hold', intro));
+      results.forEach(function (j) { box.appendChild(fbBox('correct', j.row.r.name, whyText(j.row.r, j.row.v))); });
+      byId('second').classList.remove('hidden');
+      renderSecond();
+      return;
+    }
+    if (bad.length === 1 && bad[0].state === 'near') {
+      box.appendChild(fbBox('near', '', 'One response is nearly right: ' + bad[0].row.r.name.toLowerCase() + '.'));
+    } else {
+      box.appendChild(fbBox('wrong', '', (3 - bad.length) + ' of the 3 responses hold. Each box below gives the element or the criterion and a first move.'));
+    }
+    bad.forEach(function (j) { box.appendChild(fbBox(j.state, j.row.r.name, j.text)); });
+  }
+
+  /* ---------- second pass ---------- */
+  var TOGGLES = [
+    ['cap', 'A spend cap, delegated by someone with the authority to set it'],
+    ['carrier', 'An approved carrier list'],
+    ['rule', 'A stated rule that keeps changes outside the frozen weeks'],
+    ['supplier', 'A second supplier qualified for the part'],
+    ['cred', 'The agent’s credentials already allow the action']
+  ];
+
+  function buildToggles() {
+    var box = byId('toggles');
+    clear(box);
+    TOGGLES.forEach(function (t) {
+      var lab = document.createElement('label');
+      lab.className = 'opt';
+      lab.setAttribute('for', 'tg2-' + t[0]);
+      var inp = document.createElement('input');
+      inp.type = 'checkbox';
+      inp.id = 'tg2-' + t[0];
+      inp.value = t[0];
+      inp.addEventListener('change', function () {
+        lab.classList.toggle('sel', inp.checked);
+        renderSecond();
+      });
+      var sp = document.createElement('span');
+      sp.textContent = t[1];
+      lab.appendChild(inp);
+      lab.appendChild(sp);
+      box.appendChild(lab);
+    });
+  }
+
+  function ceiling(id, on) {
+    if (id === 'rs') { return { level: 'interpret', cap: 'Stable, testable rules', missing: [] }; }
+    if (id === 'ex') {
+      var miss = [];
+      if (!on.cap) { miss.push(PRE_NAME.cap); }
+      if (!on.carrier) { miss.push(PRE_NAME.carrier); }
+      return { level: miss.length === 0 ? 'bounded' : 'recommend', cap: miss.length === 0 ? 'Limits now set; verification at volume still needed' : 'Delegated authority', missing: miss };
+    }
+    var m2 = on.rule ? [] : [PRE_NAME.rule];
+    return { level: m2.length === 0 ? 'bounded' : 'recommend', cap: m2.length === 0 ? 'Outside the frozen weeks only' : 'Reversible consequences', missing: m2 };
+  }
+
+  function renderSecond() {
+    var on = {};
+    TOGGLES.forEach(function (t) { on[t[0]] = byId('tg2-' + t[0]).checked; });
+    var ro = byId('readout');
+    var html = '';
+    var res = {};
+    RESP.forEach(function (r) {
+      var c = ceiling(r.id, on);
+      res[r.id] = c;
+      html += '<div><b>' + r.name + ': ' + LEVEL_NAME[c.level] + '</b><span>Level now: Sense</span><span>Limited by: ' + c.cap + '</span><span>' + (c.missing.length ? 'Still missing: ' + c.missing.join(' and ') : 'Nothing further named') + '</span></div>';
+    });
+    ro.innerHTML = html;
+    var parts = [];
+    if (res.ex.level === 'bounded') {
+      parts.push('Expedite rose to bounded action because both of its limits now exist, a delegated spend cap and an approved carrier list.');
+    } else if (on.cap || on.carrier) {
+      parts.push('Expedite stays at recommend. Only one of its two limits exists, so it is still missing ' + res.ex.missing.join(' and ') + '.');
+    }
+    if (res.rq.level === 'bounded') {
+      parts.push('Re-sequence rose to bounded action because the stated rule keeps it outside the first ' + CASE.frozenWeeks + ' frozen weeks, where a change can still be undone.');
+    }
+    if (on.supplier) {
+      parts.push('A qualified second supplier did not move re-source. It widens what the buyer can compare, but the choice still rests on contract terms and relationships that no feed carries, so the system prepares the case and a person decides.');
+    }
+    if (on.cred) {
+      parts.push('The agent’s credentials moved nothing. A credential records what the software can do. A delegation records what someone with authority has allowed.');
+    }
+    if (parts.length === 0) {
+      parts.push('Nothing has moved yet. Tick a precondition to see which response it lifts, and which it leaves where it was.');
+    }
+    byId('sec-moved').textContent = parts.join(' ');
+  }
+
+  /* ---------- wiring ---------- */
+  renderFacts();
+  buildWork();
+  buildToggles();
+  byId('check').addEventListener('click', check);
+  byId('work-body').addEventListener('change', function (e) {
+    var id = e.target.id || '';
+    byId('fb').innerHTML = '';
+    byId('msg').textContent = '';
+    if (id.indexOf('tg-') === 0) {
+      var rid = id.slice(3);
+      var show = e.target.value === 'bounded' || e.target.value === 'broad';
+      byId('prerow-' + rid).classList.toggle('hidden', !show);
+    }
+  });
+})();
+</script>
+</body>
+</html>

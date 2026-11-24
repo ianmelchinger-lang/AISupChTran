@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Size the stream against capacity</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h2:focus{outline:none}
+p{margin:0 0 10px}
+.lede{font-size:17px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+table{width:100%;border-collapse:collapse}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+td.num,th.num{text-align:right}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:12px 14px}
+legend{font-weight:700;padding:0 6px}
+fieldset:disabled{background:var(--panel)}
+.fld{margin:0 0 14px}
+.fld label.lab{display:block;font-weight:700;margin:0 0 4px}
+.inrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+input[type=text],select{font:inherit;color:var(--ink);background:var(--bg);min-height:44px;padding:8px 10px;border:2px solid var(--line);border-radius:8px;width:100%}
+.fld input[type=text]{width:9em}
+select:disabled,input[type=text]:disabled{background:var(--panel);color:var(--muted)}
+input[type=radio]{width:22px;height:22px;margin:0;flex:none;accent-color:var(--accent)}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;min-height:44px;cursor:pointer}
+.opt span{flex:1}
+.opt.sel{background:var(--accent-soft);border-radius:6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.msg{min-height:1.5em;margin:8px 0 0;color:var(--bad);font-weight:700}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:10px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:10px 0}
+.tally{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:10px 12px;margin:12px 0}
+.tally p{margin:0 0 6px}
+.tally p:last-child{margin:0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.tag.ill{background:var(--near-bg);color:var(--near);border-color:var(--near)}
+.hidden{display:none !important}
+.tname{font-weight:700}
+.tfacts{display:block;font-size:14px;color:var(--muted)}
+.readout{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.readout div{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.readout b{display:block;font-size:20px}
+.readout span{font-size:14px;color:var(--muted)}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .stack thead{position:absolute;left:-9999px}
+  .stack caption{display:block}
+  .stack,.stack tbody,.stack tr,.stack td{display:block;width:100%}
+  .stack tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 8px;background:var(--bg)}
+  .stack td{border:0;padding:4px 0}
+  .stack td.num{text-align:left}
+  .stack td[data-label]::before{content:attr(data-label);display:block;font-size:13px;font-weight:700;color:var(--muted)}
+  .readout{grid-template-columns:1fr}
+  .fld input[type=text]{width:100%}
+  button{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Skill practice</p>
+  <h1>Size the stream against capacity</h1>
+  <p class="lede">An alert stream is worth what its actionable share delivers against the time people have to investigate it. The move that comes first is arithmetic: how many alerts the minutes can reach, and whether the shortfall is minutes or the stream itself.</p>
+
+  <section class="card" aria-labelledby="terms-h">
+    <h2 id="terms-h">Terms used here</h2>
+    <dl class="terms">
+      <dt>Actionable alert</dt><dd>An alert that leads someone to act on a real exception.</dd>
+      <dt>Precision</dt><dd>The share of alerts that are actionable.</dd>
+      <dt>Fit</dt><dd>Whether an alert reaches the role that owns the decision it calls for.</dd>
+      <dt>Capacity</dt><dd>The investigations a day that the available minutes allow.</dd>
+      <dt>Coverage</dt><dd>Capacity as a share of the whole stream.</dd>
+      <dt>Interrupt, queue, digest, suppress</dt><dd>What happens to an alert type. An interrupted or queued alert is investigated by a person. A digest is one daily summary that a person scans, so it uses none of the investigation minutes here. A suppressed type is sent to no one.</dd>
+      <dt>Retuning</dt><dd>Raising a threshold or merging repeats so that a type fires less often.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="sit-h">
+    <h2 id="sit-h">You are the supply chain transformation lead at Sample Enterprise Goods</h2>
+    <p>The alert pilot raises exception alerts for the supply chain. Planners have stopped trusting them, and a dashboard that counts every alert as acknowledged does not say how many were investigated. Before anyone proposes more software, you size the stream against the time people have.</p>
+    <div id="facts"></div>
+    <table class="stack" id="t-facts">
+      <caption>Alert profile, per day</caption>
+      <thead><tr><th scope="col">Alert type</th><th scope="col" class="num">Alerts</th><th scope="col" class="num">Actionable</th><th scope="col">Muted today</th><th scope="col">Owner role</th></tr></thead>
+      <tbody id="facts-body"></tbody>
+    </table>
+    <p class="small muted" style="margin-top:10px">Muted means planners acknowledged the whole type unopened. Retuning is assumed to remove non-actionable alerts first, so a type cannot be cut below its actionable count without losing real exceptions.</p>
+  </section>
+
+  <section class="card" aria-labelledby="s1-h">
+    <h2 id="s1-h">Step 1 · Size the stream</h2>
+    <div class="fld">
+      <label class="lab" for="f-act">Actionable alerts a day, across all eleven types</label>
+      <div class="inrow"><input id="f-act" type="text" inputmode="decimal" autocomplete="off"><span class="small muted">alerts a day</span></div>
+    </div>
+    <div class="fld">
+      <label class="lab" for="f-cap">Alerts the planners can investigate in a day</label>
+      <div class="inrow"><input id="f-cap" type="text" inputmode="decimal" autocomplete="off"><span class="small muted">investigations a day</span></div>
+    </div>
+    <div class="fld">
+      <label class="lab" for="f-cov">Share of the stream that this capacity reaches</label>
+      <div class="inrow"><input id="f-cov" type="text" inputmode="decimal" autocomplete="off"><span class="small muted">percent</span></div>
+    </div>
+    <div class="fld">
+      <label class="lab" for="f-mis">Actionable alerts a day that go unopened, if planners open alerts at random</label>
+      <div class="inrow"><input id="f-mis" type="text" inputmode="decimal" autocomplete="off"><span class="small muted">alerts a day</span></div>
+    </div>
+    <fieldset id="diag">
+      <legend>What limits the pilot: staffing, precision and fit, or both?</legend>
+      <div id="diag-opts"></div>
+    </fieldset>
+    <p class="small muted">Counts are accepted within 1 alert or 1 investigation. A percentage is accepted within 1 percentage point.</p>
+    <p class="msg" id="msg1" role="alert"></p>
+    <div class="row"><button type="button" id="check1">Check my numbers</button></div>
+    <div id="s1-fb" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="step2" aria-labelledby="s2-h">
+    <h2 id="s2-h" tabindex="-1">Step 2 · Route each type</h2>
+    <p>The pilot sends every type to the supply planners’ queue, though the owner column shows that several of the eleven belong to other roles. Set what happens to each type, who receives it, and how many alerts a day remain after retuning. Four types are muted today. If one of them should be seen again, route it to someone.</p>
+    <table class="stack" id="t-route">
+      <caption>Routing for each alert type</caption>
+      <thead><tr><th scope="col">Alert type</th><th scope="col">What happens to it</th><th scope="col">Who receives it</th><th scope="col">Alerts a day after retuning</th></tr></thead>
+      <tbody id="route-body"></tbody>
+    </table>
+    <div class="tally" id="tally" role="group" aria-label="Load by role for the routing as set"></div>
+    <p class="msg" id="s2-msg" role="alert"></p>
+    <div class="row"><button type="button" id="check2">Check my routing</button></div>
+    <div id="s2-fb" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="sec-h">
+    <h2 id="sec-h">Move one assumption</h2>
+    <p>Everything above rests on one figure: five minutes to investigate one alert. Change it and watch what else changes.</p>
+    <p><span class="tag ill">Illustrative</span> The case measures five minutes. A longer investigation, such as one that needs a call to a carrier, might take more. The figure of 12 below is made up to show the effect. It is not part of any answer above.</p>
+    <div class="fld">
+      <label class="lab" for="f-min">Minutes to investigate one alert</label>
+      <div class="inrow">
+        <input id="f-min" type="text" inputmode="decimal" autocomplete="off" value="5">
+        <button type="button" class="secondary" id="try12">Try 12 minutes</button>
+        <button type="button" class="secondary" id="back5">Back to 5</button>
+      </div>
+    </div>
+    <p class="msg" id="sec-msg" role="alert"></p>
+    <div class="readout" id="readout" aria-live="polite"></div>
+    <p id="sec-fit"></p>
+    <div id="sec-moved" class="note hidden" aria-live="polite"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function n(x) { return Number(x).toLocaleString('en-US'); }
+  function n1(x) { return Number(x).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+  function clear(node) { while (node.firstChild) { node.removeChild(node.firstChild); } }
+  function parseNum(s) {
+    if (s === null || s === undefined) { return null; }
+    var t = String(s).replace(/[,\s%]/g, '');
+    if (t === '' || !/^-?\d*\.?\d+$/.test(t)) { return null; }
+    return Number(t);
+  }
+  function joinNames(a) {
+    if (a.length <= 1) { return a.join(''); }
+    return a.slice(0, a.length - 1).join(', ') + ' and ' + a[a.length - 1];
+  }
+
+  var ROLES = {
+    planner: { label: 'Supply planners', one: 'supply planner', heads: 7 },
+    buyer: { label: 'Buyers', one: 'buyer', heads: 14 },
+    transport: { label: 'Transportation planners', one: 'transportation planner', heads: 5 },
+    analyst: { label: 'Inventory analysts', one: 'inventory analyst', heads: 3 },
+    demand: { label: 'Demand planners', one: 'demand planner', heads: null }
+  };
+  var ROLE_ORDER = ['planner', 'buyer', 'transport', 'analyst', 'demand'];
+  var CASE = { planners: 7, minutesEach: 90, minutesPerAlert: 5 };
+
+  var TYPES = [
+    { id: 't1', name: 'PO line past due, re-fires daily', alerts: 110, first: 25, actionable: 9, muted: false, owner: 'buyer' },
+    { id: 't2', name: 'Receipt short of PO quantity', alerts: 45, actionable: 6, muted: false, owner: 'buyer' },
+    { id: 't3', name: 'DC projected below system safety stock', alerts: 150, actionable: 8, muted: true, owner: 'planner' },
+    { id: 't4', name: 'DC projected stockout within lead time', alerts: 45, actionable: 16, muted: false, owner: 'planner' },
+    { id: 't5', name: 'Truckload tender rejected', alerts: 30, actionable: 7, muted: false, owner: 'transport' },
+    { id: 't6', name: 'Truckload not picked up on schedule', alerts: 35, actionable: 6, muted: true, owner: 'transport' },
+    { id: 't7', name: 'Inventory adjustment over variance limit', alerts: 80, actionable: 2, muted: true, owner: 'analyst' },
+    { id: 't8', name: 'Transfer behind plan', alerts: 6, actionable: 3, muted: false, owner: 'planner' },
+    { id: 't9', name: 'Order line short at its DC, stock at another US DC', alerts: 78, actionable: 10, muted: false, owner: 'planner' },
+    { id: 't10', name: 'DC orders off planned demand', alerts: 50, actionable: 1, muted: true, owner: 'demand' },
+    { id: 't11', name: 'Production order behind schedule', alerts: 11, actionable: 3, muted: false, owner: 'planner' }
+  ];
+  function typeById(id) {
+    var i;
+    for (i = 0; i < TYPES.length; i += 1) { if (TYPES[i].id === id) { return TYPES[i]; } }
+    return null;
+  }
+
+  var ALERTS = 0, ACT = 0, MUTED_ALERTS = 0, MUTED_ACT = 0, MUTED_TYPES = 0;
+  TYPES.forEach(function (t) {
+    ALERTS += t.alerts;
+    ACT += t.actionable;
+    if (t.muted) { MUTED_ALERTS += t.alerts; MUTED_ACT += t.actionable; MUTED_TYPES += 1; }
+  });
+  var MINUTES = CASE.planners * CASE.minutesEach;
+  var AVG = ACT / ALERTS;
+  var FIRST = typeById('t1').first;
+
+  function capacityAt(m) { return Math.floor(MINUTES / m); }
+  function coverageAt(m) { return capacityAt(m) / ALERTS * 100; }
+  function missedAt(m) { return ACT * (1 - Math.min(1, capacityAt(m) / ALERTS)); }
+  function diagAt(m) { return ACT <= capacityAt(m) ? 'precision' : 'both'; }
+
+  var BASE = {
+    actionable: ACT,
+    capacity: capacityAt(CASE.minutesPerAlert),
+    coverage: coverageAt(CASE.minutesPerAlert),
+    missed: Math.round(missedAt(CASE.minutesPerAlert)),
+    diag: diagAt(CASE.minutesPerAlert)
+  };
+
+  function factsLine(t) {
+    var share = Math.round(t.actionable / t.alerts * 100);
+    var s = n(t.alerts) + ' a day · ' + n(t.actionable) + ' actionable (' + share + '%) · ' + (t.muted ? 'muted today' : 'not muted') + ' · owner: ' + ROLES[t.owner].one;
+    if (t.first) { s += '. ' + n(t.first) + ' announce a new condition and ' + n(t.alerts - t.first) + ' repeat a line already alerted'; }
+    return s;
+  }
+
+  /* ---------- situation ---------- */
+  function renderFacts() {
+    byId('facts').innerHTML =
+      '<p>The pilot raises <strong>' + n(ALERTS) + ' alerts a day</strong> across <strong>' + TYPES.length + ' types</strong>, and sends all of them to the supply planners. ' +
+      n(CASE.planners) + ' supply planners each give <strong>' + n(CASE.minutesEach) + ' minutes a day</strong> to exceptions. One investigation takes <strong>' + n(CASE.minutesPerAlert) + ' minutes</strong>. ' +
+      MUTED_TYPES + ' of the types are muted.</p>';
+    var body = byId('facts-body');
+    clear(body);
+    TYPES.forEach(function (t) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td data-label="Alert type">' + t.name + '</td>' +
+        '<td class="num" data-label="Alerts">' + n(t.alerts) + (t.first ? ' (' + n(t.first) + ' new, ' + n(t.alerts - t.first) + ' repeat)' : '') + '</td>' +
+        '<td class="num" data-label="Actionable">' + n(t.actionable) + '</td>' +
+        '<td data-label="Muted today">' + (t.muted ? 'Yes' : 'No') + '</td>' +
+        '<td data-label="Owner role">' + ROLES[t.owner].one.charAt(0).toUpperCase() + ROLES[t.owner].one.slice(1) + '</td>';
+      body.appendChild(tr);
+    });
+  }
+
+  /* ---------- step 1 ---------- */
+  function within(v, c, t) { return Math.abs(v - c) <= t; }
+
+  var FIELDS = [
+    {
+      id: 'f-act', name: 'Actionable alerts a day', control: BASE.actionable,
+      ok: function (v) { return within(v, BASE.actionable, 1); },
+      traps: [
+        [function (v) { return v === ALERTS; }, 'That is the whole stream. Actionable alerts are the ones that warrant action, and the table counts them type by type.'],
+        [function (v) { return v === MUTED_ALERTS; }, 'That is the alerts in the muted types. Count the actionable alerts in all eleven types.'],
+        [function (v) { return v === MUTED_ACT; }, 'That counts the actionable alerts in the muted types only. Count all eleven types.']
+      ],
+      near: 'Close, but outside the tolerance of 1. Recheck the addition down the actionable column.',
+      generic: 'This entry is a count of alerts a day. First move: add the actionable column across all eleven types.'
+    },
+    {
+      id: 'f-cap', name: 'Alerts the planners can investigate', control: BASE.capacity,
+      ok: function (v) { return within(v, BASE.capacity, 1); },
+      traps: [
+        [function (v) { return v === MINUTES; }, 'That is minutes, not investigations. Capacity counts alerts: the minutes available divided by the minutes one investigation takes.'],
+        [function (v) { return v === CASE.minutesEach; }, 'That is one planner’s minutes for the day. Capacity is a count of alerts, for all the planners together.'],
+        [function (v) { return v === CASE.minutesEach / CASE.minutesPerAlert; }, 'That is one planner’s share. Capacity here is for all the supply planners together.'],
+        [function (v) { return v === ALERTS * CASE.minutesPerAlert; }, 'That is the minutes needed to investigate every alert. Capacity starts from the minutes the planners have.'],
+        [function (v) { return v === ALERTS; }, 'That is the whole stream. Capacity is what the minutes allow.']
+      ],
+      near: 'Close, but outside the tolerance of 1. Recheck the division.',
+      generic: 'This entry is a count of alerts. First move: work out the minutes all the supply planners have, then divide by the minutes one investigation takes.'
+    },
+    {
+      id: 'f-cov', name: 'Share of the stream reached', control: BASE.coverage,
+      ok: function (v) { return within(v, BASE.coverage, 1); },
+      traps: [
+        [function (v) { return v > 100; }, 'A share of the stream cannot exceed 100 percent. Divide one count by the whole stream.'],
+        [function (v) { return within(v, AVG * 100, 0.6); }, 'That is the share of alerts that are actionable, which is precision. Coverage asks how much of the stream the minutes can reach.'],
+        [function (v) { return within(v, 100 - BASE.coverage, 0.6); }, 'That is the share the minutes cannot reach. Coverage is the share they can.']
+      ],
+      near: 'Close, but outside the tolerance of 1 percentage point. Recheck the division.',
+      generic: 'Coverage is capacity as a percentage of the whole stream. First move: divide the number of investigations by the number of alerts a day.'
+    },
+    {
+      id: 'f-mis', name: 'Actionable alerts left unopened at random', control: BASE.missed,
+      ok: function (v) { return within(v, BASE.missed, 1); },
+      traps: [
+        [function (v) { return v === ACT; }, 'That is every actionable alert. Some of them sit among the alerts that do get opened.'],
+        [function (v) { return within(v, ACT - BASE.missed, 0.6); }, 'That is how many actionable alerts a random pick opens, not how many it leaves.'],
+        [function (v) { return v === ALERTS - BASE.capacity; }, 'That is the alerts never opened, actionable or not. Count only the actionable ones.']
+      ],
+      near: 'Close, but outside the tolerance of 1. Recheck the multiplication.',
+      generic: 'If alerts are opened at random, every alert has the same chance of being opened. First move: find the share of the stream that stays unopened, then apply that share to the actionable alerts.'
+    }
+  ];
+
+  function judgeField(f, v) {
+    var i;
+    if (f.ok(v)) { return { state: 'correct' }; }
+    for (i = 0; i < f.traps.length; i += 1) {
+      if (f.traps[i][0](v)) { return { state: 'wrong', text: f.traps[i][1] }; }
+    }
+    if (Math.abs(v - f.control) <= 0.1 * Math.abs(f.control)) { return { state: 'near', text: f.near }; }
+    return { state: 'wrong', text: f.generic };
+  }
+
+  var DIAG_OPTS = [
+    ['staffing', 'Staffing. The planners do not have enough minutes for the alerts that deserve a person.'],
+    ['precision', 'Precision and fit. Too little of the stream deserves a person, or it reaches a role that cannot act on it.'],
+    ['both', 'Both. The stream is poor, and the minutes also fall short of the real exceptions.']
+  ];
+
+  function judgeDiag(v, key) {
+    if (v === key) { return { state: 'correct' }; }
+    if (key === 'precision' && v === 'both') {
+      return { state: 'near', text: 'Part of this holds: precision and fit are failing. One element is out of place: whether staffing also falls short. Compare the actionable alerts a day with the investigations the minutes allow.' };
+    }
+    if (key === 'both' && v === 'precision') {
+      return { state: 'near', text: 'Part of this holds: precision and fit are failing. One element is out of place: whether staffing also falls short. Compare the actionable alerts a day with the investigations the minutes allow.' };
+    }
+    return { state: 'wrong', text: 'Staffing is the limit only when the alerts that deserve a person outnumber the investigations the minutes allow. First move: set those two numbers side by side, then ask how much of the stream deserves a person at all.' };
+  }
+
+  function picked(name) {
+    var r = document.querySelector('input[name="' + name + '"]:checked');
+    return r ? r.value : null;
+  }
+
+  function renderDiag() {
+    var box = byId('diag-opts');
+    clear(box);
+    DIAG_OPTS.forEach(function (o, i) {
+      var lab = document.createElement('label');
+      lab.className = 'opt';
+      lab.setAttribute('for', 'diag-' + i);
+      var inp = document.createElement('input');
+      inp.type = 'radio';
+      inp.name = 'diag';
+      inp.id = 'diag-' + i;
+      inp.value = o[0];
+      inp.addEventListener('change', function () {
+        var labs = box.querySelectorAll('.opt');
+        var k;
+        for (k = 0; k < labs.length; k += 1) { labs[k].classList.toggle('sel', labs[k].querySelector('input').checked); }
+        byId('msg1').textContent = '';
+      });
+      var sp = document.createElement('span');
+      sp.textContent = o[1];
+      lab.appendChild(inp);
+      lab.appendChild(sp);
+      box.appendChild(lab);
+    });
+  }
+
+  function fbBox(state, lead, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-state', state);
+    var st = document.createElement('span');
+    st.className = 'st';
+    st.textContent = state === 'correct' ? 'Correct' : state === 'near' ? 'Near' : 'Not yet';
+    d.appendChild(st);
+    if (lead) {
+      var b = document.createElement('strong');
+      b.textContent = lead + '. ';
+      d.appendChild(b);
+    }
+    d.appendChild(document.createTextNode(text));
+    return d;
+  }
+
+  function chainText() {
+    return 'The eleven rows add to ' + n(ACT) + ' actionable alerts a day out of ' + n(ALERTS) + ', about one alert in ' + Math.round(ALERTS / ACT) + '. ' +
+      n(CASE.planners) + ' planners at ' + n(CASE.minutesEach) + ' minutes give ' + n(MINUTES) + ' minutes, and at ' + n(CASE.minutesPerAlert) + ' minutes each that is ' + n(BASE.capacity) + ' investigations, or ' + n1(BASE.coverage) + ' percent of the stream. ' +
+      'If those ' + n(BASE.capacity) + ' are picked at random, about ' + n(Math.round(BASE.missed)) + ' of the ' + n(ACT) + ' actionable alerts go unopened. ' +
+      (BASE.diag === 'precision'
+        ? 'Because ' + n(ACT) + ' is below ' + n(BASE.capacity) + ', the minutes could in principle reach every actionable alert. The shortfall comes from the stream, from its precision and its fit, and not from the headcount.'
+        : 'Because ' + n(ACT) + ' is above ' + n(BASE.capacity) + ', the minutes cannot reach every actionable alert even with a perfect stream.');
+  }
+
+  function check1() {
+    var vals = [];
+    var i, v;
+    var d = picked('diag');
+    for (i = 0; i < FIELDS.length; i += 1) {
+      v = parseNum(byId(FIELDS[i].id).value);
+      if (v === null) { byId('msg1').textContent = 'Fill in all four numbers and choose a diagnosis, then check.'; return; }
+      vals.push(v);
+    }
+    if (!d) { byId('msg1').textContent = 'Fill in all four numbers and choose a diagnosis, then check.'; return; }
+    byId('msg1').textContent = '';
+    var results = FIELDS.map(function (f, k) { var r = judgeField(f, vals[k]); r.name = f.name; return r; });
+    var dr = judgeDiag(d, BASE.diag);
+    dr.name = 'Diagnosis';
+    results.push(dr);
+    var failing = results.filter(function (r) { return r.state !== 'correct'; });
+    var box = byId('s1-fb');
+    clear(box);
+    if (failing.length === 0) {
+      box.appendChild(fbBox('correct', 'All five tie out', chainText()));
+      Array.prototype.forEach.call(document.querySelectorAll('#f-act,#f-cap,#f-cov,#f-mis'), function (el) { el.disabled = true; });
+      byId('diag').disabled = true;
+      byId('check1').disabled = true;
+      byId('step2').classList.remove('hidden');
+      byId('s2-h').focus();
+      updateTally();
+      return;
+    }
+    if (failing.length === 1) {
+      box.appendChild(fbBox('near', '', 'One entry does not tie out: ' + failing[0].name.toLowerCase() + '.'));
+    } else {
+      box.appendChild(fbBox('wrong', '', 'More than one entry does not tie out. Each one below gives the criterion and a first move.'));
+    }
+    failing.forEach(function (r) { box.appendChild(fbBox(r.state, r.name, r.text)); });
+  }
+
+  /* ---------- step 2 ---------- */
+  var DISPS = [['interrupt', 'Interrupt'], ['queue', 'Queue'], ['digest', 'Digest'], ['suppress', 'Suppress']];
+  var RECS = ROLE_ORDER.map(function (k) { return [k, ROLES[k].label]; });
+
+  function opts(list, sel) {
+    return list.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === sel ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('');
+  }
+
+  function buildRoute() {
+    var body = byId('route-body');
+    clear(body);
+    TYPES.forEach(function (t) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td data-label="Alert type"><span class="tname">' + t.name + '</span><span class="tfacts">' + factsLine(t) + '</span></td>' +
+        '<td data-label="What happens to it"><select id="d-' + t.id + '" aria-label="What happens to ' + t.name + '">' + opts(DISPS, 'queue') + '</select></td>' +
+        '<td data-label="Who receives it"><select id="r-' + t.id + '" aria-label="Who receives ' + t.name + '">' + opts(RECS, 'planner') + '</select></td>' +
+        '<td data-label="Alerts a day after retuning"><input id="v-' + t.id + '" type="text" inputmode="numeric" autocomplete="off" aria-label="Alerts a day after retuning, ' + t.name + '" value="' + t.alerts + '"></td>';
+      body.appendChild(tr);
+    });
+  }
+
+  function readRows() {
+    return TYPES.map(function (t) {
+      var disp = byId('d-' + t.id).value;
+      var rec = byId('r-' + t.id).value;
+      var raw = parseNum(byId('v-' + t.id).value);
+      var valid = raw !== null && raw >= 0 && raw <= t.alerts && Math.floor(raw) === raw;
+      var vol = valid ? raw : t.alerts;
+      return { t: t, disp: disp, rec: rec, valid: valid, vol: vol, eff: disp === 'suppress' ? 0 : vol, inv: (disp === 'interrupt' || disp === 'queue') };
+    });
+  }
+
+  function evaluate(rows, cap) {
+    var R = { rows: {}, cap: cap, q: 0, list: rows };
+    rows.forEach(function (r) {
+      R.rows[r.t.id] = r;
+      if (r.inv && r.rec === 'planner') { R.q += r.eff; }
+    });
+    return R;
+  }
+
+  function ownedMissing(R) {
+    return TYPES.filter(function (t) {
+      if (t.owner !== 'planner' || !(t.actionable / t.alerts > AVG)) { return false; }
+      var r = R.rows[t.id];
+      return !(r.inv && r.rec === 'planner');
+    }).map(function (t) { return t.name; });
+  }
+  function cutRows(R) {
+    return R.list.filter(function (r) {
+      return r.t.actionable > 0 && (r.disp === 'suppress' || r.vol < r.t.actionable);
+    }).map(function (r) { return r.t.name; });
+  }
+  function pl(a, one, many) { return a.length === 1 ? one : many; }
+
+  var CRITERIA = [
+    {
+      key: 'fit',
+      fails: function (R) { return R.q > R.cap; },
+      near: function (R) { return 'One element is out of place: the supply planners’ queue. It holds ' + n(R.q) + ' alerts, and their minutes cover ' + n(R.cap) + ' investigations. Look at which types in that queue have a low share of actionable alerts, and what a stricter threshold would cut.'; },
+      first: function (R) { return 'Start with the supply planners’ queue. It holds ' + n(R.q) + ' alerts against the ' + n(R.cap) + ' investigations their minutes allow. First move: take out every type whose owner is another role, then look at what is left.'; }
+    },
+    {
+      key: 'pickup',
+      fails: function (R) { var r = R.rows.t6; return !(r.inv && r.rec === 'transport'); },
+      near: function () { return 'One element is out of place: the row for ' + typeById('t6').name + '. Ask who can act on a missed pickup, and whether anyone sees these alerts now.'; },
+      first: function () { return 'Look at ' + typeById('t6').name + '. It is muted today, so nobody sees it. First move: ask which role owns the decision on a missed pickup.'; }
+    },
+    {
+      key: 'record',
+      fails: function (R) { var r = R.rows.t7; return r.disp !== 'suppress' && r.rec === 'planner'; },
+      near: function () { return 'One element is out of place: the row for ' + typeById('t7').name + '. Ask whether this alert is about a decision the supply planners make or about a record that someone else keeps.'; },
+      first: function () { return 'Look at ' + typeById('t7').name + '. First move: ask whether it calls for a supply decision or a record correction, and who owns that.'; }
+    },
+    {
+      key: 'repeats',
+      fails: function (R) { return R.rows.t1.eff > FIRST; },
+      near: function () { return 'One element is out of place: the row for ' + typeById('t1').name + '. Look at how many of its daily alerts announce a new condition and how many repeat one already alerted.'; },
+      first: function () { return 'Look at ' + typeById('t1').name + '. Its volume still counts repeats. First move: count only the alerts that announce a new condition.'; }
+    },
+    {
+      key: 'owned',
+      fails: function (R) { return ownedMissing(R).length > 0; },
+      near: function (R) { var a = ownedMissing(R); return 'One element is out of place: ' + joinNames(a) + '. ' + pl(a, 'This is a supply planner decision', 'These are supply planner decisions') + ' with a higher share of actionable alerts than the stream as a whole. Ask what is lost if no planner investigates ' + pl(a, 'it', 'them') + '.'; },
+      first: function (R) { var a = ownedMissing(R); return 'Look at ' + joinNames(a) + '. ' + pl(a, 'This is a supply planner decision', 'These are supply planner decisions') + ' with a higher share of actionable alerts than the stream as a whole. First move: ask what is lost if no planner investigates ' + pl(a, 'it', 'them') + '.'; }
+    },
+    {
+      key: 'kept',
+      fails: function (R) { return cutRows(R).length > 0; },
+      near: function (R) { var a = cutRows(R); return 'One element is out of place: ' + joinNames(a) + '. A real exception is cut here, by suppressing the type or by retuning below its actionable count. Ask what each cut loses.'; },
+      first: function (R) { var a = cutRows(R); return 'Look at ' + joinNames(a) + '. A real exception is cut here, by suppressing the type or by retuning below its actionable count. First move: for each cut, ask which actionable alerts disappear.'; }
+    }
+  ];
+
+  function judgeRouting(R) {
+    var failed = CRITERIA.filter(function (c) { return c.fails(R); });
+    if (failed.length === 0) { return { state: 'correct', failed: failed }; }
+    if (failed.length === 1) { return { state: 'near', failed: failed, text: failed[0].near(R) }; }
+    return { state: 'wrong', failed: failed, text: 'More than one element does not hold. ' + failed[0].first(R) };
+  }
+
+  function mutedSummary(rows) {
+    var s = { inv: 0, dig: 0, sup: 0 };
+    rows.forEach(function (r) {
+      if (!r.t.muted) { return; }
+      if (r.inv) { s.inv += 1; } else if (r.disp === 'digest') { s.dig += 1; } else { s.sup += 1; }
+    });
+    return s;
+  }
+
+  function updateTally() {
+    var rows = readRows();
+    var R = evaluate(rows, BASE.capacity);
+    var box = byId('tally');
+    var html = '';
+    var mins = CASE.minutesPerAlert;
+    ROLE_ORDER.forEach(function (k) {
+      var cnt = 0;
+      rows.forEach(function (r) { if (r.inv && r.rec === k) { cnt += r.eff; } });
+      if (cnt === 0) { return; }
+      var role = ROLES[k];
+      var m = cnt * mins;
+      if (k === 'planner') {
+        html += '<p><strong>' + role.label + ':</strong> ' + n(cnt) + ' alerts to investigate, which is ' + n(m) + ' minutes. Their capacity is ' + n(BASE.capacity) + ' investigations.</p>';
+      } else if (role.heads) {
+        html += '<p><strong>' + role.label + ':</strong> ' + n(cnt) + ' alerts to investigate, which is ' + n(m) + ' minutes, or about ' + n(Math.round(m / role.heads)) + ' minutes for each of ' + n(role.heads) + ' people. The case does not say how many minutes they have for this, so it needs confirming.</p>';
+      } else {
+        html += '<p><strong>' + role.label + ':</strong> ' + n(cnt) + ' alerts to investigate, which is ' + n(m) + ' minutes. The case does not give their headcount or minutes, so it needs confirming.</p>';
+      }
+    });
+    var dig = 0, digT = 0, sup = 0, supAct = 0, supT = 0;
+    rows.forEach(function (r) {
+      if (r.disp === 'digest') { dig += r.eff; digT += 1; }
+      if (r.disp === 'suppress') { sup += r.t.alerts; supAct += r.t.actionable; supT += 1; }
+    });
+    var ms = mutedSummary(rows);
+    if (dig > 0) { html += '<p><strong>Digests:</strong> ' + n(dig) + ' alerts a day across ' + digT + ' ' + (digT === 1 ? 'type' : 'types') + ', scanned and not investigated.</p>'; }
+    if (sup > 0) { html += '<p><strong>Suppressed:</strong> ' + n(sup) + ' alerts a day across ' + supT + ' ' + (supT === 1 ? 'type' : 'types') + ', which include ' + n(supAct) + ' actionable.</p>'; }
+    html += '<p><strong>The ' + MUTED_TYPES + ' muted types:</strong> ' + ms.inv + ' set to be investigated, ' + ms.dig + ' in a digest, ' + ms.sup + ' suppressed.</p>';
+    box.innerHTML = html;
+    return R;
+  }
+
+  function routeChanged() {
+    byId('s2-fb').innerHTML = '';
+    byId('s2-msg').textContent = '';
+    updateTally();
+    if (!byId('second').classList.contains('hidden')) { renderSecond(); }
+  }
+
+  function check2() {
+    var rows = readRows();
+    var bad = rows.filter(function (r) { return r.disp !== 'suppress' && !r.valid; });
+    var box = byId('s2-fb');
+    clear(box);
+    if (bad.length > 0) {
+      byId('s2-msg').textContent = 'Each retuned volume must be a whole number from 0 up to the type’s current volume. Check: ' + joinNames(bad.map(function (r) { return r.t.name; })) + '.';
+      return;
+    }
+    byId('s2-msg').textContent = '';
+    var R = evaluate(rows, BASE.capacity);
+    var res = judgeRouting(R);
+    if (res.state === 'correct') {
+      var ms = mutedSummary(rows);
+      box.appendChild(fbBox('correct', 'The routing holds',
+        'The supply planners’ queue is ' + n(R.q) + ' alerts against the ' + n(R.cap) + ' investigations their minutes allow. The missed-pickup alerts reach the role that can act on them, record defects leave the planners’ queue, repeats no longer count as new conditions, and no real exception is cut. ' +
+        'Of the ' + MUTED_TYPES + ' muted types, ' + ms.inv + ' are now set to be investigated and ' + ms.dig + ' reach a digest. The rest of the routing is a judgment call. Buyer, transportation planner and analyst minutes are not in the case, and this routing moves load onto them, so their capacity needs confirming.'));
+      byId('second').classList.remove('hidden');
+      renderSecond();
+    } else {
+      box.appendChild(fbBox(res.state, '', res.text));
+    }
+  }
+
+  /* ---------- second pass ---------- */
+  function renderSecond() {
+    var m = parseNum(byId('f-min').value);
+    var ro = byId('readout');
+    if (m === null || m < 1 || m > CASE.minutesEach) {
+      byId('sec-msg').textContent = 'Enter a number of minutes from 1 to ' + CASE.minutesEach + '.';
+      return;
+    }
+    byId('sec-msg').textContent = '';
+    var cap = capacityAt(m);
+    var cov = coverageAt(m);
+    var mis = missedAt(m);
+    var dg = diagAt(m);
+    ro.innerHTML =
+      '<div><b>' + n(cap) + '</b><span>investigations a day</span></div>' +
+      '<div><b>' + n1(cov) + '%</b><span>of the stream reached</span></div>' +
+      '<div><b>' + n(Math.round(mis)) + '</b><span>actionable alerts left unopened at random</span></div>' +
+      '<div><b>' + (dg === 'precision' ? 'Precision and fit' : 'Staffing as well') + '</b><span>what limits the pilot</span></div>';
+    var R = evaluate(readRows(), cap);
+    byId('sec-fit').textContent = 'Your routing puts ' + n(R.q) + ' alerts in the supply planners’ queue. At ' + n(m) + ' minutes each, their capacity is ' + n(cap) + ' investigations, so the queue ' + (R.q <= cap ? 'still fits.' : 'no longer fits.');
+    var mv = byId('sec-moved');
+    if (dg !== BASE.diag) {
+      mv.classList.remove('hidden');
+      mv.textContent = 'The diagnosis moved because capacity, ' + n(cap) + ', fell below the actionable load, ' + n(ACT) + '. Routing and retuning can still raise the share of minutes spent on real exceptions, but they cannot make the minutes reach all of them. The answer in Step 1 was right for five minutes. It was never a fact about the stream alone, and it has to be recomputed when the minutes per investigation change.';
+    } else {
+      mv.classList.remove('hidden');
+      mv.textContent = 'At this figure the diagnosis has not moved. The minutes still reach every actionable alert, so the limit is still the stream. The diagnosis rests on the minutes one investigation takes, so test other figures.';
+    }
+  }
+
+  /* ---------- wiring ---------- */
+  renderFacts();
+  renderDiag();
+  buildRoute();
+  byId('check1').addEventListener('click', check1);
+  byId('check2').addEventListener('click', check2);
+  byId('route-body').addEventListener('change', function (e) {
+    var id = e.target.id || '';
+    if (id.indexOf('d-') === 0) {
+      var tid = id.slice(2);
+      var off = e.target.value === 'suppress';
+      byId('r-' + tid).disabled = off;
+      byId('v-' + tid).disabled = off;
+    }
+    routeChanged();
+  });
+  byId('route-body').addEventListener('input', routeChanged);
+  byId('f-min').addEventListener('input', renderSecond);
+  byId('try12').addEventListener('click', function () { byId('f-min').value = '12'; renderSecond(); });
+  byId('back5').addEventListener('click', function () { byId('f-min').value = '5'; renderSecond(); });
+})();
+</script>
+</body>
+</html>

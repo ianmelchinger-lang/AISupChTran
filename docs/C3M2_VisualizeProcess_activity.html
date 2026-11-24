@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assemble the path to a defensible automation boundary</title>
+<style>:root{
+  --bg:#ffffff;
+  --page:#f4f6f9;
+  --ink:#1b2430;
+  --muted:#4d5b6b;
+  --line:#c9d1db;
+  --panel:#f6f8fb;
+  --accent:#17508a;
+  --accent-dark:#0f3a66;
+  --accent-soft:#e6eff8;
+  --ok:#1a6a43;
+  --ok-bg:#e8f4ed;
+  --near:#7a5200;
+  --near-bg:#fcf3dc;
+  --bad:#9a2a2a;
+  --bad-bg:#fbeaea;
+  --focus:#0b57d0;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+.eyebrow{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+h1{margin:0 0 8px;font-size:26px;line-height:1.25}
+h2{margin:0 0 8px;font-size:19px;line-height:1.3}
+h3{margin:0 0 6px;font-size:16px;line-height:1.35}
+p{margin:0 0 10px}
+.lede{font-size:17px;color:var(--ink)}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 16px}
+.card.soft{background:var(--panel)}
+.terms{margin:0;padding:0}
+.terms dt{font-weight:700;margin-top:8px}
+.terms dt:first-child{margin-top:0}
+.terms dd{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+table{width:100%;border-collapse:collapse}
+caption{text-align:left;font-weight:700;padding:0 0 8px}
+th,td{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid var(--line)}
+th{font-size:14px;color:var(--muted);font-weight:700}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:12px 14px}
+legend{font-weight:700;padding:0 6px}
+label{display:block}
+select{width:100%;min-height:44px;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid #8795a6;border-radius:6px}
+button{min-height:44px;padding:10px 18px;font:inherit;font-weight:700;color:#ffffff;background:var(--accent);border:2px solid var(--accent);border-radius:8px;cursor:pointer}
+button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+button.secondary{color:var(--accent);background:var(--bg)}
+button.secondary:hover{background:var(--accent-soft)}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field>span.lab{display:block;font-size:14px;font-weight:700;margin:0 0 4px}
+.fb{border-left:6px solid var(--line);border-radius:6px;padding:8px 12px;margin:8px 0;background:var(--panel)}
+.fb[data-state=correct]{border-color:var(--ok);background:var(--ok-bg)}
+.fb[data-state=near]{border-color:var(--near);background:var(--near-bg)}
+.fb[data-state=wrong]{border-color:var(--bad);background:var(--bad-bg)}
+.fb .st{display:block;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fb[data-state=correct] .st{color:var(--ok)}
+.fb[data-state=near] .st{color:var(--near)}
+.fb[data-state=wrong] .st{color:var(--bad)}
+.note{border-left:6px solid var(--accent);background:var(--accent-soft);border-radius:6px;padding:8px 12px;margin:8px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-dark);border:1px solid var(--accent)}
+.tag.ill{background:var(--near-bg);color:var(--near);border-color:var(--near)}
+.hidden{display:none !important}
+@media (max-width:480px){
+  main{padding:16px 12px 48px}
+  h1{font-size:22px}
+  .grid2{grid-template-columns:1fr}
+  button{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}
+
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-of-type{border-top:0}
+.item p.ctext{margin:0 0 8px}
+.item .grid2{margin-top:6px}
+.fbbox:empty{display:none}
+.lane ol,.lane ul{margin:4px 0 0;padding-left:20px}
+.lane li{margin:2px 0}
+.lane h3{margin:0 0 2px}
+.lane{margin:0 0 8px}
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Visualize the process</p>
+  <h1>Assemble the path from an unreviewed alert to a defensible boundary</h1>
+  <p class="lede">An automation boundary holds up when the failure is stated link by link, the moves run in an order their inputs allow, and each sign of success can be looked up on the finished design. Sort the cards, then sequence the moves.</p>
+
+  <section class="card" aria-labelledby="sit">
+    <h2 id="sit">The situation</h2>
+    <p>You are the supply chain transformation lead at Sample Enterprise Goods. The supply planning manager wants the alert pilot to queue and carry out expedites on its own, citing a dashboard that shows every alert reviewed. Fifteen cards follow. Some belong on the path to a design you can defend, and some are tempting moves that the path rules out.</p>
+    <dl class="terms">
+      <dt>What was wrong</dt><dd>A failure of the current pilot, true before any work begins.</dd>
+      <dt>What the lead did</dt><dd>A move the lead performs, in a sequence. Give each a step number. Several orders can be sound, and the check flags only the ones that break a dependency.</dd>
+      <dt>What shows it worked</dt><dd>Something an observer can verify on the finished design.</dd>
+      <dt>Leave out</dt><dd>A card that breaks a rule of the design. It does not belong in any lane.</dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="pool-h">
+    <h2 id="pool-h">The cards</h2>
+    <p class="small muted" id="count"></p>
+    <div id="pool"></div>
+  </section>
+
+  <section class="card" aria-labelledby="asm-h">
+    <h2 id="asm-h">Your assembly so far</h2>
+    <div class="grid2" id="asm"></div>
+    <div class="row">
+      <button type="button" id="check">Check my assembly</button>
+      <button type="button" class="secondary" id="reset">Clear all placements</button>
+    </div>
+    <div id="ofb" aria-live="polite"></div>
+    <div id="summary" aria-live="polite"></div>
+  </section>
+
+  <section class="card hidden" id="second" aria-labelledby="second-h">
+    <h2 id="second-h">Fire a revision trigger</h2>
+    <p>The design is not final. Four kinds of event reopen it. For each one, choose where the path re-enters. The moves after that point run again.</p>
+    <div id="trig"></div>
+    <div class="row">
+      <button type="button" id="check2">Check where the path re-enters</button>
+    </div>
+    <div id="tsum" aria-live="polite"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  function byId(id) { return document.getElementById(id); }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+
+  var LANES = [['', 'Choose'], ['wrong', 'What was wrong'], ['did', 'What the lead did'], ['worked', 'What shows it worked'], ['out', 'Leave out']];
+  var LNAME = {}; LANES.forEach(function (l) { LNAME[l[0]] = l[1]; });
+
+  var GEN_LANE = 'Ask three questions of this card. Would it be true before any work began? Does the lead act in it? Could an observer verify it on the finished design? Placement follows the question that gets a yes. First move: read the card for its actor and its tense.';
+  var GEN_OUT = 'A card leaves the assembly only if it breaks a rule of the design: it blames a link without checking which one broke, sizes review by headcount instead of by the stream, sets a level by what a tool can do, or counts a click as oversight. First move: check this card against those four.';
+  var NEAR_SIG = 'The structure is right: this card belongs on the path. One element is out of place: it describes a state an observer would verify on the finished design, and it names no move the lead makes.';
+  var NEAR_MOVE = 'The structure is right: this card belongs on the path. One element is out of place: it names a move the lead makes, and an observer cannot verify a move by looking at the finished design.';
+
+  var CARDS = [
+    { id: 'm3', s: 'Set the level for each response', lane: 'did', move: 3,
+      t: 'For each response, name the level that holds today, the target once named preconditions are met, and the one condition that caps it.',
+      ok: 'Right. The lead is the actor, and the output, a level and a cap for each response, is what the review is later designed around.' },
+    { id: 's2', s: 'Volume fits the minutes', lane: 'worked',
+      t: 'The alerts routed to investigation are no more than the investigations the planners’ minutes allow, and no muted type that holds real exceptions is left unseen.',
+      ok: 'Right. An observer can verify it by adding the investigated volume and setting it against the minutes.' },
+    { id: 'd2', s: 'Hire to clear all 640', lane: 'out',
+      t: 'Hire enough planners to investigate every one of the 640 alerts raised each day.',
+      why: 'About one alert in nine is actionable, so the new hires would spend most of their minutes on noise, and the muted types would still hold real exceptions. The stream is the problem before the headcount is.',
+      first: 'First move: compare the actionable alerts with the investigations the current minutes allow.' },
+    { id: 'p2', s: 'Muted types hide real exceptions', lane: 'wrong',
+      t: 'Planners muted four of the eleven alert types because they were mostly noise, and those types still hold real exceptions that now reach no one.',
+      ok: 'Right. It fails before any work begins: muting a type drops its real exceptions along with its noise.' },
+    { id: 'm1', s: 'Locate the broken link', lane: 'did', move: 1,
+      t: 'For one incident, write what each link produced and the check that ran, assign the failure to the first link whose output was unfit for the next, and name the check that was missing.',
+      ok: 'Right. The lead is the actor, and the output, a located link and a named check, is what the level-setting later relies on.' },
+    { id: 's4', s: 'The review can prove itself', lane: 'worked',
+      t: 'The review specification names seeded errors and overrides as its evidence, and names a reviewer role with the minutes to perform it, so the record can show errors caught.',
+      ok: 'Right. An observer can verify it by looking for error detection, action divergence or a trace, and a reviewer role in the specification.' },
+    { id: 'd4', s: 'Report approval rate as oversight', lane: 'out',
+      t: 'Report the approval rate and the share of alerts acknowledged as the evidence that the review is real.',
+      why: 'An approval or acknowledgement rate cannot tell a good recommender from a reviewer who agrees with everything.',
+      first: 'First move: ask whether a reviewer who agrees with everything would produce the same number.' },
+    { id: 'p3', s: 'No check before release', lane: 'wrong',
+      t: 'A recommendation passes to the action link with no check in between, so a rule can release an order that cannot ship, and “the data was wrong” hides which link broke.',
+      ok: 'Right. It fails before any work begins: with no check between links, a wrong output at one link becomes the next link’s input.' },
+    { id: 'm4', s: 'Specify a review that can be performed', lane: 'did', move: 4,
+      t: 'Test the claimed review against access, authority, time, error detection, and outcome linkage, rule on it, and name the measures and the reviewers that would prove it.',
+      ok: 'Right. The lead writes the specification last, because what must be reviewed depends on what is automated and at what volume.' },
+    { id: 'd1', s: 'Blame the signal and buy visibility', lane: 'out',
+      t: 'Treat the failed order as a data problem, and buy more visibility so that the signal improves.',
+      why: 'The signal and the shortage were real. The failure sat at the link that chose the location and released it, and more visibility would leave that link unchecked.',
+      first: 'First move: ask which link’s output was unfit for the next link.' },
+    { id: 's1', s: 'Every link has a check', lane: 'worked',
+      t: 'Each incident record shows the link where it failed and the check that would have caught it before the next link ran.',
+      ok: 'Right. An observer can verify it by reading each incident for its failing link and its missing check.' },
+    { id: 'p1', s: 'A click counted as review', lane: 'wrong',
+      t: 'The dashboard reports every alert as reviewed because an acknowledgement is a click, and the planners’ minutes reach only about a fifth of the stream.',
+      ok: 'Right. It fails before any work begins: a click counts acknowledgements, and it says nothing about whether anyone checked.' },
+    { id: 'm2', s: 'Size the stream against capacity', lane: 'did', move: 2,
+      t: 'Compute the actionable load and the investigations the planners’ minutes allow, state whether the limit is staffing or precision and fit, and give each alert type a disposition, a recipient, and a retuned volume.',
+      ok: 'Right. The lead is the actor, and the output, a diagnosis and a routing that fits the minutes, is what the level-setting later uses.' },
+    { id: 's3', s: 'Each response has a level and a cap', lane: 'worked',
+      t: 'Each response carries a level for today, a target, and the condition that caps it, and re-sourcing stays a human decision with the system preparing the case.',
+      ok: 'Right. An observer can verify it by reading the level and the cap beside each response.' },
+    { id: 'd3', s: 'Set the level by what the tool can do', lane: 'out',
+      t: 'Set each response’s level by what the tool can do, and let the system re-source automatically because it can compare suppliers.',
+      why: 'What a tool can do is not a condition on a level. Re-sourcing a single-source part rests on qualification and contract terms that no feed carries, and no authority has been delegated to software.',
+      first: 'First move: ask which of the four conditions limits this response, whatever the tool can do.' }
+  ];
+  var BYID = {}; CARDS.forEach(function (c) { BYID[c.id] = c; });
+
+  var MOVES = { m1: 'locating the broken link', m2: 'sizing the stream', m3: 'setting the levels', m4: 'specifying the review' };
+  var DEPS = [
+    ['m1', 'm3', 'A level needs a located link: what a response may do depends on which link can fail and what checks it, so level-setting waits for the link read.'],
+    ['m2', 'm3', 'A level needs a capacity diagnosis: how far software goes depends on whether anyone can review its output at this volume, so level-setting waits for the sizing.'],
+    ['m3', 'm4', 'What must be reviewed depends on what is automated and at what volume, so the review specification waits for the levels.']
+  ];
+
+  // Build the pool.
+  var pool = byId('pool');
+  var laneOpts = LANES.map(function (l) { return '<option value="' + l[0] + '">' + l[1] + '</option>'; }).join('');
+  var stepOpts = '<option value="">Choose</option>';
+  for (var i = 1; i <= 8; i++) stepOpts += '<option value="' + i + '">' + fmt(i) + '</option>';
+  CARDS.forEach(function (c) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="t-' + c.id + '">' + c.t + '</p>' +
+      '<div class="grid2">' +
+      '<label class="field"><span class="lab">Place in</span><select id="lane-' + c.id + '" aria-describedby="t-' + c.id + '">' + laneOpts + '</select></label>' +
+      '<label class="field hidden" id="stepw-' + c.id + '"><span class="lab">Step</span><select id="step-' + c.id + '" aria-describedby="t-' + c.id + '">' + stepOpts + '</select></label>' +
+      '</div><div class="fbbox" id="fb-' + c.id + '" aria-live="polite"></div>';
+    pool.appendChild(d);
+  });
+
+  function laneOf(c) { return byId('lane-' + c.id).value; }
+  function stepOf(c) { var v = byId('step-' + c.id).value; return v ? parseInt(v, 10) : 0; }
+
+  function readout() {
+    var groups = { wrong: [], did: [], worked: [], out: [] }, left = 0;
+    CARDS.forEach(function (c) {
+      var l = laneOf(c);
+      if (!l) { left++; return; }
+      groups[l].push(c);
+    });
+    groups.did.sort(function (a, b) {
+      var sa = stepOf(a) || 99, sb = stepOf(b) || 99;
+      return sa - sb;
+    });
+    function list(tag, arr, numbered) {
+      if (!arr.length) return '<p class="small muted">Nothing placed yet.</p>';
+      return '<' + tag + '>' + arr.map(function (c) {
+        var s = stepOf(c);
+        return '<li>' + c.s + (numbered && !s ? ' <span class="tag">no step</span>' : '') + (numbered && s ? ' <span class="small muted">step ' + fmt(s) + '</span>' : '') + '</li>';
+      }).join('') + '</' + tag + '>';
+    }
+    byId('asm').innerHTML =
+      '<div class="lane"><h3>What was wrong</h3>' + list('ul', groups.wrong) + '</div>' +
+      '<div class="lane"><h3>What the lead did</h3>' + list('ol', groups.did, true) + '</div>' +
+      '<div class="lane"><h3>What shows it worked</h3>' + list('ul', groups.worked) + '</div>' +
+      '<div class="lane"><h3>Left out</h3>' + list('ul', groups.out) + '</div>';
+    byId('count').textContent = left === 0 ? 'Every card is placed.' : 'Cards still unplaced: ' + fmt(left) + '.';
+  }
+
+  function syncSteps() {
+    CARDS.forEach(function (c) {
+      var show = laneOf(c) === 'did';
+      byId('stepw-' + c.id).classList.toggle('hidden', !show);
+      if (!show) byId('step-' + c.id).value = '';
+    });
+  }
+
+  function judgeCard(c, lane) {
+    if (!lane) return ['blank', 'Not placed yet. Choose a lane for this card.'];
+    if (c.lane === lane) return ['correct', c.lane === 'out' ? 'Left out, correctly. ' + c.why : c.ok];
+    if (c.lane === 'out') return ['wrong', c.why + ' ' + c.first];
+    if (lane === 'out') return ['wrong', GEN_OUT];
+    if (c.lane === 'worked' && lane === 'did') return ['near', NEAR_SIG];
+    if (c.lane === 'did' && lane === 'worked') return ['near', NEAR_MOVE];
+    return ['wrong', GEN_LANE];
+  }
+
+  function judgeOrder() {
+    var ids = ['m1', 'm2', 'm3', 'm4'], pos = {}, missing = false;
+    ids.forEach(function (id) {
+      var c = BYID[id];
+      if (laneOf(c) !== 'did' || !stepOf(c)) missing = true; else pos[id] = stepOf(c);
+    });
+    if (missing) return ['blank', 'The sequence cannot be checked yet. Place all four moves in the middle lane and give each a step.'];
+    var seen = {}, dup = 0;
+    ids.forEach(function (id) { if (seen[pos[id]]) dup = pos[id]; seen[pos[id]] = true; });
+    if (dup) return ['wrong', 'Two moves share step ' + fmt(dup) + '. Each step holds one move. First move: for the move you placed earliest, ask what it needs as input and which move makes that input.'];
+    var broken = DEPS.filter(function (d) { return pos[d[0]] > pos[d[1]]; });
+    if (broken.length === 0) {
+      return ['correct', 'The sequence respects every dependency. Only part of the order is fixed. Locating the link and sizing the stream are separate axes, so either may come first. Setting the levels needs both, and the review specification comes last, because what must be reviewed depends on what is automated and at what volume.'];
+    }
+    if (broken.length === 1) {
+      var d = broken[0];
+      return ['near', 'The structure is right: the moves that can swap are sound. One element is out of place: ' + MOVES[d[1]] + ' sits ahead of ' + MOVES[d[0]] + '. ' + d[2]];
+    }
+    return ['wrong', 'More than one move stands ahead of the work it depends on. A move cannot start until its inputs exist. First move: for the move you placed earliest, ask what it needs as input and which move makes that input.'];
+  }
+
+  function put(box, state, label, text) {
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', label);
+    if (state !== 'blank') d.setAttribute('data-state', state);
+    var t = state === 'correct' ? ' · Correct' : state === 'near' ? ' · Near' : state === 'wrong' ? ' · Not yet' : '';
+    d.innerHTML = '<span class="st">' + label + t + '</span>' + text;
+    box.appendChild(d);
+  }
+
+  var checked = false;
+  function checkAll() {
+    checked = true;
+    var bad = 0, near = 0;
+    CARDS.forEach(function (c) {
+      var box = byId('fb-' + c.id);
+      box.innerHTML = '';
+      var r = judgeCard(c, laneOf(c));
+      put(box, r[0], 'Placement', r[1]);
+      if (r[0] === 'near') near++; else if (r[0] !== 'correct') bad++;
+    });
+    var ob = byId('ofb');
+    ob.innerHTML = '';
+    var o = judgeOrder();
+    put(ob, o[0], 'Sequence', o[1]);
+    if (o[0] === 'near') near++; else if (o[0] !== 'correct') bad++;
+
+    var sum = byId('summary');
+    sum.innerHTML = '';
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-cell', 'summary');
+    d.setAttribute('data-state', state);
+    d.innerHTML = state === 'correct'
+      ? '<span class="st">Assembly · Correct</span>The failure is stated link by link, the moves run in an order their inputs allow, and every sign of success can be checked on the finished design.'
+      : '<span class="st">Assembly · ' + (state === 'near' ? 'Close' : 'Review the flagged cards') + '</span>Cards marked amber or red need another look. Change a placement and the check runs again.';
+    sum.appendChild(d);
+    byId('second').classList.toggle('hidden', state !== 'correct');
+  }
+
+  function onChange() {
+    syncSteps();
+    readout();
+    if (checked) checkAll();
+  }
+  CARDS.forEach(function (c) {
+    byId('lane-' + c.id).addEventListener('change', onChange);
+    byId('step-' + c.id).addEventListener('change', onChange);
+  });
+  byId('check').addEventListener('click', checkAll);
+  byId('reset').addEventListener('click', function () {
+    checked = false;
+    CARDS.forEach(function (c) {
+      byId('lane-' + c.id).value = '';
+      byId('step-' + c.id).value = '';
+      byId('fb-' + c.id).innerHTML = '';
+    });
+    byId('ofb').innerHTML = '';
+    byId('summary').innerHTML = '';
+    byId('second').classList.add('hidden');
+    syncSteps();
+    readout();
+  });
+
+  // Second pass: a revision trigger fires, and the learner chooses where the path re-enters.
+  var RE = [['', 'Choose'], ['m1', 'Move 1 · Locate the broken link'], ['m2', 'Move 2 · Size the stream against capacity'], ['m12', 'Moves 1 and 2'], ['m3', 'Move 3 · Set the level for each response'], ['m4', 'Move 4 · Specify a review that can be performed']];
+  var RUNS = {
+    m1: 'Locating the link runs again, then the level-setting, then the review specification.',
+    m2: 'Sizing the stream runs again, then the level-setting, then the review specification.',
+    m12: 'Locating the link and sizing the stream both run again, then the level-setting, then the review specification.',
+    m3: 'Level-setting runs again, then the review specification.',
+    m4: 'The review specification runs again.'
+  };
+  var GEN_RE = 'The path re-enters at the first move whose input changed, and the moves after it run again. First move: ask which move takes this news as an input.';
+  var NEAR_LATE = 'The structure is right: the change shows up in the result of that move. One element is out of place: it enters earlier, at the move whose input changed.';
+  var TRIGS = [
+    { id: 't1', kind: 'A precondition is delivered',
+      t: 'A spend cap is delegated for expedites, and an approved carrier list is agreed.',
+      key: 'm3',
+      ok: 'Right. A delivered precondition changes what caps a level and leaves the link read and the sizing where they were, so the path re-enters at the level-setting. ',
+      near: { m4: NEAR_LATE, m12: 'The structure is right: the path re-enters at or before the move whose input changed. One element is out of place: the link read and the sizing do not depend on a delivered precondition, so they do not need to run again.' } },
+    { id: 't2', kind: 'An assumption changes', ill: true,
+      t: 'A time study, constructed for this exercise, finds that a real investigation takes 12 minutes, not five.',
+      key: 'm2',
+      ok: 'Right. A longer investigation changes the capacity the planners have, so the path re-enters at the sizing. The levels and the review specification run again after it. ',
+      near: { m3: NEAR_LATE, m4: NEAR_LATE, m12: 'The structure is right: the path re-enters at or before the move whose input changed. One element is out of place: which link failed does not depend on how long an investigation takes, so the link read does not need to run again.' } },
+    { id: 't3', kind: 'A new automated flow joins',
+      t: 'The paused fulfilling-location trial resumes, so a new automated flow and its alerts join the pilot’s stream.',
+      key: 'm12',
+      ok: 'Right. A new automated flow needs its own links and checks, and its alerts add volume to the stream. The two are separate axes, so the path re-enters at both. ',
+      near: {
+        m1: 'The structure is right: the path re-enters at the front. One element is out of place: the new flow adds volume to the stream as well as new links, and each is read separately.',
+        m2: 'The structure is right: the path re-enters at the front. One element is out of place: the new flow needs its own links and checks as well as adding volume, and each is read separately.'
+      } },
+    { id: 't4', kind: 'An audit result arrives',
+      t: 'A seeded audit finds that planners catch only a few of the planted wrong alerts.',
+      key: 'm4',
+      ok: 'Right. An audit result is evidence about the review itself, so the path re-enters at the review specification. ',
+      near: { m3: 'The structure is right: the path re-enters at or before the move whose input changed. One element is out of place: the audit tests the review, not the levels that were set, so the level-setting does not need to run again.' } }
+  ];
+  var tdiv = byId('trig');
+  var reOpts = RE.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+  TRIGS.forEach(function (T) {
+    var d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = '<p class="ctext" id="tt-' + T.id + '"><span class="tag">' + T.kind + '</span> ' + (T.ill ? '<span class="tag ill">Illustrative</span> ' : '') + T.t + '</p>' +
+      '<label class="field"><span class="lab">The path re-enters at</span><select id="re-' + T.id + '" aria-describedby="tt-' + T.id + '">' + reOpts + '</select></label>' +
+      '<div class="fbbox" id="tf-' + T.id + '" aria-live="polite"></div>';
+    tdiv.appendChild(d);
+    byId('re-' + T.id).addEventListener('change', function () {
+      byId('tf-' + T.id).innerHTML = '';
+      byId('tsum').innerHTML = '';
+    });
+  });
+  byId('check2').addEventListener('click', function () {
+    var open = [], bad = 0, near = 0;
+    TRIGS.forEach(function (T, i) { if (!byId('re-' + T.id).value) open.push(fmt(i + 1)); });
+    var sum = byId('tsum');
+    sum.innerHTML = '';
+    if (open.length) {
+      put(sum, 'blank', 'Triggers', 'Choose where the path re-enters for each event first. Still open: ' + open.join(', ') + '.');
+      return;
+    }
+    TRIGS.forEach(function (T) {
+      var v = byId('re-' + T.id).value, box = byId('tf-' + T.id);
+      box.innerHTML = '';
+      if (v === T.key) { put(box, 'correct', 'Re-entry', T.ok + RUNS[T.key]); }
+      else if (T.near[v]) { put(box, 'near', 'Re-entry', T.near[v]); near++; }
+      else { put(box, 'wrong', 'Re-entry', GEN_RE); bad++; }
+    });
+    var state = bad ? 'wrong' : near ? 'near' : 'correct';
+    var d = document.createElement('div');
+    d.className = 'fb';
+    d.setAttribute('data-state', state);
+    d.innerHTML = state === 'correct'
+      ? '<span class="st">Triggers · Correct</span>Each event re-enters the path at the first move whose input it changes. Nothing earlier reruns without cause, and nothing later is skipped.'
+      : '<span class="st">Triggers · ' + (state === 'near' ? 'Close' : 'Review the flagged events') + '</span>Events marked amber or red need another look. Change a choice and check again.';
+    sum.appendChild(d);
+  });
+
+  syncSteps();
+  readout();
+})();
+</script>
+</body>
+</html>
